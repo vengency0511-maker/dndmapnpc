@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DnD Lore Portal</title>
+
+  <script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=ykfBWj_oEkS7hHZxkIGyJdmbGtkQyGc_7QC3A5Gm6owWiuxyRTwKfxRs3jf6Mi8VLpdv64bbWA8ZfNmzZQoo5v3l9oBcfb0v967Y1Qh5epHENOIwgdHEG-iTZj9kCemuiI875eZJR5o-pPeD8br61NYjO3pyAxMvsNC24jgkjcZXpa2bap--0bpjhlg4qmaEXluo9Ze4QpJFdFJLFcUwIUrjc3OIm8m3wQADR0wlsZXNWTb_MbeHfsawxu-SVmGN2CdixydM0ZbdaxeLPe24cQ" charset="UTF-8"></script><script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-zinc-950 text-zinc-100">
+
+  <header class="border-b border-zinc-800 bg-zinc-900 p-6">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold text-amber-400">
+          DnD Lore Portal
+        </h1>
+
+        <p class="text-zinc-400">
+          Русская wiki для Dungeons & Dragons
+        </p>
+      </div>
+
+      <nav class="flex gap-6">
+        <a href="#campaigns" class="hover:text-amber-400">Кампании</a>
+        <a href="#characters" class="hover:text-amber-400">Персонажи</a>
+        <a href="#map" class="hover:text-amber-400">Карта</a>
+        <a href="#sessions" class="hover:text-amber-400">Сессии</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-10 space-y-16">
+
+    <!-- HERO -->
+
+    <section class="grid lg:grid-cols-2 gap-10 items-center">
+
+      <div class="space-y-6">
+
+        <div class="inline-block bg-amber-500/10 border border-amber-500/20 text-amber-300 px-4 py-2 rounded-full">
+          ⚔️ Dungeons & Dragons Campaign Manager
+        </div>
+
+        <h2 class="text-5xl font-black leading-tight">
+          Храни весь лор своей кампании в одном месте
+        </h2>
+
+        <p class="text-zinc-400 text-lg">
+          Создавай персонажей, NPC, карты, локации и заметки.
+          Работай вместе с друзьями и веди историю вашей кампании.
+        </p>
+
+        <div class="flex gap-4 flex-wrap">
+          <button class="bg-amber-500 hover:bg-amber-400 text-black px-6 py-3 rounded-2xl font-semibold">
+            Создать кампанию
+          </button>
+
+          <button class="border border-zinc-700 hover:border-zinc-500 px-6 py-3 rounded-2xl">
+            Экспорт данных
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
+        <img
+          src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?q=80&w=1600&auto=format&fit=crop"
+          class="rounded-2xl w-full"
+        />
+      </div>
+
+    </section>
+
+    <!-- CAMPAIGNS -->
+
+    <section id="campaigns">
+
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-3xl font-bold">Кампании</h3>
+
+        <button class="bg-zinc-800 px-4 py-2 rounded-xl">
+          + Новая кампания
+        </button>
+      </div>
+
+      <div id="campaignList" class="grid md:grid-cols-2 gap-6"></div>
+
+    </section>
+
+    <!-- CHARACTERS -->
+
+    <section id="characters">
+
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-3xl font-bold">Персонажи</h3>
+
+        <button class="bg-zinc-800 px-4 py-2 rounded-xl">
+          + Добавить персонажа
+        </button>
+      </div>
+
+      <div id="characterList" class="grid lg:grid-cols-2 gap-6"></div>
+
+    </section>
+
+    <!-- NPC -->
+
+    <section>
+
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-3xl font-bold">NPC</h3>
+
+        <button class="bg-zinc-800 px-4 py-2 rounded-xl">
+          + NPC
+        </button>
+      </div>
+
+      <div id="npcList" class="space-y-4"></div>
+
+    </section>
+
+    <!-- LOCATIONS -->
+
+    <section>
+
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-3xl font-bold">Локации</h3>
+
+        <button class="bg-zinc-800 px-4 py-2 rounded-xl">
+          + Локация
+        </button>
+      </div>
+
+      <div id="locationList" class="space-y-4"></div>
+
+    </section>
+
+    <!-- MAP -->
+
+    <section id="map">
+
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-3xl font-bold">
+          Интерактивная карта
+        </h3>
+
+        <button class="bg-amber-500 text-black px-4 py-2 rounded-xl font-semibold">
+          + Маркер
+        </button>
+      </div>
+
+      <div class="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden">
+        <img
+          src="https://images.unsplash.com/photo-1521295121783-8a321d551ad2?q=80&w=1600&auto=format&fit=crop"
+          class="w-full"
+        />
+      </div>
+
+    </section>
+
+    <!-- SESSIONS -->
+
+    <section id="sessions">
+
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-3xl font-bold">Журнал сессий</h3>
+
+        <button class="bg-zinc-800 px-4 py-2 rounded-xl">
+          + Сессия
+        </button>
+      </div>
+
+      <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
+        <h4 class="text-2xl font-bold text-amber-300 mb-2">
+          Сессия #12
+        </h4>
+
+        <p class="text-zinc-400 mb-4">
+          10 мая 2026
+        </p>
+
+        <p class="text-zinc-300">
+          Группа добралась до разрушенного Элтюреля,
+          встретила Лулу и обнаружила следы демонического ритуала.
+        </p>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer class="border-t border-zinc-800 mt-20">
+    <div class="max-w-7xl mx-auto px-6 py-8 text-zinc-500 flex justify-between">
+      <div>
+        DnD Lore Portal • Русская DnD Wiki
+      </div>
+
+      <div class="flex gap-4">
+        <span>JavaScript</span>
+        <span>TailwindCSS</span>
+        <span>IndexedDB</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+
+    const campaigns = [
+      {
+        title: 'Нисхождение в Авернус',
+        description: 'Кампания по Forgotten Realms с путешествием в Авернус.'
+      },
+      {
+        title: 'Проклятие Страда',
+        description: 'Мрачное приключение в Баровии.'
+      }
+    ];
+
+    const characters = [
+      {
+        name: 'Талис',
+        race: 'Тифлинг',
+        cls: 'Колдун',
+        lore: 'Изгнанник из Элтюреля.'
+      },
+      {
+        name: 'Бром',
+        race: 'Дварф',
+        cls: 'Паладин',
+        lore: 'Поклялся очистить Авернус.'
+      }
+    ];
+
+    const npcs = [
+      {
+        name: 'Зариэль',
+        role: 'Архидьявол'
+      },
+      {
+        name: 'Лулу',
+        role: 'Небесный слон'
+      }
+    ];
+
+    const locations = [
+      {
+        name: 'Элтюрель',
+        type: 'Город'
+      },
+      {
+        name: 'Кровавая Цитадель',
+        type: 'Подземелье'
+      }
+    ];
+
+    // CAMPAIGNS
+
+    const campaignList = document.getElementById('campaignList');
+
+    campaigns.forEach(campaign => {
+
+      campaignList.innerHTML += `
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
+          <h4 class="text-2xl font-bold text-amber-300 mb-3">
+            ${campaign.title}
+          </h4>
+
+          <p class="text-zinc-400">
+            ${campaign.description}
+          </p>
+        </div>
+      `;
+    });
+
+    // CHARACTERS
+
+    const characterList = document.getElementById('characterList');
+
+    characters.forEach(char => {
+
+      characterList.innerHTML += `
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
+          <h4 class="text-2xl font-bold text-amber-300 mb-2">
+            ${char.name}
+          </h4>
+
+          <div class="text-zinc-400 mb-3">
+            ${char.race} • ${char.cls}
+          </div>
+
+          <p class="text-zinc-300">
+            ${char.lore}
+          </p>
+        </div>
+      `;
+    });
+
+    // NPC
+
+    const npcList = document.getElementById('npcList');
+
+    npcs.forEach(npc => {
+
+      npcList.innerHTML += `
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex justify-between">
+          <div>
+            <div class="text-xl font-semibold text-amber-300">
+              ${npc.name}
+            </div>
+
+            <div class="text-zinc-400">
+              ${npc.role}
+            </div>
+          </div>
+
+          <button class="border border-zinc-700 px-4 py-2 rounded-xl">
+            Открыть
+          </button>
+        </div>
+      `;
+    });
+
+    // LOCATIONS
+
+    const locationList = document.getElementById('locationList');
+
+    locations.forEach(location => {
+
+      locationList.innerHTML += `
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex justify-between">
+          <div>
+            <div class="text-xl font-semibold text-amber-300">
+              ${location.name}
+            </div>
+
+            <div class="text-zinc-400">
+              ${location.type}
+            </div>
+          </div>
+
+          <button class="border border-zinc-700 px-4 py-2 rounded-xl">
+            Открыть
+          </button>
+        </div>
+      `;
+    });
+
+  </script>
+
+</body>
+</html>
