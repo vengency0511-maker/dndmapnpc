@@ -244,13 +244,24 @@
               <div class="flex items-end"><button type="submit" class="w-full rounded-xl border border-amber-500/40 px-4 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-500/10">Применить</button></div>
             </form>
             <p id="battle-scene-error" class="mb-3 hidden text-sm text-red-300" role="alert"></p>
-            <div id="battle-scene-board" class="relative isolate min-h-[360px] overflow-hidden rounded-2xl border border-zinc-700 bg-zinc-950" style="height:min(66vw,620px);max-height:620px;touch-action:pan-y" aria-label="Боевая сетка; фишки можно перетаскивать">
-              <div id="battle-scene-map-layer" class="pointer-events-none absolute inset-0 z-0 bg-cover bg-center opacity-90"></div>
-              <div id="battle-scene-grid" class="pointer-events-none absolute inset-0 z-10 opacity-70"></div>
-              <div id="battle-scene-markers" class="absolute inset-0 z-20"></div>
+            <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <p class="text-xs text-zinc-400">Колёсико — масштаб · тащи пустое место — перемещение</p>
+              <div class="flex items-center gap-2" aria-label="Масштаб карты">
+                <button id="battle-scene-zoom-out" type="button" class="h-9 w-9 rounded-lg border border-zinc-700 text-lg text-zinc-200 hover:border-amber-400" aria-label="Уменьшить карту">−</button>
+                <span id="battle-scene-zoom-label" class="min-w-12 text-center text-xs tabular-nums text-zinc-300">100%</span>
+                <button id="battle-scene-zoom-in" type="button" class="h-9 w-9 rounded-lg border border-zinc-700 text-lg text-zinc-200 hover:border-amber-400" aria-label="Увеличить карту">+</button>
+                <button id="battle-scene-zoom-reset" type="button" class="rounded-lg border border-zinc-700 px-3 py-2 text-xs text-zinc-300 hover:border-amber-400">Сброс</button>
+              </div>
+            </div>
+            <div id="battle-scene-board" class="relative isolate min-h-[360px] overflow-hidden rounded-2xl border border-zinc-700 bg-zinc-950" style="height:min(66vw,620px);max-height:620px;touch-action:none;cursor:grab" aria-label="Боевая сетка; перетаскивай пустое место для перемещения карты, фишки можно перетаскивать отдельно">
+              <div id="battle-scene-world" class="absolute inset-0" style="transform-origin:top left">
+                <div id="battle-scene-map-layer" class="pointer-events-none absolute inset-0 z-0 bg-cover bg-center opacity-90"></div>
+                <div id="battle-scene-grid" class="pointer-events-none absolute inset-0 z-10 opacity-70"></div>
+                <div id="battle-scene-markers" class="absolute inset-0 z-20"></div>
+              </div>
               <div id="battle-scene-empty" class="pointer-events-none absolute inset-x-3 top-3 z-30 rounded-xl bg-zinc-950/80 p-3 text-center text-sm text-zinc-300">Добавь участников боя справа — их фишки появятся здесь.</div>
             </div>
-            <p class="mt-2 text-xs text-zinc-500">Перетаскивай фишки пальцем или мышью. Если карта не указана, поле остаётся пустой сеткой. Изображение карты загружается по ссылке и не копируется в проект.</p>
+            <p class="mt-2 text-xs text-zinc-500">Перетаскивай фишки отдельно. Чтобы двигаться по большой карте, тяни пустое место; масштаб меняется колёсиком или кнопками. На телефоне карту можно двигать пальцем.</p>
           </div>
           <div class="space-y-5">
             <form id="battle-combatant-form" class="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
@@ -535,9 +546,58 @@
     battleScene.gridSize = Math.max(20, Math.min(100, Number(battleScene.gridSize) || 40));
     battleScene.round = Math.max(1, Number(battleScene.round) || 1);
     const battleBoard = document.getElementById('battle-scene-board');
+    const battleWorld = document.getElementById('battle-scene-world');
     const battleGrid = document.getElementById('battle-scene-grid');
     const battleMapLayer = document.getElementById('battle-scene-map-layer');
     const battleMarkers = document.getElementById('battle-scene-markers');
+    let battleZoom = 1, battlePanX = 0, battlePanY = 0;
+    let panningBattleMap = false, battlePanPointerId = null, battlePanStart = null;
+    function updateBattleViewport() {
+      battleWorld.style.transform = 'translate(' + battlePanX + 'px,' + battlePanY + 'px) scale(' + battleZoom + ')';
+      document.getElementById('battle-scene-zoom-label').textContent = Math.round(battleZoom * 100) + '%';
+    }
+    function zoomBattleMap(nextZoom, clientX, clientY) {
+      const rect = battleBoard.getBoundingClientRect();
+      const oldZoom = battleZoom;
+      const zoom = Math.max(0.5, Math.min(3, nextZoom));
+      const anchorX = (clientX == null ? rect.width / 2 : clientX - rect.left);
+      const anchorY = (clientY == null ? rect.height / 2 : clientY - rect.top);
+      const worldX = (anchorX - battlePanX) / oldZoom;
+      const worldY = (anchorY - battlePanY) / oldZoom;
+      battleZoom = zoom;
+      battlePanX = anchorX - worldX * battleZoom;
+      battlePanY = anchorY - worldY * battleZoom;
+      updateBattleViewport();
+    }
+    document.getElementById('battle-scene-zoom-in').addEventListener('click', () => zoomBattleMap(battleZoom + 0.2));
+    document.getElementById('battle-scene-zoom-out').addEventListener('click', () => zoomBattleMap(battleZoom - 0.2));
+    document.getElementById('battle-scene-zoom-reset').addEventListener('click', () => { battleZoom = 1; battlePanX = 0; battlePanY = 0; updateBattleViewport(); });
+    battleBoard.addEventListener('wheel', event => {
+      event.preventDefault();
+      zoomBattleMap(battleZoom + (event.deltaY < 0 ? 0.12 : -0.12), event.clientX, event.clientY);
+    }, {passive:false});
+    battleBoard.addEventListener('pointerdown', event => {
+      if (event.target.closest('[data-battle-marker]') || event.button === 2) return;
+      event.preventDefault();
+      panningBattleMap = true;
+      battlePanPointerId = event.pointerId;
+      battlePanStart = {x:event.clientX,y:event.clientY,panX:battlePanX,panY:battlePanY};
+      battleBoard.setPointerCapture(event.pointerId);
+      battleBoard.style.cursor = 'grabbing';
+    });
+    battleBoard.addEventListener('pointermove', event => {
+      if (!panningBattleMap || event.pointerId !== battlePanPointerId || !battlePanStart) return;
+      battlePanX = battlePanStart.panX + event.clientX - battlePanStart.x;
+      battlePanY = battlePanStart.panY + event.clientY - battlePanStart.y;
+      updateBattleViewport();
+    });
+    function endBattlePan(event) {
+      if (event && battlePanPointerId !== event.pointerId) return;
+      panningBattleMap = false; battlePanPointerId = null; battlePanStart = null;
+      battleBoard.style.cursor = 'grab';
+    }
+    battleBoard.addEventListener('pointerup', endBattlePan);
+    battleBoard.addEventListener('pointercancel', endBattlePan);
     const sideLabels = {hero:'Герой',enemy:'Враг',ally:'Союзник'};
     const sideColors = {hero:'#2563eb',enemy:'#dc2626',ally:'#059669'};
     function saveBattleScene() {
@@ -659,6 +719,7 @@
       const marker = event.target.closest('[data-battle-marker]');
       if (!marker) return;
       event.preventDefault();
+      event.stopPropagation();
       draggedBattleMarker = marker.dataset.battleMarker;
       marker.setPointerCapture(event.pointerId);
     });
@@ -667,17 +728,21 @@
       const c = battleScene.combatants.find(item => item.id === draggedBattleMarker);
       if (!c) return;
       const rect = battleBoard.getBoundingClientRect();
-      c.x = Math.max(2, Math.min(98, ((event.clientX - rect.left) / rect.width) * 100));
-      c.y = Math.max(5, Math.min(95, ((event.clientY - rect.top) / rect.height) * 100));
+      const worldX = (event.clientX - rect.left - battlePanX) / battleZoom;
+      const worldY = (event.clientY - rect.top - battlePanY) / battleZoom;
+      c.x = Math.max(2, Math.min(98, (worldX / rect.width) * 100));
+      c.y = Math.max(5, Math.min(95, (worldY / rect.height) * 100));
       const marker = battleMarkers.querySelector('[data-battle-marker="' + draggedBattleMarker + '"]');
       if (marker) { marker.style.left = c.x + '%'; marker.style.top = c.y + '%'; }
     });
-    battleMarkers.addEventListener('pointerup', () => {
+    function endBattleMarkerDrag() {
       if (!draggedBattleMarker) return;
       draggedBattleMarker = null;
       saveBattleScene();
-    });
-    battleMarkers.addEventListener('pointercancel', () => { draggedBattleMarker = null; });
+    }
+    battleMarkers.addEventListener('pointerup', endBattleMarkerDrag);
+    battleMarkers.addEventListener('pointercancel', endBattleMarkerDrag);
+    updateBattleViewport();
     renderBattleScene();
 
     // Карточки персонажей сохраняются локально в браузере: GitHub Pages не предоставляет базу данных.
