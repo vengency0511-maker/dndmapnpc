@@ -52,8 +52,8 @@
     <nav class="tab-strip mt-8 flex flex-wrap gap-2 border-b border-zinc-800 pb-4" role="tablist" aria-label="Разделы кампании">
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-dashboard" role="tab" aria-controls="panel-dashboard" aria-selected="false" data-tab="dashboard">Панель мастера</button>
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-overview" role="tab" aria-controls="panel-overview" aria-selected="true" data-tab="overview">Обзор</button>
-      <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-map" role="tab" aria-controls="panel-map" aria-selected="false" data-tab="map">Карта</button>
-      <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-battlemaps" role="tab" aria-controls="panel-battlemaps" aria-selected="false" data-tab="battlemaps">Боевые карты · мастер</button>
+      <button class="hidden tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-map" role="tab" aria-controls="panel-map" aria-selected="false" data-tab="map">Карта</button>
+      <button class="hidden tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-battlemaps" role="tab" aria-controls="panel-battlemaps" aria-selected="false" data-tab="battlemaps">Боевые карты · мастер</button>
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-players" role="tab" aria-controls="panel-players" aria-selected="false" data-tab="players">Персонажи игроков</button>
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-npcs" role="tab" aria-controls="panel-npcs" aria-selected="false" data-tab="npcs">NPC и фракции</button>
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-sessions" role="tab" aria-controls="panel-sessions" aria-selected="false" data-tab="sessions">Журнал сессий</button>
@@ -61,6 +61,21 @@
 
     <section id="panel-dashboard" class="tab-panel py-8" role="tabpanel" aria-labelledby="tab-dashboard" hidden>
       <div class="mb-6"><p class="text-xs uppercase tracking-[.2em] text-amber-400">Рабочее место ведущего</p><h2 class="mt-2 text-3xl font-black md:text-4xl">Панель мастера</h2><p class="mt-2 text-zinc-400">Главное по кампании — перед сессией и во время игры.</p></div>
+      <section class="mb-6 rounded-3xl border border-amber-500/20 bg-zinc-900 p-5 md:p-6">
+        <div class="mb-4"><h3 class="text-xl font-bold text-amber-200">Инструменты мастера</h3><p class="mt-1 text-sm text-zinc-400">Карта мира и подготовка боевых сцен теперь собраны здесь.</p></div>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <button type="button" data-open-tab="map" class="group flex items-center gap-4 rounded-2xl border border-zinc-700 bg-zinc-950 p-4 text-left transition hover:border-amber-400/60 hover:bg-amber-500/5">
+            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-2xl" aria-hidden="true">🗺️</span>
+            <span><span class="block font-semibold text-zinc-100 group-hover:text-amber-200">Карта кампании</span><span class="mt-1 block text-sm text-zinc-400">Мир, локации и маршруты</span></span>
+            <span class="ml-auto text-amber-300" aria-hidden="true">→</span>
+          </button>
+          <button type="button" data-open-tab="battlemaps" class="group flex items-center gap-4 rounded-2xl border border-zinc-700 bg-zinc-950 p-4 text-left transition hover:border-amber-400/60 hover:bg-amber-500/5">
+            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-2xl" aria-hidden="true">⚔️</span>
+            <span><span class="block font-semibold text-zinc-100 group-hover:text-amber-200">Боевые карты · мастер</span><span class="mt-1 block text-sm text-zinc-400">Библиотека карт и тактическая сцена</span></span>
+            <span class="ml-auto text-amber-300" aria-hidden="true">→</span>
+          </button>
+        </div>
+      </section>
       <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <article class="rounded-2xl border border-zinc-800 bg-zinc-900 p-5"><p class="text-sm text-zinc-400">Записи сессий</p><p id="dashboard-session-count" class="mt-2 text-3xl font-black text-amber-200">0</p><button type="button" data-open-tab="sessions" class="mt-3 text-sm text-amber-300">Открыть журнал →</button></article>
         <article class="rounded-2xl border border-zinc-800 bg-zinc-900 p-5"><p class="text-sm text-zinc-400">Активные квесты</p><p id="dashboard-quest-count" class="mt-2 text-3xl font-black text-amber-200">0</p><button type="button" data-open-tab="sessions" class="mt-3 text-sm text-amber-300">К целям группы →</button></article>
@@ -289,25 +304,28 @@
     const panels = Array.from(document.querySelectorAll('[role="tabpanel"]'));
     function activateTab(tab, focus = false) {
       tabs.forEach(item => {
-        const selected = item === tab;
+        const selected = item === tab || (tab.classList.contains('hidden') && item.dataset.tab === 'dashboard');
         item.setAttribute('aria-selected', String(selected));
-        item.tabIndex = selected ? 0 : -1;
+        item.tabIndex = item.classList.contains('hidden') || !selected ? -1 : 0;
       });
       panels.forEach(panel => { panel.hidden = panel.id !== tab.getAttribute('aria-controls'); });
       if (focus) tab.focus();
       if (history.replaceState) history.replaceState(null, '', '#' + tab.dataset.tab);
     }
-    tabs.forEach((tab, index) => {
+    tabs.forEach(tab => {
       tab.addEventListener('click', () => activateTab(tab));
       tab.addEventListener('keydown', event => {
+        const visibleTabs = tabs.filter(item => !item.classList.contains('hidden'));
+        const index = visibleTabs.indexOf(tab);
+        if (index < 0) return;
         let next = index;
-        if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
-        else if (event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === 'ArrowRight') next = (index + 1) % visibleTabs.length;
+        else if (event.key === 'ArrowLeft') next = (index - 1 + visibleTabs.length) % visibleTabs.length;
         else if (event.key === 'Home') next = 0;
-        else if (event.key === 'End') next = tabs.length - 1;
+        else if (event.key === 'End') next = visibleTabs.length - 1;
         else return;
         event.preventDefault();
-        activateTab(tabs[next], true);
+        activateTab(visibleTabs[next], true);
       });
     });
     // Панель мастера, журнал, квесты и авторские заметки.
