@@ -53,6 +53,7 @@
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-dashboard" role="tab" aria-controls="panel-dashboard" aria-selected="false" data-tab="dashboard">Панель мастера</button>
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-overview" role="tab" aria-controls="panel-overview" aria-selected="true" data-tab="overview">Обзор</button>
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-map" role="tab" aria-controls="panel-map" aria-selected="false" data-tab="map">Карта</button>
+      <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-battlemaps" role="tab" aria-controls="panel-battlemaps" aria-selected="false" data-tab="battlemaps">Боевые карты · мастер</button>
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-players" role="tab" aria-controls="panel-players" aria-selected="false" data-tab="players">Персонажи игроков</button>
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-npcs" role="tab" aria-controls="panel-npcs" aria-selected="false" data-tab="npcs">NPC и фракции</button>
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-sessions" role="tab" aria-controls="panel-sessions" aria-selected="false" data-tab="sessions">Журнал сессий</button>
@@ -181,6 +182,77 @@
       </div>
     </section>
 
+    <section id="panel-battlemaps" class="tab-panel py-8" role="tabpanel" aria-labelledby="tab-battlemaps" hidden>
+      <div class="mb-6"><p class="text-xs uppercase tracking-[.2em] text-amber-400">Инструменты ведущего</p><h2 class="mt-2 text-3xl font-black">Библиотека боевых карт</h2><p class="mt-2 max-w-3xl text-zinc-400">Подборка источников с картами для D&D и личный список карт, которые пригодятся в будущих столкновениях.</p></div>
+      <div class="mb-6 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm leading-relaxed text-amber-100"><strong>На будущее:</strong> вкладка пока не защищена авторизацией и видна всем, кто откроет страницу. Не добавляй сюда секретные сюжетные детали. Записи хранятся локально в этом браузере.</div>
+      <h3 class="mb-4 text-xl font-bold text-amber-200">Каталоги карт</h3>
+      <div class="grid gap-4 md:grid-cols-3">
+        <article class="rounded-2xl border border-zinc-800 bg-zinc-900 p-5"><p class="text-xs uppercase tracking-wide text-emerald-300">Есть бесплатные карты</p><h4 class="mt-2 text-lg font-bold">2-Minute Tabletop</h4><p class="mt-2 text-sm leading-relaxed text-zinc-400">Рисованные карты лесов, подземелий, городских сцен и таверн; многие подходят для виртуальных столов и печати.</p><a href="https://2minutetabletop.com/product-category/free/" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex rounded-xl border border-amber-500/30 px-3 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-500/10">Открыть каталог ↗</a></article>
+        <article class="rounded-2xl border border-zinc-800 bg-zinc-900 p-5"><p class="text-xs uppercase tracking-wide text-emerald-300">Есть бесплатные версии</p><h4 class="mt-2 text-lg font-bold">Forgotten Adventures</h4><p class="mt-2 text-sm leading-relaxed text-zinc-400">Детализированные карты перевалов, пещер, лагерей и поселений — особенно полезно для Дикого Севера.</p><a href="https://www.forgotten-adventures.net/battlemaps/" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex rounded-xl border border-amber-500/30 px-3 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-500/10">Открыть каталог ↗</a></article>
+        <article class="rounded-2xl border border-zinc-800 bg-zinc-900 p-5"><p class="text-xs uppercase tracking-wide text-amber-300">Карты по приключениям</p><h4 class="mt-2 text-lg font-bold">The Cartographer’s Vault</h4><p class="mt-2 text-sm leading-relaxed text-zinc-400">Каталог карт, организованный по приключениям и областям, с возможностью просматривать и скачивать доступные материалы.</p><a href="https://freedndmaps.com/maps" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex rounded-xl border border-amber-500/30 px-3 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-500/10">Открыть каталог ↗</a></article>
+      </div>
+      <div class="mt-8 grid gap-6 xl:grid-cols-[minmax(0,.85fr)_minmax(0,1.15fr)]">
+        <section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 md:p-7"><h3 class="text-xl font-bold text-amber-200">Добавить карту в свою подборку</h3><p class="mt-2 text-sm text-zinc-400">Сохраняй ссылку на карту, чтобы быстро открыть её перед боем. Можно добавить заметку о встрече или местности.</p>
+          <form id="battlemap-form" class="mt-5 space-y-4">
+            <label class="block text-sm text-zinc-300">Название карты <span class="text-amber-300">*</span><input id="battlemap-title" required maxlength="140" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например, Горный перевал"></label>
+            <label class="block text-sm text-zinc-300">Ссылка на оригинал <span class="text-amber-300">*</span><input id="battlemap-url" type="url" required maxlength="1000" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="https://..."></label>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <label class="block text-sm text-zinc-300">Тип местности<select id="battlemap-type" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white"><option value="forest">Лес / природа</option><option value="dungeon">Подземелье / пещера</option><option value="settlement">Город / поселение</option><option value="mountain">Горы / снег</option><option value="road">Дорога / лагерь</option><option value="other">Другое</option></select></label>
+              <label class="block text-sm text-zinc-300">Источник<input id="battlemap-source" maxlength="120" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например, Forgotten Adventures"></label>
+            </div>
+            <label class="block text-sm text-zinc-300">Заметка<textarea id="battlemap-notes" maxlength="2000" rows="3" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Для какой встречи подойдёт, размер сетки, важные детали..."></textarea></label>
+            <p id="battlemap-form-error" class="hidden text-sm text-red-300" role="alert"></p>
+            <button type="submit" class="rounded-xl bg-amber-400 px-5 py-3 font-semibold text-zinc-950">＋ Сохранить карту</button>
+          </form>
+        </section>
+        <section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 md:p-7"><div class="flex flex-wrap items-center justify-between gap-3"><h3 class="text-xl font-bold text-amber-200">Моя подборка</h3><span id="battlemap-count" class="rounded-full border border-zinc-700 px-3 py-1 text-xs text-zinc-400">0 карт</span></div>
+          <label class="mt-4 block text-sm text-zinc-300">Фильтр по типу<select id="battlemap-filter" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white"><option value="all">Все карты</option><option value="forest">Лес / природа</option><option value="dungeon">Подземелье / пещера</option><option value="settlement">Город / поселение</option><option value="mountain">Горы / снег</option><option value="road">Дорога / лагерь</option><option value="other">Другое</option></select></label>
+          <div id="battlemap-list" class="mt-5 space-y-3" aria-live="polite"></div>
+        </section>
+      </div>
+
+      <section class="mt-8 rounded-3xl border border-amber-500/20 bg-zinc-900 p-5 md:p-7" aria-labelledby="battle-scene-heading">
+        <div class="mb-5"><p class="text-xs uppercase tracking-[.2em] text-amber-400">Игровое поле</p><h3 id="battle-scene-heading" class="mt-2 text-2xl font-black text-amber-200">Тактическая сцена</h3><p class="mt-2 text-sm text-zinc-400">Добавь участников, расставь фишки на клетках и веди очередь ходов. Сцена сохраняется в этом браузере.</p></div>
+        <div class="grid gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(280px,.8fr)]">
+          <div class="min-w-0">
+            <form id="battle-scene-settings" class="mb-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_100px_auto]">
+              <label class="text-sm text-zinc-300">Ссылка на изображение карты (необязательно)<input id="battle-scene-map-url" type="url" maxlength="1000" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-white" placeholder="https://.../map.jpg"></label>
+              <label class="text-sm text-zinc-300">Размер клетки<input id="battle-scene-grid-size" type="number" min="20" max="100" value="40" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-white"></label>
+              <div class="flex items-end"><button type="submit" class="w-full rounded-xl border border-amber-500/40 px-4 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-500/10">Применить</button></div>
+            </form>
+            <p id="battle-scene-error" class="mb-3 hidden text-sm text-red-300" role="alert"></p>
+            <div id="battle-scene-board" class="relative isolate min-h-[360px] overflow-hidden rounded-2xl border border-zinc-700 bg-zinc-950" style="height:min(66vw,620px);max-height:620px;touch-action:pan-y" aria-label="Боевая сетка; фишки можно перетаскивать">
+              <div id="battle-scene-map-layer" class="pointer-events-none absolute inset-0 z-0 bg-cover bg-center opacity-90"></div>
+              <div id="battle-scene-grid" class="pointer-events-none absolute inset-0 z-10 opacity-70"></div>
+              <div id="battle-scene-markers" class="absolute inset-0 z-20"></div>
+              <div id="battle-scene-empty" class="pointer-events-none absolute inset-x-3 top-3 z-30 rounded-xl bg-zinc-950/80 p-3 text-center text-sm text-zinc-300">Добавь участников боя справа — их фишки появятся здесь.</div>
+            </div>
+            <p class="mt-2 text-xs text-zinc-500">Перетаскивай фишки пальцем или мышью. Если карта не указана, поле остаётся пустой сеткой. Изображение карты загружается по ссылке и не копируется в проект.</p>
+          </div>
+          <div class="space-y-5">
+            <form id="battle-combatant-form" class="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
+              <h4 class="font-bold text-amber-200">Добавить участника</h4>
+              <label class="mt-3 block text-sm text-zinc-300">Имя<input id="battle-combatant-name" required maxlength="100" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-white" placeholder="Например, Краг"></label>
+              <div class="mt-3 grid grid-cols-2 gap-3">
+                <label class="text-sm text-zinc-300">Сторона<select id="battle-combatant-side" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"><option value="hero">Герой</option><option value="enemy">Враг</option><option value="ally">Союзник</option></select></label>
+                <label class="text-sm text-zinc-300">Инициатива<input id="battle-combatant-initiative" type="number" min="-20" max="50" value="10" required class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"></label>
+                <label class="text-sm text-zinc-300">Текущие HP<input id="battle-combatant-hp" type="number" min="0" max="9999" value="10" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"></label>
+                <label class="text-sm text-zinc-300">Макс. HP<input id="battle-combatant-maxhp" type="number" min="1" max="9999" value="10" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"></label>
+              </div>
+              <button type="submit" class="mt-4 w-full rounded-xl bg-amber-400 px-4 py-3 font-bold text-zinc-950">＋ Добавить на поле</button>
+            </form>
+            <div class="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
+              <div class="flex items-center justify-between gap-3"><h4 class="font-bold text-amber-200">Инициатива</h4><span id="battle-round-label" class="rounded-full border border-zinc-700 px-3 py-1 text-xs text-zinc-400">Раунд 1</span></div>
+              <div class="mt-3 flex gap-2"><button id="battle-next-turn" type="button" class="flex-1 rounded-xl bg-amber-400 px-3 py-2 text-sm font-bold text-zinc-950">Следующий ход →</button><button id="battle-reset-turn" type="button" class="rounded-xl border border-zinc-700 px-3 py-2 text-sm text-zinc-300">Сброс</button></div>
+              <ol id="battle-initiative-list" class="mt-4 space-y-2" aria-live="polite"></ol>
+              <p id="battle-initiative-empty" class="mt-3 text-sm text-zinc-500">Участников пока нет. Добавь первого героя или врага.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <p class="mt-5 text-xs leading-relaxed text-zinc-500">Тактическая сцена и инициатива пока не имеют отдельной авторизации и доступны посетителям страницы. Не используй здесь секретные данные до настройки защиты мастера.</p>
+    </section>
+
     <section id="panel-sessions" class="tab-panel py-8" role="tabpanel" aria-labelledby="tab-sessions" hidden>
       <div class="mb-6"><p class="text-xs uppercase tracking-[.2em] text-amber-400">История приключения</p><h2 class="mt-2 text-3xl font-black">Журнал сессий и заметки</h2><p class="mt-2 text-zinc-400">Итоги встреч, квесты группы, личные записи игроков и заметки ведущего.</p></div>
       <div class="grid gap-6 xl:grid-cols-2">
@@ -230,7 +302,7 @@
     });
     // Панель мастера, журнал, квесты и авторские заметки.
     const CAMPAIGN_DATA_KEY = 'dnd-lore-stormking-dm-tools-v1';
-    const defaultCampaignData = { sessions: [], quests: [], playerNotes: [], secretNotes: [], quickNotes: [], worldEntries: [{id:'npc-zephyros',type:'npc',name:'Зефирос',role:'Облачный великан · учёный',stance:'unknown',description:'Загадочный исследователь, способный неожиданно вмешаться в путешествие героев.',notes:''},{id:'npc-neri',type:'npc',name:'Нери',role:'Королева штормовых великанов',stance:'unknown',description:'Супруга Хекатона; её судьба связана с историей королевской семьи.',notes:''}] };
+    const defaultCampaignData = { sessions: [], quests: [], playerNotes: [], secretNotes: [], quickNotes: [], battleMaps: [], worldEntries: [{id:'npc-zephyros',type:'npc',name:'Зефирос',role:'Облачный великан · учёный',stance:'unknown',description:'Загадочный исследователь, способный неожиданно вмешаться в путешествие героев.',notes:''},{id:'npc-neri',type:'npc',name:'Нери',role:'Королева штормовых великанов',stance:'unknown',description:'Супруга Хекатона; её судьба связана с историей королевской семьи.',notes:''}] };
     let campaignData = loadCampaignData();
     function loadCampaignData() {
       try { const saved = JSON.parse(localStorage.getItem(CAMPAIGN_DATA_KEY) || '{}'); return Object.assign({}, defaultCampaignData, saved && typeof saved === 'object' ? saved : {}); }
@@ -372,6 +444,201 @@
       }
     });
     renderWorldEntries();
+
+    // Библиотека боевых карт: сохраняем ссылки и заметки, не копируя чужие изображения.
+    const battleMapTypes = {forest:'Лес / природа',dungeon:'Подземелье / пещера',settlement:'Город / поселение',mountain:'Горы / снег',road:'Дорога / лагерь',other:'Другое'};
+    const battleMapForm = document.getElementById('battlemap-form');
+    function renderBattleMaps() {
+      if (!Array.isArray(campaignData.battleMaps)) campaignData.battleMaps = [];
+      const filter = document.getElementById('battlemap-filter').value;
+      const entries = campaignData.battleMaps.filter(item => filter === 'all' || item.type === filter);
+      document.getElementById('battlemap-count').textContent = campaignData.battleMaps.length + (campaignData.battleMaps.length === 1 ? ' карта' : campaignData.battleMaps.length >= 2 && campaignData.battleMaps.length <= 4 ? ' карты' : ' карт');
+      const list = document.getElementById('battlemap-list');
+      if (!entries.length) {
+        list.innerHTML = '<p class="rounded-xl border border-dashed border-zinc-800 p-5 text-sm text-zinc-500">Пока нет сохранённых карт. Добавь ссылку на карту из одного из каталогов выше.</p>';
+        return;
+      }
+      list.innerHTML = entries.slice().reverse().map(item => '<article class="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">' +
+        '<div class="flex flex-wrap items-start justify-between gap-2"><div class="min-w-0"><h4 class="break-words font-semibold text-amber-200">' + safeText(item.title) + '</h4><p class="mt-1 text-xs text-zinc-500">' + safeText(battleMapTypes[item.type] || 'Другое') + (item.source ? ' · ' + safeText(item.source) : '') + '</p></div><button type="button" data-battlemap-delete="' + safeText(item.id) + '" class="rounded-lg border border-zinc-800 px-3 py-2 text-xs text-red-300 hover:border-red-400">Удалить</button></div>' +
+        (item.notes ? '<p class="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed text-zinc-300">' + safeText(item.notes) + '</p>' : '') +
+        '<a href="' + safeText(item.url) + '" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex max-w-full break-all rounded-xl border border-amber-500/30 px-3 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-500/10">Открыть карту / источник ↗</a></article>').join('');
+    }
+    function showBattleMapError(message) {
+      const el = document.getElementById('battlemap-form-error');
+      el.textContent = message;
+      el.classList.remove('hidden');
+    }
+    battleMapForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const title = document.getElementById('battlemap-title').value.trim();
+      const rawUrl = document.getElementById('battlemap-url').value.trim();
+      let parsedUrl;
+      try { parsedUrl = new URL(rawUrl); } catch (error) { showBattleMapError('Укажи корректную ссылку, начинающуюся с https:// или http://.'); return; }
+      if (!['https:','http:'].includes(parsedUrl.protocol)) { showBattleMapError('Разрешены только ссылки http:// и https://.'); return; }
+      if (!title) { showBattleMapError('Укажи название карты.'); return; }
+      const item = {id:'battlemap-' + Date.now(),title,url:parsedUrl.href,type:document.getElementById('battlemap-type').value,source:document.getElementById('battlemap-source').value.trim(),notes:document.getElementById('battlemap-notes').value.trim(),createdAt:new Date().toISOString()};
+      if (!Array.isArray(campaignData.battleMaps)) campaignData.battleMaps = [];
+      campaignData.battleMaps.push(item);
+      if (saveCampaignData()) {
+        battleMapForm.reset();
+        document.getElementById('battlemap-form-error').classList.add('hidden');
+        renderBattleMaps();
+      }
+    });
+    document.getElementById('battlemap-filter').addEventListener('change', renderBattleMaps);
+    document.getElementById('battlemap-list').addEventListener('click', event => {
+      const button = event.target.closest('[data-battlemap-delete]');
+      if (!button) return;
+      const item = campaignData.battleMaps.find(entry => entry.id === button.dataset.battlemapDelete);
+      if (!item || !confirm('Удалить карту «' + item.title + '» из подборки?')) return;
+      campaignData.battleMaps = campaignData.battleMaps.filter(entry => entry.id !== item.id);
+      if (saveCampaignData()) renderBattleMaps();
+    });
+    renderBattleMaps();
+
+    // Тактическая боевая сцена: сетка, перетаскиваемые фишки и очередь инициативы.
+    if (!campaignData.battleScene || typeof campaignData.battleScene !== 'object') {
+      campaignData.battleScene = {mapUrl:'',gridSize:40,round:1,activeId:null,combatants:[]};
+    }
+    const battleScene = campaignData.battleScene;
+    if (!Array.isArray(battleScene.combatants)) battleScene.combatants = [];
+    battleScene.gridSize = Math.max(20, Math.min(100, Number(battleScene.gridSize) || 40));
+    battleScene.round = Math.max(1, Number(battleScene.round) || 1);
+    const battleBoard = document.getElementById('battle-scene-board');
+    const battleGrid = document.getElementById('battle-scene-grid');
+    const battleMapLayer = document.getElementById('battle-scene-map-layer');
+    const battleMarkers = document.getElementById('battle-scene-markers');
+    const sideLabels = {hero:'Герой',enemy:'Враг',ally:'Союзник'};
+    const sideColors = {hero:'#2563eb',enemy:'#dc2626',ally:'#059669'};
+    function saveBattleScene() {
+      campaignData.battleScene = battleScene;
+      return saveCampaignData();
+    }
+    function sortedCombatants() {
+      return battleScene.combatants.slice().sort((a,b) => Number(b.initiative)-Number(a.initiative) || String(a.name).localeCompare(String(b.name),'ru'));
+    }
+    function renderBattleScene() {
+      document.getElementById('battle-scene-grid-size').value = battleScene.gridSize;
+      document.getElementById('battle-scene-map-url').value = battleScene.mapUrl || '';
+      battleGrid.style.backgroundImage = 'linear-gradient(to right, rgba(226,232,240,.42) 1px, transparent 1px), linear-gradient(to bottom, rgba(226,232,240,.42) 1px, transparent 1px)';
+      battleGrid.style.backgroundSize = battleScene.gridSize + 'px ' + battleScene.gridSize + 'px';
+      battleMapLayer.style.backgroundImage = '';
+      if (battleScene.mapUrl) {
+        try {
+          const u = new URL(battleScene.mapUrl);
+          if (['http:','https:'].includes(u.protocol)) battleMapLayer.style.backgroundImage = 'url("' + u.href.replace(/["\\\\]/g, '') + '")';
+        } catch (e) {}
+      }
+      const participants = battleScene.combatants;
+      document.getElementById('battle-scene-empty').classList.toggle('hidden', participants.length > 0);
+      battleMarkers.innerHTML = participants.map((c, i) => {
+        const x = Math.max(2, Math.min(98, Number(c.x) || 10 + (i % 5) * 16));
+        const y = Math.max(5, Math.min(95, Number(c.y) || 14 + (Math.floor(i / 5) % 5) * 16));
+        const color = sideColors[c.side] || sideColors.enemy;
+        return '<button type="button" draggable="false" data-battle-marker="' + safeText(c.id) + '" title="' + safeText(c.name) + ' — перетащи фишку" class="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 focus:outline-none focus:ring-2 focus:ring-amber-300" style="left:' + x + '%;top:' + y + '%;touch-action:none;max-width:92px">' +
+          '<span class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white text-lg font-black text-white shadow-lg" style="background:' + color + '">' + (c.side === 'enemy' ? '☠' : c.side === 'ally' ? '✦' : '♟') + '</span>' +
+          '<span class="max-w-[92px] rounded-md bg-zinc-950/90 px-1.5 py-0.5 text-center text-[11px] font-semibold leading-tight text-white">' + safeText(c.name) + '</span></button>';
+      }).join('');
+      const sorted = sortedCombatants();
+      if (!sorted.some(c => c.id === battleScene.activeId)) battleScene.activeId = sorted.length ? sorted[0].id : null;
+      document.getElementById('battle-round-label').textContent = 'Раунд ' + battleScene.round;
+      document.getElementById('battle-initiative-empty').classList.toggle('hidden', sorted.length > 0);
+      document.getElementById('battle-initiative-list').innerHTML = sorted.map((c, index) => {
+        const active = c.id === battleScene.activeId;
+        return '<li class="rounded-xl border ' + (active ? 'border-amber-400 bg-amber-400/10' : 'border-zinc-800 bg-zinc-900') + ' p-3">' +
+          '<div class="flex items-start gap-2"><span class="flex h-8 min-w-8 items-center justify-center rounded-lg bg-zinc-800 px-2 text-sm font-black text-amber-200">' + safeText(c.initiative) + '</span><div class="min-w-0 flex-1"><p class="break-words text-sm font-semibold ' + (active ? 'text-amber-200' : 'text-zinc-100') + '">' + (active ? '▶ ' : '') + safeText(c.name) + '</p><p class="mt-1 text-xs text-zinc-500">' + safeText(sideLabels[c.side] || 'Участник') + ' · HP ' + safeText(c.hp) + '/' + safeText(c.maxHp) + '</p></div></div>' +
+          '<div class="mt-2 flex flex-wrap gap-2"><button type="button" data-battle-active="' + safeText(c.id) + '" class="rounded-lg border border-zinc-700 px-2 py-1 text-xs text-zinc-300">Ход</button><button type="button" data-battle-hp="' + safeText(c.id) + '" data-hp-delta="-1" class="rounded-lg border border-zinc-700 px-2 py-1 text-xs text-zinc-300">− HP</button><button type="button" data-battle-hp="' + safeText(c.id) + '" data-hp-delta="1" class="rounded-lg border border-zinc-700 px-2 py-1 text-xs text-zinc-300">+ HP</button><button type="button" data-battle-remove="' + safeText(c.id) + '" class="ml-auto rounded-lg border border-zinc-800 px-2 py-1 text-xs text-red-300">Убрать</button></div></li>';
+      }).join('');
+    }
+    document.getElementById('battle-scene-settings').addEventListener('submit', event => {
+      event.preventDefault();
+      const err = document.getElementById('battle-scene-error');
+      err.classList.add('hidden');
+      const raw = document.getElementById('battle-scene-map-url').value.trim();
+      let mapUrl = '';
+      if (raw) {
+        try {
+          const parsed = new URL(raw);
+          if (!['http:','https:'].includes(parsed.protocol)) throw new Error('protocol');
+          mapUrl = parsed.href;
+        } catch (e) { err.textContent = 'Ссылка на карту должна начинаться с https:// или http://.'; err.classList.remove('hidden'); return; }
+      }
+      battleScene.mapUrl = mapUrl;
+      battleScene.gridSize = Math.max(20, Math.min(100, Number(document.getElementById('battle-scene-grid-size').value) || 40));
+      if (saveBattleScene()) renderBattleScene();
+    });
+    document.getElementById('battle-combatant-form').addEventListener('submit', event => {
+      event.preventDefault();
+      const name = document.getElementById('battle-combatant-name').value.trim();
+      if (!name) return;
+      const side = document.getElementById('battle-combatant-side').value;
+      const maxHp = Math.max(1, Math.min(9999, Number(document.getElementById('battle-combatant-maxhp').value) || 1));
+      const hp = Math.max(0, Math.min(maxHp, Number(document.getElementById('battle-combatant-hp').value) || 0));
+      const id = 'combatant-' + Date.now() + '-' + Math.random().toString(36).slice(2,7);
+      const count = battleScene.combatants.length;
+      battleScene.combatants.push({id,name,side,initiative:Math.max(-20,Math.min(50,Number(document.getElementById('battle-combatant-initiative').value)||0)),hp,maxHp,x:8+(count%6)*16,y:12+(Math.floor(count/6)%6)*15});
+      if (!battleScene.activeId) battleScene.activeId = id;
+      if (saveBattleScene()) { event.target.reset(); document.getElementById('battle-combatant-initiative').value = 10; document.getElementById('battle-combatant-hp').value = 10; document.getElementById('battle-combatant-maxhp').value = 10; renderBattleScene(); }
+    });
+    document.getElementById('battle-initiative-list').addEventListener('click', event => {
+      const activeButton = event.target.closest('[data-battle-active]');
+      const hpButton = event.target.closest('[data-battle-hp]');
+      const removeButton = event.target.closest('[data-battle-remove]');
+      if (activeButton) {
+        battleScene.activeId = activeButton.dataset.battleActive;
+        saveBattleScene(); renderBattleScene();
+      } else if (hpButton) {
+        const c = battleScene.combatants.find(item => item.id === hpButton.dataset.battleHp);
+        if (!c) return;
+        c.hp = Math.max(0, Math.min(c.maxHp, Number(c.hp) + Number(hpButton.dataset.hpDelta)));
+        saveBattleScene(); renderBattleScene();
+      } else if (removeButton) {
+        const c = battleScene.combatants.find(item => item.id === removeButton.dataset.battleRemove);
+        if (!c || !confirm('Убрать участника «' + c.name + '» из боя?')) return;
+        battleScene.combatants = battleScene.combatants.filter(item => item.id !== c.id);
+        if (battleScene.activeId === c.id) battleScene.activeId = null;
+        saveBattleScene(); renderBattleScene();
+      }
+    });
+    document.getElementById('battle-next-turn').addEventListener('click', () => {
+      const sorted = sortedCombatants();
+      if (!sorted.length) return;
+      const currentIndex = sorted.findIndex(c => c.id === battleScene.activeId);
+      if (currentIndex < 0 || currentIndex === sorted.length - 1) { battleScene.round += 1; battleScene.activeId = sorted[0].id; }
+      else battleScene.activeId = sorted[currentIndex + 1].id;
+      saveBattleScene(); renderBattleScene();
+    });
+    document.getElementById('battle-reset-turn').addEventListener('click', () => {
+      battleScene.round = 1;
+      const sorted = sortedCombatants();
+      battleScene.activeId = sorted.length ? sorted[0].id : null;
+      saveBattleScene(); renderBattleScene();
+    });
+    let draggedBattleMarker = null;
+    battleMarkers.addEventListener('pointerdown', event => {
+      const marker = event.target.closest('[data-battle-marker]');
+      if (!marker) return;
+      event.preventDefault();
+      draggedBattleMarker = marker.dataset.battleMarker;
+      marker.setPointerCapture(event.pointerId);
+    });
+    battleMarkers.addEventListener('pointermove', event => {
+      if (!draggedBattleMarker) return;
+      const c = battleScene.combatants.find(item => item.id === draggedBattleMarker);
+      if (!c) return;
+      const rect = battleBoard.getBoundingClientRect();
+      c.x = Math.max(2, Math.min(98, ((event.clientX - rect.left) / rect.width) * 100));
+      c.y = Math.max(5, Math.min(95, ((event.clientY - rect.top) / rect.height) * 100));
+      const marker = battleMarkers.querySelector('[data-battle-marker="' + draggedBattleMarker + '"]');
+      if (marker) { marker.style.left = c.x + '%'; marker.style.top = c.y + '%'; }
+    });
+    battleMarkers.addEventListener('pointerup', () => {
+      if (!draggedBattleMarker) return;
+      draggedBattleMarker = null;
+      saveBattleScene();
+    });
+    battleMarkers.addEventListener('pointercancel', () => { draggedBattleMarker = null; });
+    renderBattleScene();
 
     // Карточки персонажей сохраняются локально в браузере: GitHub Pages не предоставляет базу данных.
     const PLAYER_STORAGE_KEY = 'dnd-lore-stormking-players-v1';
