@@ -215,8 +215,18 @@
         <div class="mb-5"><p class="text-xs uppercase tracking-[.2em] text-amber-400">Игровое поле</p><h3 id="battle-scene-heading" class="mt-2 text-2xl font-black text-amber-200">Тактическая сцена</h3><p class="mt-2 text-sm text-zinc-400">Добавь участников, расставь фишки на клетках и веди очередь ходов. Сцена сохраняется в этом браузере.</p></div>
         <div class="grid gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(280px,.8fr)]">
           <div class="min-w-0">
+            <div class="mb-4 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-3">
+              <label for="battle-scene-saved-map" class="text-sm font-semibold text-amber-200">Выбрать сохранённую карту</label>
+              <div class="mt-2 flex flex-col gap-2 sm:flex-row">
+                <select id="battle-scene-saved-map" class="min-w-0 flex-1 rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white">
+                  <option value="">— Выбери карту из библиотеки —</option>
+                </select>
+                <button id="battle-scene-use-saved-map" type="button" class="rounded-xl border border-amber-500/40 px-4 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-500/10">Наложить на поле</button>
+              </div>
+              <p class="mt-2 text-xs leading-relaxed text-zinc-500">Для отображения на поле нужна прямая ссылка на файл изображения (например, .jpg, .png или .webp). Ссылка на страницу сайта с картой может открываться отдельно, но не отображаться фоном.</p>
+            </div>
             <form id="battle-scene-settings" class="mb-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_100px_auto]">
-              <label class="text-sm text-zinc-300">Ссылка на изображение карты (необязательно)<input id="battle-scene-map-url" type="url" maxlength="1000" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-white" placeholder="https://.../map.jpg"></label>
+              <label class="text-sm text-zinc-300">Или вставь прямую ссылку на изображение<input id="battle-scene-map-url" type="url" maxlength="1000" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-white" placeholder="https://.../map.jpg"></label>
               <label class="text-sm text-zinc-300">Размер клетки<input id="battle-scene-grid-size" type="number" min="20" max="100" value="40" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-white"></label>
               <div class="flex items-end"><button type="submit" class="w-full rounded-xl border border-amber-500/40 px-4 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-500/10">Применить</button></div>
             </form>
@@ -517,7 +527,17 @@
     function sortedCombatants() {
       return battleScene.combatants.slice().sort((a,b) => Number(b.initiative)-Number(a.initiative) || String(a.name).localeCompare(String(b.name),'ru'));
     }
+    function renderSavedBattleMapOptions() {
+      const select = document.getElementById('battle-scene-saved-map');
+      const selected = select.value;
+      const maps = Array.isArray(campaignData.battleMaps) ? campaignData.battleMaps : [];
+      select.innerHTML = '<option value="">— Выбери карту из библиотеки —</option>' + maps.map(item =>
+        '<option value="' + safeText(item.id) + '">' + safeText(item.title) + '</option>'
+      ).join('');
+      if (maps.some(item => item.id === selected)) select.value = selected;
+    }
     function renderBattleScene() {
+      renderSavedBattleMapOptions();
       document.getElementById('battle-scene-grid-size').value = battleScene.gridSize;
       document.getElementById('battle-scene-map-url').value = battleScene.mapUrl || '';
       battleGrid.style.backgroundImage = 'linear-gradient(to right, rgba(226,232,240,.42) 1px, transparent 1px), linear-gradient(to bottom, rgba(226,232,240,.42) 1px, transparent 1px)';
@@ -550,6 +570,41 @@
           '<div class="mt-2 flex flex-wrap gap-2"><button type="button" data-battle-active="' + safeText(c.id) + '" class="rounded-lg border border-zinc-700 px-2 py-1 text-xs text-zinc-300">Ход</button><button type="button" data-battle-hp="' + safeText(c.id) + '" data-hp-delta="-1" class="rounded-lg border border-zinc-700 px-2 py-1 text-xs text-zinc-300">− HP</button><button type="button" data-battle-hp="' + safeText(c.id) + '" data-hp-delta="1" class="rounded-lg border border-zinc-700 px-2 py-1 text-xs text-zinc-300">+ HP</button><button type="button" data-battle-remove="' + safeText(c.id) + '" class="ml-auto rounded-lg border border-zinc-800 px-2 py-1 text-xs text-red-300">Убрать</button></div></li>';
       }).join('');
     }
+    document.getElementById('battle-scene-use-saved-map').addEventListener('click', () => {
+      const err = document.getElementById('battle-scene-error');
+      err.classList.add('hidden');
+      const selectedId = document.getElementById('battle-scene-saved-map').value;
+      const item = (Array.isArray(campaignData.battleMaps) ? campaignData.battleMaps : []).find(entry => entry.id === selectedId);
+      if (!item) {
+        err.textContent = 'Сначала выбери карту из библиотеки.';
+        err.classList.remove('hidden');
+        return;
+      }
+      let parsed;
+      try {
+        parsed = new URL(item.url);
+        if (!['http:','https:'].includes(parsed.protocol)) throw new Error('protocol');
+      } catch (e) {
+        err.textContent = 'У сохранённой карты некорректная ссылка. Открой библиотеку и исправь её.';
+        err.classList.remove('hidden');
+        return;
+      }
+      const image = new Image();
+      image.onload = () => {
+        battleScene.mapUrl = parsed.href;
+        document.getElementById('battle-scene-map-url').value = parsed.href;
+        if (saveBattleScene()) {
+          renderBattleScene();
+          document.getElementById('battle-scene-saved-map').value = item.id;
+          err.classList.add('hidden');
+        }
+      };
+      image.onerror = () => {
+        err.textContent = 'Эта ссылка не загружается как изображение. В библиотеке сохранена, вероятно, страница сайта, а не сам файл карты. Открой карту-источник и скопируй прямую ссылку на изображение.';
+        err.classList.remove('hidden');
+      };
+      image.src = parsed.href;
+    });
     document.getElementById('battle-scene-settings').addEventListener('submit', event => {
       event.preventDefault();
       const err = document.getElementById('battle-scene-error');
