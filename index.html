@@ -261,6 +261,14 @@
       {
         title: 'Проклятие Страда',
         description: 'Мрачное приключение в Баровии.'
+      },
+      {
+        title: 'Гром штурмового короля',
+        description: 'Эпическое приключение по Дикому Северу Фаэруна. Древний порядок великанов — Ординг — разрушен, и великаны разных родов начинают угрожать поселениям и городам.',
+        levels: '1–11 уровень',
+        setting: 'Forgotten Realms · Дикий Север',
+        themes: 'Великаны, древние руны, исследование мира, политические интриги',
+        details: 'Героям предстоит выяснить, почему исчез король штормовых великанов Хекатон, разобраться в конфликте между родами великанов и раскрыть силу, стоящую за хаосом. Кампания сочетает путешествия по открытому миру, опасные встречи и исследование древних мест.'
       }
     ];
 
@@ -316,6 +324,17 @@
           <p class="text-zinc-400">
             ${campaign.description}
           </p>
+          ${campaign.levels ? `
+            <div class="flex flex-wrap gap-2 mt-4">
+              <span class="inline-block text-xs border border-amber-500/30 bg-amber-500/10 text-amber-200 rounded-full px-3 py-1">⚔️ ${campaign.levels}</span>
+              <span class="inline-block text-xs border border-zinc-700 text-zinc-300 rounded-full px-3 py-1">🗺️ ${campaign.setting}</span>
+            </div>
+            <p class="text-zinc-300 text-sm mt-4"><strong class="text-amber-300">Темы:</strong> ${campaign.themes}</p>
+            <details class="mt-4">
+              <summary class="cursor-pointer text-amber-300 hover:text-amber-200 font-semibold">Подробнее о кампании</summary>
+              <p class="text-zinc-400 mt-3 leading-relaxed">${campaign.details}</p>
+            </details>
+          ` : ''}
         </div>
       `;
     });
