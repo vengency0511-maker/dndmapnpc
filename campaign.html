@@ -157,13 +157,27 @@
     </section>
 
     <section id="panel-npcs" class="tab-panel py-8" role="tabpanel" aria-labelledby="tab-npcs" hidden>
-      <div class="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 md:p-8">
-        <h2 class="text-2xl font-bold">NPC и фракции</h2><p class="mt-2 text-zinc-400">Персонажи мира, союзники, противники и организации, с которыми встретилась группа.</p>
-        <div class="mt-6 grid gap-4 sm:grid-cols-2">
-          <article class="rounded-2xl border border-zinc-800 bg-zinc-950 p-5"><h3 class="font-semibold text-amber-300">Зефирос</h3><p class="mt-1 text-sm text-zinc-400">Облачный великан · учёный</p><p class="mt-3 text-sm leading-relaxed text-zinc-300">Загадочный исследователь, способный неожиданно вмешаться в путешествие героев.</p></article>
-          <article class="rounded-2xl border border-zinc-800 bg-zinc-950 p-5"><h3 class="font-semibold text-amber-300">Нери</h3><p class="mt-1 text-sm text-zinc-400">Королева штормовых великанов</p><p class="mt-3 text-sm leading-relaxed text-zinc-300">Супруга Хекатона; её судьба связана с историей королевской семьи.</p></article>
-        </div>
-        <p class="mt-5 text-xs text-zinc-500">Некоторые сведения могут раскрывать сюжетные детали приключения.</p>
+      <div class="mb-6"><p class="text-xs uppercase tracking-[.2em] text-amber-400">Справочник мира</p><h2 class="mt-2 text-3xl font-black">NPC, фракции и локации</h2><p class="mt-2 max-w-3xl text-zinc-400">Собирай в одном месте важных персонажей, организации и места. Можно хранить отношение к группе, описание и собственные заметки.</p></div>
+      <div class="grid gap-6 xl:grid-cols-[minmax(0,.9fr)_minmax(0,1.1fr)]">
+        <section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 md:p-7">
+          <h3 id="world-form-heading" class="text-xl font-bold text-amber-200">Добавить запись</h3>
+          <form id="world-entry-form" class="mt-4 space-y-4">
+            <div class="grid gap-4 sm:grid-cols-2">
+              <label class="block text-sm text-zinc-300">Тип записи<select id="world-entry-type" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white"><option value="npc">NPC / персонаж</option><option value="faction">Фракция / организация</option><option value="location">Локация</option></select></label>
+              <label class="block text-sm text-zinc-300">Название<input id="world-entry-name" required maxlength="140" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Имя, организация или место"></label>
+            </div>
+            <label class="block text-sm text-zinc-300">Роль / краткая характеристика<input id="world-entry-role" maxlength="180" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например, облачный великан-учёный"></label>
+            <label class="block text-sm text-zinc-300">Отношение к группе<select id="world-entry-stance" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white"><option value="unknown">Пока неизвестно</option><option value="ally">Союзник</option><option value="neutral">Нейтрален</option><option value="enemy">Противник</option></select></label>
+            <label class="block text-sm text-zinc-300">Описание<textarea id="world-entry-description" maxlength="5000" rows="4" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Внешность, цели, история, важные особенности..."></textarea></label>
+            <label class="block text-sm text-zinc-300">Заметки ведущего<textarea id="world-entry-notes" maxlength="5000" rows="3" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Что группа знает, зацепки, что не забыть..."></textarea></label>
+            <div class="flex flex-wrap gap-3"><button id="world-entry-submit" type="submit" class="rounded-xl bg-amber-400 px-5 py-3 font-semibold text-zinc-950">Сохранить запись</button><button id="world-entry-cancel" type="button" class="hidden rounded-xl border border-zinc-700 px-5 py-3 text-zinc-300">Отменить редактирование</button></div>
+          </form>
+          <p class="mt-4 text-xs leading-relaxed text-zinc-500">Пока записи хранятся в локальном браузере. Это не приватный раздел: до настройки доступа мастерские заметки может увидеть любой, кто пользуется этим же браузером.</p>
+        </section>
+        <section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 md:p-7">
+          <div class="flex flex-wrap items-start justify-between gap-3"><div><h3 class="text-xl font-bold text-amber-200">Справочник</h3><p id="world-entry-count" class="mt-1 text-sm text-zinc-500">0 записей</p></div><label class="text-sm text-zinc-300">Показать<select id="world-entry-filter" class="ml-2 rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-base text-white"><option value="all">Всё</option><option value="npc">NPC</option><option value="faction">Фракции</option><option value="location">Локации</option></select></label></div>
+          <div id="world-entry-list" class="mt-5 grid gap-4" aria-live="polite"></div>
+        </section>
       </div>
     </section>
 
@@ -216,7 +230,7 @@
     });
     // Панель мастера, журнал, квесты и авторские заметки.
     const CAMPAIGN_DATA_KEY = 'dnd-lore-stormking-dm-tools-v1';
-    const defaultCampaignData = { sessions: [], quests: [], playerNotes: [], secretNotes: [], quickNotes: [] };
+    const defaultCampaignData = { sessions: [], quests: [], playerNotes: [], secretNotes: [], quickNotes: [], worldEntries: [{id:'npc-zephyros',type:'npc',name:'Зефирос',role:'Облачный великан · учёный',stance:'unknown',description:'Загадочный исследователь, способный неожиданно вмешаться в путешествие героев.',notes:''},{id:'npc-neri',type:'npc',name:'Нери',role:'Королева штормовых великанов',stance:'unknown',description:'Супруга Хекатона; её судьба связана с историей королевской семьи.',notes:''}] };
     let campaignData = loadCampaignData();
     function loadCampaignData() {
       try { const saved = JSON.parse(localStorage.getItem(CAMPAIGN_DATA_KEY) || '{}'); return Object.assign({}, defaultCampaignData, saved && typeof saved === 'object' ? saved : {}); }
@@ -285,6 +299,79 @@
       const tab = tabs.find(item => item.dataset.tab === button.dataset.openTab);
       if (tab) { activateTab(tab); tab.scrollIntoView({behavior:'smooth',block:'start'}); }
     });
+
+    // Справочник NPC, фракций и локаций.
+    let editingWorldEntryId = null;
+    const worldTypeLabels = {npc:'NPC / персонаж',faction:'Фракция / организация',location:'Локация'};
+    const worldStanceLabels = {unknown:'Отношение неизвестно',ally:'Союзник',neutral:'Нейтрален',enemy:'Противник'};
+    const worldForm = document.getElementById('world-entry-form');
+    function resetWorldEntryForm() {
+      worldForm.reset();
+      editingWorldEntryId = null;
+      document.getElementById('world-form-heading').textContent = 'Добавить запись';
+      document.getElementById('world-entry-submit').textContent = 'Сохранить запись';
+      document.getElementById('world-entry-cancel').classList.add('hidden');
+    }
+    function renderWorldEntries() {
+      if (!Array.isArray(campaignData.worldEntries)) campaignData.worldEntries = [];
+      const filter = document.getElementById('world-entry-filter').value;
+      const entries = campaignData.worldEntries.filter(item => filter === 'all' || item.type === filter);
+      document.getElementById('world-entry-count').textContent = campaignData.worldEntries.length + ' записей';
+      const list = document.getElementById('world-entry-list');
+      if (!entries.length) {
+        list.innerHTML = '<p class="rounded-xl border border-dashed border-zinc-800 p-5 text-sm text-zinc-500">Записей в этой категории пока нет. Добавь первую с помощью формы.</p>';
+        return;
+      }
+      list.innerHTML = entries.slice().reverse().map(item => {
+        const stanceClass = item.stance === 'ally' ? 'border-emerald-500/30 text-emerald-200' : item.stance === 'enemy' ? 'border-red-500/30 text-red-200' : 'border-zinc-700 text-zinc-300';
+        return '<article class="rounded-2xl border border-zinc-800 bg-zinc-950 p-5">' +
+          '<div class="flex flex-wrap items-start justify-between gap-3"><div class="min-w-0"><p class="text-xs uppercase tracking-wide text-amber-400">' + safeText(worldTypeLabels[item.type] || 'Запись') + '</p><h4 class="mt-1 break-words text-lg font-bold text-amber-200">' + safeText(item.name) + '</h4>' +
+          (item.role ? '<p class="mt-1 break-words text-sm text-zinc-400">' + safeText(item.role) + '</p>' : '') +
+          '</div><span class="rounded-full border px-3 py-1 text-xs ' + stanceClass + '">' + safeText(worldStanceLabels[item.stance] || worldStanceLabels.unknown) + '</span></div>' +
+          (item.description ? '<p class="mt-4 whitespace-pre-wrap break-words text-sm leading-relaxed text-zinc-300">' + safeText(item.description) + '</p>' : '') +
+          (item.notes ? '<div class="mt-4 rounded-xl border border-amber-500/10 bg-amber-500/5 p-3"><p class="mb-1 text-xs font-semibold uppercase tracking-wide text-amber-300">Заметки ведущего</p><p class="whitespace-pre-wrap break-words text-sm leading-relaxed text-zinc-300">' + safeText(item.notes) + '</p></div>' : '') +
+          '<div class="mt-4 flex gap-2 border-t border-zinc-800 pt-3"><button type="button" data-world-edit="' + safeText(item.id) + '" class="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300 hover:border-amber-400">Редактировать</button><button type="button" data-world-delete="' + safeText(item.id) + '" class="rounded-lg border border-zinc-800 px-3 py-2 text-sm text-red-300 hover:border-red-400">Удалить</button></div></article>';
+      }).join('');
+    }
+    worldForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const item = {id:editingWorldEntryId || 'world-' + Date.now(),type:document.getElementById('world-entry-type').value,name:document.getElementById('world-entry-name').value.trim(),role:document.getElementById('world-entry-role').value.trim(),stance:document.getElementById('world-entry-stance').value,description:document.getElementById('world-entry-description').value.trim(),notes:document.getElementById('world-entry-notes').value.trim(),updatedAt:new Date().toISOString()};
+      if (!item.name) return;
+      if (!Array.isArray(campaignData.worldEntries)) campaignData.worldEntries = [];
+      if (editingWorldEntryId) {
+        const index = campaignData.worldEntries.findIndex(entry => entry.id === editingWorldEntryId);
+        if (index >= 0) campaignData.worldEntries[index] = Object.assign({}, campaignData.worldEntries[index], item);
+      } else campaignData.worldEntries.push(item);
+      if (saveCampaignData()) { resetWorldEntryForm(); renderWorldEntries(); }
+    });
+    document.getElementById('world-entry-cancel').addEventListener('click', resetWorldEntryForm);
+    document.getElementById('world-entry-filter').addEventListener('change', renderWorldEntries);
+    document.getElementById('world-entry-list').addEventListener('click', event => {
+      const editButton = event.target.closest('[data-world-edit]');
+      const deleteButton = event.target.closest('[data-world-delete]');
+      if (editButton) {
+        const item = campaignData.worldEntries.find(entry => entry.id === editButton.dataset.worldEdit);
+        if (!item) return;
+        editingWorldEntryId = item.id;
+        document.getElementById('world-entry-type').value = item.type || 'npc';
+        document.getElementById('world-entry-name').value = item.name || '';
+        document.getElementById('world-entry-role').value = item.role || '';
+        document.getElementById('world-entry-stance').value = item.stance || 'unknown';
+        document.getElementById('world-entry-description').value = item.description || '';
+        document.getElementById('world-entry-notes').value = item.notes || '';
+        document.getElementById('world-form-heading').textContent = 'Редактировать запись';
+        document.getElementById('world-entry-submit').textContent = 'Сохранить изменения';
+        document.getElementById('world-entry-cancel').classList.remove('hidden');
+        worldForm.scrollIntoView({behavior:'smooth',block:'start'});
+        document.getElementById('world-entry-name').focus({preventScroll:true});
+      } else if (deleteButton) {
+        const item = campaignData.worldEntries.find(entry => entry.id === deleteButton.dataset.worldDelete);
+        if (!item || !confirm('Удалить запись «' + item.name + '»?')) return;
+        campaignData.worldEntries = campaignData.worldEntries.filter(entry => entry.id !== item.id);
+        if (saveCampaignData()) renderWorldEntries();
+      }
+    });
+    renderWorldEntries();
 
     // Карточки персонажей сохраняются локально в браузере: GitHub Pages не предоставляет базу данных.
     const PLAYER_STORAGE_KEY = 'dnd-lore-stormking-players-v1';
