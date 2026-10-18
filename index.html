@@ -133,6 +133,24 @@
 
       <div id="campaignList" class="grid md:grid-cols-2 gap-6"></div>
 
+      <section id="campaignDetail" class="hidden mt-8 bg-zinc-900 border border-amber-500/30 rounded-3xl p-6 md:p-8" aria-live="polite">
+        <button id="backToCampaigns" class="border border-zinc-700 hover:border-amber-400 px-4 py-2 rounded-xl mb-6">← Назад к кампаниям</button>
+        <div class="text-amber-300 text-sm font-semibold tracking-wide uppercase">Dungeons & Dragons 5e</div>
+        <h4 id="detailTitle" class="text-3xl md:text-4xl font-black text-amber-300 mt-2 mb-4"></h4>
+        <p id="detailDescription" class="text-zinc-300 text-lg leading-relaxed"></p>
+        <div id="detailMeta" class="flex flex-wrap gap-2 mt-5"></div>
+        <div class="mt-8">
+          <h5 class="text-2xl font-bold mb-3">О чём эта кампания</h5>
+          <p id="detailStory" class="text-zinc-300 leading-relaxed"></p>
+        </div>
+        <div class="mt-8">
+          <h5 class="text-2xl font-bold mb-2">Персонажи и NPC, которых можно встретить</h5>
+          <p class="text-zinc-400 mb-4">Состав встреч зависит от решений группы и выбранного маршрута. Ниже — важные персонажи приключения.</p>
+          <div id="detailCharacters" class="grid md:grid-cols-2 gap-4"></div>
+        </div>
+        <p class="text-xs text-zinc-500 mt-6">Внимание: подробности о ключевых персонажах могут содержать сюжетные спойлеры.</p>
+      </section>
+
     </section>
 
     <!-- CHARACTERS -->
@@ -268,7 +286,18 @@
         levels: '1–11 уровень',
         setting: 'Forgotten Realms · Дикий Север',
         themes: 'Великаны, древние руны, исследование мира, политические интриги',
-        details: 'Героям предстоит выяснить, почему исчез король штормовых великанов Хекатон, разобраться в конфликте между родами великанов и раскрыть силу, стоящую за хаосом. Кампания сочетает путешествия по открытому миру, опасные встречи и исследование древних мест.'
+        details: 'Героям предстоит выяснить, почему рушится привычный порядок великанов, разобраться в конфликте между их родами и раскрыть силу, стоящую за хаосом. Кампания сочетает путешествия по открытому миру, опасные встречи и исследование древних мест.',
+        story: 'После распада Ординга — древней иерархии великанов — по Дикому Северу прокатывается волна беспорядков. Герои отправятся в путешествие по Фаэруну, будут искать союзников среди великанов и других народов, исследовать древние места и выяснять, кто стоит за кризисом. Их решения влияют на то, какие фракции станут союзниками, а какие — врагами.',
+        characters: [
+          { name: 'Хекатон', role: 'Король штормовых великанов', lore: 'Могущественный правитель, чьё исчезновение становится одной из центральных загадок приключения.' },
+          { name: 'Серисса', role: 'Принцесса штормовых великанов', lore: 'Дочь Хекатона. Может стать важным союзником героев в попытке восстановить порядок.' },
+          { name: 'Харшнаг', role: 'Ледяной великан-следопыт', lore: 'Опытный путешественник, который помогает героям понять мир великанов и угрозы Дикого Севера.' },
+          { name: 'Иymрит', role: 'Древняя синяя драконица', lore: 'Опасная фигура, чьи планы тесно связаны с кризисом среди великанов.' },
+          { name: 'Зефирос', role: 'Облачный великан', lore: 'Загадочный учёный-великан, способный неожиданно вмешаться в путешествие отряда.' },
+          { name: 'Фелгос', role: 'Золотой дракон', lore: 'Необычный возможный союзник, связанный с опасностями и тайнами Севера.' },
+          { name: 'Клаут', role: 'Древний красный дракон', lore: 'Грозная сила, с которой героям лучше не сталкиваться без подготовки.' },
+          { name: 'Нери', role: 'Королева штормовых великанов', lore: 'Супруга Хекатона; её судьба и история семьи важны для понимания событий.' }
+        ]
       }
     ];
 
@@ -337,6 +366,58 @@
           ` : ''}
         </div>
       `;
+    });
+
+    // CAMPAIGN DETAIL PAGE
+    const campaignDetail = document.getElementById('campaignDetail');
+    const campaignCards = campaignList.children;
+
+    campaigns.forEach((campaign, index) => {
+      const card = campaignCards[index];
+      if (!card) return;
+      card.classList.add('cursor-pointer', 'transition', 'hover:border-amber-500', 'hover:-translate-y-0.5');
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('aria-label', 'Открыть кампанию: ' + campaign.title);
+
+      const openCampaign = () => {
+        if (campaign.title !== 'Гром штурмового короля') {
+          document.getElementById('detailTitle').textContent = campaign.title;
+          document.getElementById('detailDescription').textContent = campaign.description;
+          document.getElementById('detailStory').textContent = 'Подробная страница этой кампании пока находится в разработке.';
+          document.getElementById('detailMeta').innerHTML = '';
+          document.getElementById('detailCharacters').innerHTML = '<p class="text-zinc-400">Список персонажей будет добавлен позже.</p>';
+        } else {
+          document.getElementById('detailTitle').textContent = campaign.title;
+          document.getElementById('detailDescription').textContent = campaign.description;
+          document.getElementById('detailStory').textContent = campaign.story;
+          document.getElementById('detailMeta').innerHTML = [
+            campaign.levels, campaign.setting, campaign.themes
+          ].map(item => '<span class="text-sm border border-zinc-700 bg-zinc-950 text-zinc-300 rounded-full px-3 py-2">' + item + '</span>').join('');
+          document.getElementById('detailCharacters').innerHTML = campaign.characters.map(person =>
+            '<article class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">' +
+              '<h6 class="text-lg font-bold text-amber-300">' + person.name + '</h6>' +
+              '<p class="text-sm text-zinc-400 mt-1">' + person.role + '</p>' +
+              '<p class="text-zinc-300 mt-3 leading-relaxed">' + person.lore + '</p>' +
+            '</article>'
+          ).join('');
+        }
+        campaignDetail.classList.remove('hidden');
+        campaignDetail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      };
+
+      card.addEventListener('click', openCampaign);
+      card.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          openCampaign();
+        }
+      });
+    });
+
+    document.getElementById('backToCampaigns').addEventListener('click', () => {
+      campaignDetail.classList.add('hidden');
+      document.getElementById('campaigns').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
     // CHARACTERS
