@@ -6,6 +6,53 @@
   <title>DnD Lore Portal</title>
 
   <script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=ykfBWj_oEkS7hHZxkIGyJdmbGtkQyGc_7QC3A5Gm6owWiuxyRTwKfxRs3jf6Mi8VLpdv64bbWA8ZfNmzZQoo5v3l9oBcfb0v967Y1Qh5epHENOIwgdHEG-iTZj9kCemuiI875eZJR5o-pPeD8br61NYjO3pyAxMvsNC24jgkjcZXpa2bap--0bpjhlg4qmaEXluo9Ze4QpJFdFJLFcUwIUrjc3OIm8m3wQADR0wlsZXNWTb_MbeHfsawxu-SVmGN2CdixydM0ZbdaxeLPe24cQ" charset="UTF-8"></script><script src="https://cdn.tailwindcss.com"></script>
+
+<style id="responsive-layout">
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 1rem; -webkit-text-size-adjust: 100%; }
+  body { min-width: 320px; overflow-wrap: anywhere; }
+  img { max-width: 100%; height: auto; }
+  button, a { -webkit-tap-highlight-color: transparent; }
+  button { min-height: 42px; cursor: pointer; touch-action: manipulation; }
+  input, textarea, select { font: inherit; max-width: 100%; }
+  section[id] { scroll-margin-top: 1rem; }
+  @media (max-width: 767px) {
+    header { padding: 0 !important; }
+    header > div { padding: 1rem !important; align-items: flex-start !important; gap: 1rem !important; flex-direction: column; }
+    header h1 { font-size: 1.65rem !important; line-height: 1.2; }
+    header nav { width: 100%; display: flex !important; flex-wrap: nowrap; gap: .45rem !important; overflow-x: auto; overscroll-behavior-x: contain; padding: .2rem 1rem .85rem; scrollbar-width: thin; }
+    header nav a { flex: 0 0 auto; white-space: nowrap; padding: .55rem .7rem; border: 1px solid #3f3f46; border-radius: .7rem; }
+    main { padding: 1.25rem 1rem !important; }
+    main.space-y-16 > :not([hidden]) ~ :not([hidden]) { margin-top: 2.75rem; }
+    main .grid.lg\:grid-cols-2 { grid-template-columns: minmax(0, 1fr) !important; gap: 1.5rem !important; }
+    main h2 { font-size: clamp(1.8rem, 8vw, 2.5rem) !important; line-height: 1.12 !important; overflow-wrap: anywhere; }
+    main h3 { font-size: 1.5rem !important; line-height: 1.2; }
+    main h4 { font-size: 1.25rem !important; line-height: 1.25; }
+    main .flex.justify-between.items-center { align-items: flex-start !important; flex-wrap: wrap; gap: .75rem; }
+    main .flex.justify-between.items-center > button { max-width: 100%; white-space: normal; }
+    main .flex.gap-4.flex-wrap { gap: .65rem !important; }
+    main button { padding: .65rem .85rem !important; }
+    main .rounded-3xl.p-6, main .rounded-2xl.p-5 { padding: 1rem !important; }
+    main img { object-fit: cover; }
+    #campaignList, #characterList, #npcList, #locationList { grid-template-columns: minmax(0, 1fr) !important; }
+    #campaignList > *, #characterList > *, #npcList > *, #locationList > * { min-width: 0; }
+    #map img { min-height: 180px; object-fit: cover; }
+    #sessions .p-6 { padding: 1rem !important; }
+    footer > div { padding: 1.25rem 1rem !important; flex-direction: column; gap: .75rem; }
+    footer .flex { flex-wrap: wrap; gap: .5rem 1rem; }
+  }
+  @media (min-width: 768px) and (max-width: 1023px) {
+    header > div { gap: 1rem; }
+    header nav { gap: 1rem !important; flex-wrap: wrap; }
+    main { padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
+    main h2 { font-size: clamp(2.3rem, 5vw, 3.2rem) !important; }
+    #characterList, #campaignList { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }
+</style>
 </head>
 
 <body class="bg-zinc-950 text-zinc-100">
