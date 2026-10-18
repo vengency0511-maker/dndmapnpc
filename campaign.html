@@ -236,7 +236,7 @@
                 </select>
                 <button id="battle-scene-use-saved-map" type="button" class="rounded-xl border border-amber-500/40 px-4 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-500/10">Наложить на поле</button>
               </div>
-              <p class="mt-2 text-xs leading-relaxed text-zinc-500">Для отображения на поле нужна прямая ссылка на файл изображения (например, .jpg, .png или .webp). Ссылка на страницу сайта с картой может открываться отдельно, но не отображаться фоном.</p>
+              <p class="mt-2 text-xs leading-relaxed text-zinc-500">Можно выбрать загруженную карту из библиотеки или вставить прямую ссылку на изображение.</p>
             </div>
             <form id="battle-scene-settings" class="mb-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_100px_auto]">
               <label class="text-sm text-zinc-300">Или вставь прямую ссылку на изображение<input id="battle-scene-map-url" type="url" maxlength="1000" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-white" placeholder="https://.../map.jpg"></label>
@@ -566,9 +566,6 @@
       if (battleScene.mapImageObjectUrl) { URL.revokeObjectURL(battleScene.mapImageObjectUrl); battleScene.mapImageObjectUrl=null; }
       if (battleScene.mapImageId) { const localId=battleScene.mapImageId; getMapImage(localId).then(stored=>{if(stored&&battleScene.mapImageId===localId){battleScene.mapImageObjectUrl=URL.createObjectURL(stored.blob);battleMapLayer.style.backgroundImage='url("' + battleScene.mapImageObjectUrl + '")';}}).catch(()=>{}); }
       else if (battleScene.mapUrl) { try { const u=new URL(battleScene.mapUrl); if(['http:','https:'].includes(u.protocol)) battleMapLayer.style.backgroundImage='url("' + u.href.replace(/["\\]/g,'') + '")'; } catch(e) {} }
-      if (false) { try { const u = new URL(battleScene.mapUrl); if (['http:','https:'].includes(u.protocol)) battleMapLayer.style.backgroundImage = 'url("' + u.href.replace(/["\\\\]/g, '') + '")';
-        } catch (e) {}
-      }
       const participants = battleScene.combatants;
       document.getElementById('battle-scene-empty').classList.toggle('hidden', participants.length > 0);
       battleMarkers.innerHTML = participants.map((c, i) => {
