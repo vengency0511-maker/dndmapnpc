@@ -131,9 +131,7 @@
           <div><h2 class="text-2xl font-bold">Карта кампании</h2><p class="mt-2 max-w-2xl text-zinc-400">Здесь разместим карту Дикого Севера и отметки важных мест, маршрутов и открытий группы.</p></div>
           <span class="rounded-full border border-zinc-700 px-3 py-1 text-sm text-zinc-400">В разработке</span>
         </div>
-        <div class="mt-6 flex min-h-64 flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-700 bg-zinc-950 p-8 text-center">
-          <span class="text-5xl" aria-hidden="true">🗺️</span><h3 class="mt-4 text-lg font-semibold text-amber-200">Место для карты</h3><p class="mt-2 max-w-md text-sm leading-relaxed text-zinc-500">Следующим шагом добавим настоящее изображение карты и интерактивные маркеры локаций.</p>
-        </div>
+        <div class="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950 p-4 md:p-6"><form id="world-map-form" class="space-y-4"><label class="block text-sm text-zinc-300">Загрузить карту мира с компьютера<input id="world-map-file" type="file" accept="image/*" class="mt-2 block w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-3 text-sm text-white"></label><p class="text-xs text-zinc-500">Файл хранится локально в браузере на этом компьютере.</p><div class="flex flex-wrap gap-3"><button type="submit" class="rounded-xl bg-amber-400 px-5 py-3 font-semibold text-zinc-950">Сохранить карту кампании</button><button id="world-map-remove" type="button" class="rounded-xl border border-zinc-700 px-4 py-3 text-sm text-zinc-300">Удалить карту</button></div><p id="world-map-status" class="text-sm text-zinc-400" role="status" aria-live="polite"></p></form><div id="world-map-preview" class="mt-5 hidden overflow-hidden rounded-xl border border-zinc-800 bg-black"><img id="world-map-image" alt="Карта мира кампании" class="block h-auto max-h-[75vh] w-full object-contain"></div><div id="world-map-empty" class="mt-5 flex min-h-48 flex-col items-center justify-center rounded-xl border border-dashed border-zinc-700 p-8 text-center"><span class="text-5xl">🗺️</span><h3 class="mt-3 text-lg font-semibold text-amber-200">Пока нет карты</h3><p class="mt-2 text-sm text-zinc-500">Выбери изображение на компьютере и сохрани его.</p></div></div>
       </div>
     </section>
 
@@ -210,7 +208,7 @@
         <section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 md:p-7"><h3 class="text-xl font-bold text-amber-200">Добавить карту в свою подборку</h3><p class="mt-2 text-sm text-zinc-400">Сохраняй ссылку на карту, чтобы быстро открыть её перед боем. Можно добавить заметку о встрече или местности.</p>
           <form id="battlemap-form" class="mt-5 space-y-4">
             <label class="block text-sm text-zinc-300">Название карты <span class="text-amber-300">*</span><input id="battlemap-title" required maxlength="140" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например, Горный перевал"></label>
-            <label class="block text-sm text-zinc-300">Ссылка на оригинал <span class="text-amber-300">*</span><input id="battlemap-url" type="url" required maxlength="1000" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="https://..."></label>
+            <label class="block text-sm text-zinc-300">Ссылка на карту (необязательно)<input id="battlemap-url" type="url" maxlength="1000" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="https://..."></label><label class="block text-sm text-zinc-300">Или загрузить изображение с компьютера<input id="battlemap-file" type="file" accept="image/*" class="mt-2 block w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-3 text-sm text-white"></label><div id="battlemap-upload-preview" class="hidden overflow-hidden rounded-xl border border-zinc-800"><img id="battlemap-upload-image" alt="Предпросмотр боевой карты" class="block max-h-64 w-full object-contain"></div><p class="text-xs text-zinc-500">Можно загрузить файл или сохранить прямую ссылку. Файл хранится локально в браузере.</p>
             <div class="grid gap-4 sm:grid-cols-2">
               <label class="block text-sm text-zinc-300">Тип местности<select id="battlemap-type" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white"><option value="forest">Лес / природа</option><option value="dungeon">Подземелье / пещера</option><option value="settlement">Город / поселение</option><option value="mountain">Горы / снег</option><option value="road">Дорога / лагерь</option><option value="other">Другое</option></select></label>
               <label class="block text-sm text-zinc-300">Источник<input id="battlemap-source" maxlength="120" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например, Forgotten Adventures"></label>
@@ -473,7 +471,14 @@
     });
     renderWorldEntries();
 
-    // Библиотека боевых карт: сохраняем ссылки и заметки, не копируя чужие изображения.
+    const MAP_IMAGE_DB='dnd-lore-map-images-v1', MAP_IMAGE_STORE='images';
+    function openMapImageDb(){return new Promise((resolve,reject)=>{if(!window.indexedDB){reject(new Error('IndexedDB недоступен'));return;}const req=indexedDB.open(MAP_IMAGE_DB,1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(MAP_IMAGE_STORE))req.result.createObjectStore(MAP_IMAGE_STORE,{keyPath:'id'});};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});}
+    async function storeMapImage(file,id){const db=await openMapImageDb();try{await new Promise((resolve,reject)=>{const tx=db.transaction(MAP_IMAGE_STORE,'readwrite');tx.objectStore(MAP_IMAGE_STORE).put({id,blob:file,name:file.name,type:file.type,updatedAt:Date.now()});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);});}finally{db.close();}}
+    async function getMapImage(id){if(!id)return null;const db=await openMapImageDb();try{return await new Promise((resolve,reject)=>{const req=db.transaction(MAP_IMAGE_STORE,'readonly').objectStore(MAP_IMAGE_STORE).get(id);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error);});}finally{db.close();}}
+    async function deleteMapImage(id){if(!id)return;const db=await openMapImageDb();try{await new Promise((resolve,reject)=>{const tx=db.transaction(MAP_IMAGE_STORE,'readwrite');tx.objectStore(MAP_IMAGE_STORE).delete(id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});}finally{db.close();}}
+    function isImageFile(file){return !!file&&file.type.startsWith('image/');}
+    function setImagePreview(file,boxId,imgId){const box=document.getElementById(boxId),img=document.getElementById(imgId);if(img.dataset.objectUrl)URL.revokeObjectURL(img.dataset.objectUrl);if(!file){box.classList.add('hidden');img.removeAttribute('src');delete img.dataset.objectUrl;return;}const url=URL.createObjectURL(file);img.dataset.objectUrl=url;img.src=url;box.classList.remove('hidden');}
+    // Библиотека боевых карт поддерживает локальные файлы и внешние ссылки.
     const battleMapTypes = {forest:'Лес / природа',dungeon:'Подземелье / пещера',settlement:'Город / поселение',mountain:'Горы / снег',road:'Дорога / лагерь',other:'Другое'};
     const battleMapForm = document.getElementById('battlemap-form');
     function renderBattleMaps() {
@@ -486,33 +491,23 @@
         list.innerHTML = '<p class="rounded-xl border border-dashed border-zinc-800 p-5 text-sm text-zinc-500">Пока нет сохранённых карт. Добавь ссылку на карту из одного из каталогов выше.</p>';
         return;
       }
-      list.innerHTML = entries.slice().reverse().map(item => '<article class="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">' +
-        '<div class="flex flex-wrap items-start justify-between gap-2"><div class="min-w-0"><h4 class="break-words font-semibold text-amber-200">' + safeText(item.title) + '</h4><p class="mt-1 text-xs text-zinc-500">' + safeText(battleMapTypes[item.type] || 'Другое') + (item.source ? ' · ' + safeText(item.source) : '') + '</p></div><button type="button" data-battlemap-delete="' + safeText(item.id) + '" class="rounded-lg border border-zinc-800 px-3 py-2 text-xs text-red-300 hover:border-red-400">Удалить</button></div>' +
-        (item.notes ? '<p class="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed text-zinc-300">' + safeText(item.notes) + '</p>' : '') +
-        '<a href="' + safeText(item.url) + '" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex max-w-full break-all rounded-xl border border-amber-500/30 px-3 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-500/10">Открыть карту / источник ↗</a></article>').join('');
+      list.innerHTML = entries.slice().reverse().map(item => '<article class="rounded-2xl border border-zinc-800 bg-zinc-950 p-4"><div class="flex flex-wrap items-start justify-between gap-2"><div class="min-w-0"><h4 class="break-words font-semibold text-amber-200">' + safeText(item.title) + '</h4><p class="mt-1 text-xs text-zinc-500">' + safeText(battleMapTypes[item.type] || 'Другое') + (item.source ? ' · ' + safeText(item.source) : '') + (item.imageId ? ' · Файл с компьютера' : '') + '</p></div><button type="button" data-battlemap-delete="' + safeText(item.id) + '" class="rounded-lg border border-zinc-800 px-3 py-2 text-xs text-red-300">Удалить</button></div>' + (item.notes ? '<p class="mt-3 whitespace-pre-wrap break-words text-sm text-zinc-300">' + safeText(item.notes) + '</p>' : '') + (item.imageId ? '<div class="mt-3 overflow-hidden rounded-xl border border-zinc-800"><img data-battlemap-preview="' + safeText(item.imageId) + '" alt="' + safeText(item.title) + '" class="max-h-56 w-full object-contain"></div><button type="button" data-battlemap-use="' + safeText(item.id) + '" class="mt-3 rounded-xl border border-amber-500/30 px-3 py-2 text-sm text-amber-200">Наложить на тактическую сцену</button>' : '') + (item.url ? '<a href="' + safeText(item.url) + '" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex max-w-full break-all rounded-xl border border-amber-500/30 px-3 py-2 text-sm text-amber-200">Открыть карту / источник ↗</a>' : '') + '</article>').join('');
+      list.querySelectorAll('[data-battlemap-preview]').forEach(async img=>{try{const stored=await getMapImage(img.dataset.battlemapPreview);if(stored&&img.isConnected)img.src=URL.createObjectURL(stored.blob);}catch(e){img.alt='Не удалось загрузить файл';}});
     }
     function showBattleMapError(message) {
       const el = document.getElementById('battlemap-form-error');
       el.textContent = message;
       el.classList.remove('hidden');
     }
-    battleMapForm.addEventListener('submit', event => {
-      event.preventDefault();
-      const title = document.getElementById('battlemap-title').value.trim();
-      const rawUrl = document.getElementById('battlemap-url').value.trim();
-      let parsedUrl;
-      try { parsedUrl = new URL(rawUrl); } catch (error) { showBattleMapError('Укажи корректную ссылку, начинающуюся с https:// или http://.'); return; }
-      if (!['https:','http:'].includes(parsedUrl.protocol)) { showBattleMapError('Разрешены только ссылки http:// и https://.'); return; }
-      if (!title) { showBattleMapError('Укажи название карты.'); return; }
-      const item = {id:'battlemap-' + Date.now(),title,url:parsedUrl.href,type:document.getElementById('battlemap-type').value,source:document.getElementById('battlemap-source').value.trim(),notes:document.getElementById('battlemap-notes').value.trim(),createdAt:new Date().toISOString()};
-      if (!Array.isArray(campaignData.battleMaps)) campaignData.battleMaps = [];
-      campaignData.battleMaps.push(item);
-      if (saveCampaignData()) {
-        battleMapForm.reset();
-        document.getElementById('battlemap-form-error').classList.add('hidden');
-        renderBattleMaps();
-      }
+    battleMapForm.addEventListener('submit',async event=>{
+      event.preventDefault();const title=document.getElementById('battlemap-title').value.trim(),rawUrl=document.getElementById('battlemap-url').value.trim(),file=document.getElementById('battlemap-file').files[0];
+      if(!title){showBattleMapError('Укажи название карты.');return;}if(!rawUrl&&!file){showBattleMapError('Загрузи изображение или укажи ссылку.');return;}if(file&&!isImageFile(file)){showBattleMapError('Выбери файл изображения.');return;}
+      let parsedUrl=null;if(rawUrl){try{parsedUrl=new URL(rawUrl);}catch(e){showBattleMapError('Укажи корректную ссылку http:// или https://.');return;}if(!['https:','http:'].includes(parsedUrl.protocol)){showBattleMapError('Разрешены только ссылки http:// и https://.');return;}}
+      const id='battlemap-'+Date.now();let imageId=null;try{if(file){imageId='map-image-'+id;await storeMapImage(file,imageId);}}catch(e){showBattleMapError('Не удалось сохранить файл. Попробуй другое изображение или проверь место в браузере.');return;}
+      const item={id,title,url:parsedUrl?parsedUrl.href:'',imageId,type:document.getElementById('battlemap-type').value,source:document.getElementById('battlemap-source').value.trim(),notes:document.getElementById('battlemap-notes').value.trim(),createdAt:new Date().toISOString()};if(!Array.isArray(campaignData.battleMaps))campaignData.battleMaps=[];campaignData.battleMaps.push(item);
+      if(saveCampaignData()){battleMapForm.reset();document.getElementById('battlemap-form-error').classList.add('hidden');setImagePreview(null,'battlemap-upload-preview','battlemap-upload-image');renderBattleMaps();renderSavedBattleMapOptions();}else{campaignData.battleMaps=campaignData.battleMaps.filter(entry=>entry.id!==id);if(imageId)deleteMapImage(imageId).catch(()=>{});}
     });
+    document.getElementById('battlemap-file').addEventListener('change',event=>{const file=event.target.files[0];if(file&&!isImageFile(file)){showBattleMapError('Выбери файл изображения.');event.target.value='';setImagePreview(null,'battlemap-upload-preview','battlemap-upload-image');return;}setImagePreview(file,'battlemap-upload-preview','battlemap-upload-image');document.getElementById('battlemap-form-error').classList.add('hidden');});
     document.getElementById('battlemap-filter').addEventListener('change', renderBattleMaps);
     document.getElementById('battlemap-list').addEventListener('click', event => {
       const button = event.target.closest('[data-battlemap-delete]');
@@ -520,13 +515,20 @@
       const item = campaignData.battleMaps.find(entry => entry.id === button.dataset.battlemapDelete);
       if (!item || !confirm('Удалить карту «' + item.title + '» из подборки?')) return;
       campaignData.battleMaps = campaignData.battleMaps.filter(entry => entry.id !== item.id);
-      if (saveCampaignData()) renderBattleMaps();
+      if(saveCampaignData()){if(item.imageId)deleteMapImage(item.imageId).catch(()=>{});renderBattleMaps();renderSavedBattleMapOptions();}
     });
     renderBattleMaps();
 
+    let worldMapObjectUrl=null;
+    async function renderWorldMap(){const preview=document.getElementById('world-map-preview'),empty=document.getElementById('world-map-empty'),img=document.getElementById('world-map-image');if(worldMapObjectUrl)URL.revokeObjectURL(worldMapObjectUrl);worldMapObjectUrl=null;if(!campaignData.worldMapImageId){preview.classList.add('hidden');empty.classList.remove('hidden');return;}try{const stored=await getMapImage(campaignData.worldMapImageId);if(!stored)throw Error('missing');worldMapObjectUrl=URL.createObjectURL(stored.blob);img.src=worldMapObjectUrl;preview.classList.remove('hidden');empty.classList.add('hidden');document.getElementById('world-map-status').textContent='Карта сохранена в этом браузере.';}catch(e){preview.classList.add('hidden');empty.classList.remove('hidden');document.getElementById('world-map-status').textContent='Не удалось найти файл. Загрузи карту ещё раз.';}}
+    document.getElementById('world-map-file').addEventListener('change',e=>{const file=e.target.files[0];if(file&&!isImageFile(file)){e.target.value='';document.getElementById('world-map-status').textContent='Выбери файл изображения.';}else document.getElementById('world-map-status').textContent=file?'Файл выбран. Нажми «Сохранить карту кампании».':'';});
+    document.getElementById('world-map-form').addEventListener('submit',async e=>{e.preventDefault();const file=document.getElementById('world-map-file').files[0];if(!file){document.getElementById('world-map-status').textContent='Сначала выбери изображение.';return;}const id='world-map-'+Date.now(),oldId=campaignData.worldMapImageId;try{await storeMapImage(file,id);campaignData.worldMapImageId=id;if(!saveCampaignData()){campaignData.worldMapImageId=oldId||null;await deleteMapImage(id).catch(()=>{});return;}if(oldId)await deleteMapImage(oldId).catch(()=>{});document.getElementById('world-map-file').value='';document.getElementById('world-map-status').textContent='Карта успешно сохранена.';await renderWorldMap();}catch(err){document.getElementById('world-map-status').textContent='Не удалось сохранить файл. Попробуй другое изображение или проверь место в браузере.';}});
+    document.getElementById('world-map-remove').addEventListener('click',async()=>{const id=campaignData.worldMapImageId;if(!id){document.getElementById('world-map-status').textContent='Карта ещё не сохранена.';return;}if(!confirm('Удалить изображение карты кампании?'))return;campaignData.worldMapImageId=null;if(saveCampaignData()){await deleteMapImage(id).catch(()=>{});document.getElementById('world-map-file').value='';document.getElementById('world-map-status').textContent='Карта удалена.';await renderWorldMap();}});
+    renderWorldMap();
+
     // Тактическая боевая сцена: сетка, перетаскиваемые фишки и очередь инициативы.
     if (!campaignData.battleScene || typeof campaignData.battleScene !== 'object') {
-      campaignData.battleScene = {mapUrl:'',gridSize:40,round:1,activeId:null,combatants:[]};
+      campaignData.battleScene = {mapUrl:'',mapImageId:null,gridSize:40,round:1,activeId:null,combatants:[]};
     }
     const battleScene = campaignData.battleScene;
     if (!Array.isArray(battleScene.combatants)) battleScene.combatants = [];
@@ -561,10 +563,10 @@
       battleGrid.style.backgroundImage = 'linear-gradient(to right, rgba(226,232,240,.42) 1px, transparent 1px), linear-gradient(to bottom, rgba(226,232,240,.42) 1px, transparent 1px)';
       battleGrid.style.backgroundSize = battleScene.gridSize + 'px ' + battleScene.gridSize + 'px';
       battleMapLayer.style.backgroundImage = '';
-      if (battleScene.mapUrl) {
-        try {
-          const u = new URL(battleScene.mapUrl);
-          if (['http:','https:'].includes(u.protocol)) battleMapLayer.style.backgroundImage = 'url("' + u.href.replace(/["\\\\]/g, '') + '")';
+      if (battleScene.mapImageObjectUrl) { URL.revokeObjectURL(battleScene.mapImageObjectUrl); battleScene.mapImageObjectUrl=null; }
+      if (battleScene.mapImageId) { const localId=battleScene.mapImageId; getMapImage(localId).then(stored=>{if(stored&&battleScene.mapImageId===localId){battleScene.mapImageObjectUrl=URL.createObjectURL(stored.blob);battleMapLayer.style.backgroundImage='url("' + battleScene.mapImageObjectUrl + '")';}}).catch(()=>{}); }
+      else if (battleScene.mapUrl) { try { const u=new URL(battleScene.mapUrl); if(['http:','https:'].includes(u.protocol)) battleMapLayer.style.backgroundImage='url("' + u.href.replace(/["\\]/g,'') + '")'; } catch(e) {} }
+      if (false) { try { const u = new URL(battleScene.mapUrl); if (['http:','https:'].includes(u.protocol)) battleMapLayer.style.backgroundImage = 'url("' + u.href.replace(/["\\\\]/g, '') + '")';
         } catch (e) {}
       }
       const participants = battleScene.combatants;
@@ -588,41 +590,9 @@
           '<div class="mt-2 flex flex-wrap gap-2"><button type="button" data-battle-active="' + safeText(c.id) + '" class="rounded-lg border border-zinc-700 px-2 py-1 text-xs text-zinc-300">Ход</button><button type="button" data-battle-hp="' + safeText(c.id) + '" data-hp-delta="-1" class="rounded-lg border border-zinc-700 px-2 py-1 text-xs text-zinc-300">− HP</button><button type="button" data-battle-hp="' + safeText(c.id) + '" data-hp-delta="1" class="rounded-lg border border-zinc-700 px-2 py-1 text-xs text-zinc-300">+ HP</button><button type="button" data-battle-remove="' + safeText(c.id) + '" class="ml-auto rounded-lg border border-zinc-800 px-2 py-1 text-xs text-red-300">Убрать</button></div></li>';
       }).join('');
     }
-    document.getElementById('battle-scene-use-saved-map').addEventListener('click', () => {
-      const err = document.getElementById('battle-scene-error');
-      err.classList.add('hidden');
-      const selectedId = document.getElementById('battle-scene-saved-map').value;
-      const item = (Array.isArray(campaignData.battleMaps) ? campaignData.battleMaps : []).find(entry => entry.id === selectedId);
-      if (!item) {
-        err.textContent = 'Сначала выбери карту из библиотеки.';
-        err.classList.remove('hidden');
-        return;
-      }
-      let parsed;
-      try {
-        parsed = new URL(item.url);
-        if (!['http:','https:'].includes(parsed.protocol)) throw new Error('protocol');
-      } catch (e) {
-        err.textContent = 'У сохранённой карты некорректная ссылка. Открой библиотеку и исправь её.';
-        err.classList.remove('hidden');
-        return;
-      }
-      const image = new Image();
-      image.onload = () => {
-        battleScene.mapUrl = parsed.href;
-        document.getElementById('battle-scene-map-url').value = parsed.href;
-        if (saveBattleScene()) {
-          renderBattleScene();
-          document.getElementById('battle-scene-saved-map').value = item.id;
-          err.classList.add('hidden');
-        }
-      };
-      image.onerror = () => {
-        err.textContent = 'Эта ссылка не загружается как изображение. В библиотеке сохранена, вероятно, страница сайта, а не сам файл карты. Открой карту-источник и скопируй прямую ссылку на изображение.';
-        err.classList.remove('hidden');
-      };
-      image.src = parsed.href;
-    });
+    async function applySavedBattleMap(item){const err=document.getElementById('battle-scene-error');err.classList.add('hidden');if(!item){err.textContent='Сначала выбери карту из библиотеки.';err.classList.remove('hidden');return;}if(item.imageId){try{const stored=await getMapImage(item.imageId);if(!stored)throw Error('missing');battleScene.mapImageId=item.imageId;battleScene.mapUrl='';document.getElementById('battle-scene-map-url').value='';if(saveBattleScene()){renderBattleScene();document.getElementById('battle-scene-saved-map').value=item.id;}}catch(e){err.textContent='Не удалось прочитать локальный файл карты.';err.classList.remove('hidden');}return;}let parsed;try{parsed=new URL(item.url);if(!['https:','http:'].includes(parsed.protocol))throw Error('protocol');}catch(e){err.textContent='У карты нет корректной ссылки или локального изображения.';err.classList.remove('hidden');return;}const image=new Image();image.onload=()=>{battleScene.mapUrl=parsed.href;battleScene.mapImageId=null;document.getElementById('battle-scene-map-url').value=parsed.href;if(saveBattleScene()){renderBattleScene();document.getElementById('battle-scene-saved-map').value=item.id;}};image.onerror=()=>{err.textContent='Ссылка не загружается как изображение. Укажи прямую ссылку на файл карты.';err.classList.remove('hidden');};image.src=parsed.href;}
+    document.getElementById('battle-scene-use-saved-map').addEventListener('click',()=>{const id=document.getElementById('battle-scene-saved-map').value;applySavedBattleMap((campaignData.battleMaps||[]).find(item=>item.id===id));});
+    document.getElementById('battlemap-list').addEventListener('click',event=>{const button=event.target.closest('[data-battlemap-use]');if(!button)return;const item=(campaignData.battleMaps||[]).find(entry=>entry.id===button.dataset.battlemapUse);if(!item)return;document.getElementById('battle-scene-saved-map').value=item.id;applySavedBattleMap(item);const tab=tabs.find(entry=>entry.dataset.tab==='battlemaps');if(tab){activateTab(tab);document.getElementById('battle-scene-board').scrollIntoView({behavior:'smooth',block:'center'});}});
     document.getElementById('battle-scene-settings').addEventListener('submit', event => {
       event.preventDefault();
       const err = document.getElementById('battle-scene-error');
@@ -636,7 +606,7 @@
           mapUrl = parsed.href;
         } catch (e) { err.textContent = 'Ссылка на карту должна начинаться с https:// или http://.'; err.classList.remove('hidden'); return; }
       }
-      battleScene.mapUrl = mapUrl;
+      battleScene.mapUrl = mapUrl; battleScene.mapImageId = null;
       battleScene.gridSize = Math.max(20, Math.min(100, Number(document.getElementById('battle-scene-grid-size').value) || 40));
       if (saveBattleScene()) renderBattleScene();
     });
