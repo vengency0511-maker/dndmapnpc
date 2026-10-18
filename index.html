@@ -359,10 +359,7 @@
               <span class="inline-block text-xs border border-zinc-700 text-zinc-300 rounded-full px-3 py-1">🗺️ ${campaign.setting}</span>
             </div>
             <p class="text-zinc-300 text-sm mt-4"><strong class="text-amber-300">Темы:</strong> ${campaign.themes}</p>
-            <details class="mt-4">
-              <summary class="cursor-pointer text-amber-300 hover:text-amber-200 font-semibold">Подробнее о кампании</summary>
-              <p class="text-zinc-400 mt-3 leading-relaxed">${campaign.details}</p>
-            </details>
+            <p class="text-amber-300 font-semibold mt-5">Открыть страницу кампании →</p>
           ` : ''}
         </div>
       `;
@@ -381,6 +378,10 @@
       card.setAttribute('aria-label', 'Открыть кампанию: ' + campaign.title);
 
       const openCampaign = () => {
+        if (campaign.title === 'Гром штурмового короля') {
+          window.location.href = 'campaign.html';
+          return;
+        }
         if (campaign.title !== 'Гром штурмового короля') {
           document.getElementById('detailTitle').textContent = campaign.title;
           document.getElementById('detailDescription').textContent = campaign.description;
