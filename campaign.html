@@ -131,7 +131,18 @@
           <div><h2 class="text-2xl font-bold">Карта кампании</h2><p class="mt-2 max-w-2xl text-zinc-400">Здесь разместим карту Дикого Севера и отметки важных мест, маршрутов и открытий группы.</p></div>
           <span class="rounded-full border border-zinc-700 px-3 py-1 text-sm text-zinc-400">В разработке</span>
         </div>
-        <div class="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950 p-4 md:p-6"><form id="world-map-form" class="space-y-4"><label class="block text-sm text-zinc-300">Загрузить карту мира с компьютера<input id="world-map-file" type="file" accept="image/*" class="mt-2 block w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-3 text-sm text-white"></label><p class="text-xs text-zinc-500">Файл хранится локально в браузере на этом компьютере.</p><div class="flex flex-wrap gap-3"><button type="submit" class="rounded-xl bg-amber-400 px-5 py-3 font-semibold text-zinc-950">Сохранить карту кампании</button><button id="world-map-remove" type="button" class="rounded-xl border border-zinc-700 px-4 py-3 text-sm text-zinc-300">Удалить карту</button></div><p id="world-map-status" class="text-sm text-zinc-400" role="status" aria-live="polite"></p></form><div id="world-map-preview" class="mt-5 hidden overflow-hidden rounded-xl border border-zinc-800 bg-black"><img id="world-map-image" alt="Карта мира кампании" class="block h-auto max-h-[75vh] w-full object-contain"></div><div id="world-map-empty" class="mt-5 flex min-h-48 flex-col items-center justify-center rounded-xl border border-dashed border-zinc-700 p-8 text-center"><span class="text-5xl">🗺️</span><h3 class="mt-3 text-lg font-semibold text-amber-200">Пока нет карты</h3><p class="mt-2 text-sm text-zinc-500">Выбери изображение на компьютере и сохрани его.</p></div></div>
+        <div class="mt-6 rounded-2xl border border-zinc-800 bg-zinc-950 p-4 md:p-6"><form id="world-map-form" class="space-y-4"><label class="block text-sm text-zinc-300">Загрузить карту мира с компьютера<input id="world-map-file" type="file" accept="image/*" class="mt-2 block w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-3 text-sm text-white"></label><p class="text-xs text-zinc-500">Файл хранится локально в браузере на этом компьютере.</p><div class="flex flex-wrap gap-3"><button type="submit" class="rounded-xl bg-amber-400 px-5 py-3 font-semibold text-zinc-950">Сохранить карту кампании</button><button id="world-map-remove" type="button" class="rounded-xl border border-zinc-700 px-4 py-3 text-sm text-zinc-300">Удалить карту</button></div><p id="world-map-status" class="text-sm text-zinc-400" role="status" aria-live="polite"></p></form><div id="world-map-preview" class="mt-5 hidden">
+          <div class="mb-3 flex flex-wrap items-center gap-2">
+            <button id="world-map-zoom-out" type="button" class="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-200 hover:border-amber-400" aria-label="Уменьшить карту">−</button>
+            <span id="world-map-zoom-label" class="min-w-14 text-center text-sm tabular-nums text-zinc-300" aria-live="polite">100%</span>
+            <button id="world-map-zoom-in" type="button" class="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-200 hover:border-amber-400" aria-label="Увеличить карту">+</button>
+            <button id="world-map-zoom-reset" type="button" class="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300 hover:border-amber-400">Сбросить масштаб</button>
+            <span class="text-xs text-zinc-500">Колесико — масштаб · Перетаскивай карту мышью или пальцем</span>
+          </div>
+          <div id="world-map-viewport" class="relative flex h-[min(75vh,720px)] min-h-[280px] touch-none select-none items-center justify-center overflow-hidden rounded-xl border border-zinc-800 bg-black" style="cursor:grab">
+            <img id="world-map-image" alt="Карта мира кампании" draggable="false" class="block h-full w-full object-contain" style="transform:translate(0px,0px) scale(1);transform-origin:center center;pointer-events:none">
+          </div>
+        </div><div id="world-map-empty" class="mt-5 flex min-h-48 flex-col items-center justify-center rounded-xl border border-dashed border-zinc-700 p-8 text-center"><span class="text-5xl">🗺️</span><h3 class="mt-3 text-lg font-semibold text-amber-200">Пока нет карты</h3><p class="mt-2 text-sm text-zinc-500">Выбери изображение на компьютере и сохрани его.</p></div></div>
       </div>
     </section>
 
@@ -535,6 +546,56 @@
     document.getElementById('world-map-file').addEventListener('change',e=>{const file=e.target.files[0];if(file&&!isImageFile(file)){e.target.value='';document.getElementById('world-map-status').textContent='Выбери файл изображения.';}else document.getElementById('world-map-status').textContent=file?'Файл выбран. Нажми «Сохранить карту кампании».':'';});
     document.getElementById('world-map-form').addEventListener('submit',async e=>{e.preventDefault();const file=document.getElementById('world-map-file').files[0];if(!file){document.getElementById('world-map-status').textContent='Сначала выбери изображение.';return;}const id='world-map-'+Date.now(),oldId=campaignData.worldMapImageId;try{await storeMapImage(file,id);campaignData.worldMapImageId=id;if(!saveCampaignData()){campaignData.worldMapImageId=oldId||null;await deleteMapImage(id).catch(()=>{});return;}if(oldId)await deleteMapImage(oldId).catch(()=>{});document.getElementById('world-map-file').value='';document.getElementById('world-map-status').textContent='Карта успешно сохранена.';await renderWorldMap();}catch(err){document.getElementById('world-map-status').textContent='Не удалось сохранить файл. Попробуй другое изображение или проверь место в браузере.';}});
     document.getElementById('world-map-remove').addEventListener('click',async()=>{const id=campaignData.worldMapImageId;if(!id){document.getElementById('world-map-status').textContent='Карта ещё не сохранена.';return;}if(!confirm('Удалить изображение карты кампании?'))return;campaignData.worldMapImageId=null;if(saveCampaignData()){await deleteMapImage(id).catch(()=>{});document.getElementById('world-map-file').value='';document.getElementById('world-map-status').textContent='Карта удалена.';await renderWorldMap();}});
+    const worldMapViewport=document.getElementById('world-map-viewport');
+    let worldMapZoom=1,worldMapPanX=0,worldMapPanY=0;
+    let panningWorldMap=false,worldMapPointerId=null,worldMapPanStart=null;
+    function updateWorldMapViewport(){
+      const img=document.getElementById('world-map-image');
+      img.style.transform='translate('+worldMapPanX+'px,'+worldMapPanY+'px) scale('+worldMapZoom+')';
+      document.getElementById('world-map-zoom-label').textContent=Math.round(worldMapZoom*100)+'%';
+    }
+    function zoomWorldMap(nextZoom,clientX,clientY){
+      const rect=worldMapViewport.getBoundingClientRect();
+      const oldZoom=worldMapZoom,zoom=Math.max(0.5,Math.min(4,nextZoom));
+      const anchorX=(clientX==null?rect.width/2:clientX-rect.left);
+      const anchorY=(clientY==null?rect.height/2:clientY-rect.top);
+      const centerX=rect.width/2,centerY=rect.height/2;
+      const worldX=(anchorX-centerX-worldMapPanX)/oldZoom;
+      const worldY=(anchorY-centerY-worldMapPanY)/oldZoom;
+      worldMapZoom=zoom;
+      worldMapPanX=anchorX-centerX-worldX*worldMapZoom;
+      worldMapPanY=anchorY-centerY-worldY*worldMapZoom;
+      updateWorldMapViewport();
+    }
+    document.getElementById('world-map-zoom-in').addEventListener('click',()=>zoomWorldMap(worldMapZoom+0.2));
+    document.getElementById('world-map-zoom-out').addEventListener('click',()=>zoomWorldMap(worldMapZoom-0.2));
+    document.getElementById('world-map-zoom-reset').addEventListener('click',()=>{worldMapZoom=1;worldMapPanX=0;worldMapPanY=0;updateWorldMapViewport();});
+    worldMapViewport.addEventListener('wheel',event=>{
+      event.preventDefault();
+      zoomWorldMap(worldMapZoom+(event.deltaY<0?0.12:-0.12),event.clientX,event.clientY);
+    },{passive:false});
+    worldMapViewport.addEventListener('pointerdown',event=>{
+      if(event.button===2)return;
+      event.preventDefault();
+      panningWorldMap=true;worldMapPointerId=event.pointerId;
+      worldMapPanStart={x:event.clientX,y:event.clientY,panX:worldMapPanX,panY:worldMapPanY};
+      worldMapViewport.setPointerCapture(event.pointerId);
+      worldMapViewport.style.cursor='grabbing';
+    });
+    worldMapViewport.addEventListener('pointermove',event=>{
+      if(!panningWorldMap||event.pointerId!==worldMapPointerId||!worldMapPanStart)return;
+      worldMapPanX=worldMapPanStart.panX+event.clientX-worldMapPanStart.x;
+      worldMapPanY=worldMapPanStart.panY+event.clientY-worldMapPanStart.y;
+      updateWorldMapViewport();
+    });
+    function endWorldMapPan(event){
+      if(event&&worldMapPointerId!==event.pointerId)return;
+      panningWorldMap=false;worldMapPointerId=null;worldMapPanStart=null;
+      worldMapViewport.style.cursor='grab';
+    }
+    worldMapViewport.addEventListener('pointerup',endWorldMapPan);
+    worldMapViewport.addEventListener('pointercancel',endWorldMapPan);
+    updateWorldMapViewport();
     renderWorldMap();
 
     // Тактическая боевая сцена: сетка, перетаскиваемые фишки и очередь инициативы.
