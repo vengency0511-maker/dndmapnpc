@@ -304,9 +304,9 @@
     const panels = Array.from(document.querySelectorAll('[role="tabpanel"]'));
     function activateTab(tab, focus = false) {
       tabs.forEach(item => {
-        const selected = item === tab;
+        const selected = item === tab || (tab.classList.contains('hidden') && item.dataset.tab === 'dashboard');
         item.setAttribute('aria-selected', String(selected));
-        item.tabIndex = selected ? 0 : -1;
+        item.tabIndex = item.classList.contains('hidden') || !selected ? -1 : 0;
       });
       panels.forEach(panel => { panel.hidden = panel.id !== tab.getAttribute('aria-controls'); });
       if (focus) tab.focus();
