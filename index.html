@@ -2,499 +2,439 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DnD Lore Portal</title>
-
-  <script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=ykfBWj_oEkS7hHZxkIGyJdmbGtkQyGc_7QC3A5Gm6owWiuxyRTwKfxRs3jf6Mi8VLpdv64bbWA8ZfNmzZQoo5v3l9oBcfb0v967Y1Qh5epHENOIwgdHEG-iTZj9kCemuiI875eZJR5o-pPeD8br61NYjO3pyAxMvsNC24jgkjcZXpa2bap--0bpjhlg4qmaEXluo9Ze4QpJFdFJLFcUwIUrjc3OIm8m3wQADR0wlsZXNWTb_MbeHfsawxu-SVmGN2CdixydM0ZbdaxeLPe24cQ" charset="UTF-8"></script><script src="https://cdn.tailwindcss.com"></script>
-
-<style id="responsive-layout">
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; scroll-padding-top: 1rem; -webkit-text-size-adjust: 100%; }
-  body { min-width: 320px; overflow-wrap: anywhere; }
-  img { max-width: 100%; height: auto; }
-  button, a { -webkit-tap-highlight-color: transparent; }
-  button { min-height: 42px; cursor: pointer; touch-action: manipulation; }
-  input, textarea, select { font: inherit; max-width: 100%; }
-  section[id] { scroll-margin-top: 1rem; }
-  @media (max-width: 767px) {
-    header { padding: 0 !important; }
-    header > div { padding: 1rem !important; align-items: flex-start !important; gap: 1rem !important; flex-direction: column; }
-    header h1 { font-size: 1.65rem !important; line-height: 1.2; }
-    header nav { width: 100%; display: flex !important; flex-wrap: nowrap; gap: .45rem !important; overflow-x: auto; overscroll-behavior-x: contain; padding: .2rem 1rem .85rem; scrollbar-width: thin; }
-    header nav a { flex: 0 0 auto; white-space: nowrap; padding: .55rem .7rem; border: 1px solid #3f3f46; border-radius: .7rem; }
-    main { padding: 1.25rem 1rem !important; }
-    main.space-y-16 > :not([hidden]) ~ :not([hidden]) { margin-top: 2.75rem; }
-    main .grid.lg\:grid-cols-2 { grid-template-columns: minmax(0, 1fr) !important; gap: 1.5rem !important; }
-    main h2 { font-size: clamp(1.8rem, 8vw, 2.5rem) !important; line-height: 1.12 !important; overflow-wrap: anywhere; }
-    main h3 { font-size: 1.5rem !important; line-height: 1.2; }
-    main h4 { font-size: 1.25rem !important; line-height: 1.25; }
-    main .flex.justify-between.items-center { align-items: flex-start !important; flex-wrap: wrap; gap: .75rem; }
-    main .flex.justify-between.items-center > button { max-width: 100%; white-space: normal; }
-    main .flex.gap-4.flex-wrap { gap: .65rem !important; }
-    main button { padding: .65rem .85rem !important; }
-    main .rounded-3xl.p-6, main .rounded-2xl.p-5 { padding: 1rem !important; }
-    main img { object-fit: cover; }
-    #campaignList, #characterList, #npcList, #locationList { grid-template-columns: minmax(0, 1fr) !important; }
-    #campaignList > *, #characterList > *, #npcList > *, #locationList > * { min-width: 0; }
-    #map img { min-height: 180px; object-fit: cover; }
-    #sessions .p-6 { padding: 1rem !important; }
-    footer > div { padding: 1.25rem 1rem !important; flex-direction: column; gap: .75rem; }
-    footer .flex { flex-wrap: wrap; gap: .5rem 1rem; }
-  }
-  @media (min-width: 768px) and (max-width: 1023px) {
-    header > div { gap: 1rem; }
-    header nav { gap: 1rem !important; flex-wrap: wrap; }
-    main { padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
-    main h2 { font-size: clamp(2.3rem, 5vw, 3.2rem) !important; }
-    #characterList, #campaignList { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    html { scroll-behavior: auto; }
-    *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
-  }
-</style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#09090b" />
+  <title>DnD Lore Portal — кампании и карта Фаэруна</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { min-width: 320px; }
+    button, input, select { font: inherit; }
+    button { min-height: 42px; touch-action: manipulation; }
+    .campaign-card { transition: border-color .18s ease, transform .18s ease; }
+    .campaign-card:hover { transform: translateY(-2px); border-color: #d97706; }
+    #mapViewport { position: relative; height: min(68vh, 680px); min-height: 360px; overflow: hidden; background: #18181b; cursor: grab; touch-action: none; user-select: none; }
+    #mapViewport.dragging { cursor: grabbing; }
+    #mapStage { position: absolute; left: 0; top: 0; width: 1280px; height: 960px; transform-origin: 0 0; will-change: transform; }
+    #faerunMap { display: block; width: 1280px; height: 960px; max-width: none; pointer-events: none; -webkit-user-drag: none; }
+    #markerLayer { position: absolute; inset: 0; }
+    .map-marker { position: absolute; transform: translate(-50%, -100%); border: 2px solid #fff7ed; border-radius: 999px 999px 999px 3px; width: 28px; height: 28px; color: white; font-size: 13px; font-weight: 800; box-shadow: 0 2px 8px #000b; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .map-marker:focus-visible { outline: 3px solid white; outline-offset: 3px; }
+    .map-marker span { position: absolute; left: 50%; top: 31px; transform: translateX(-50%); padding: 3px 7px; white-space: nowrap; max-width: 180px; overflow: hidden; text-overflow: ellipsis; background: #09090bdf; border: 1px solid #52525b; border-radius: 6px; font-size: 11px; font-weight: 500; pointer-events: none; }
+    .control-btn { border: 1px solid #3f3f46; background: #27272a; border-radius: 10px; padding: 8px 12px; }
+    .control-btn:hover { border-color: #d97706; }
+    @media (max-width: 640px) {
+      #mapViewport { height: 58vh; min-height: 340px; }
+      #campaignList { grid-template-columns: minmax(0, 1fr); }
+      .map-marker span { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition-duration: .01ms !important; } }
+  </style>
 </head>
-
 <body class="bg-zinc-950 text-zinc-100">
-
-  <header class="border-b border-zinc-800 bg-zinc-900 p-6">
-    <div class="max-w-7xl mx-auto flex justify-between items-center">
+  <header class="border-b border-zinc-800 bg-zinc-900/95">
+    <div class="max-w-6xl mx-auto px-5 py-5 flex flex-wrap items-center justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-amber-400">
-          DnD Lore Portal
-        </h1>
-
-        <p class="text-zinc-400">
-          Русская wiki для Dungeons & Dragons
-        </p>
+        <h1 class="text-2xl sm:text-3xl font-black text-amber-400">DnD Lore Portal</h1>
+        <p class="text-sm text-zinc-400 mt-1">Твои кампании. Один общий мир для приключений.</p>
       </div>
-
-      <nav class="flex gap-6">
-        <a href="#campaigns" class="hover:text-amber-400">Кампании</a>
-        <a href="#characters" class="hover:text-amber-400">Персонажи</a>
-        <a href="#map" class="hover:text-amber-400">Карта</a>
-        <a href="#sessions" class="hover:text-amber-400">Сессии</a>
+      <nav class="flex gap-3 text-sm">
+        <a href="#campaigns" class="rounded-lg px-3 py-2 hover:text-amber-300">Кампании</a>
+        <a href="#map" class="rounded-lg px-3 py-2 hover:text-amber-300">Карта Фаэруна</a>
       </nav>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-6 py-10 space-y-16">
-
-    <!-- HERO -->
-
-    <section class="grid lg:grid-cols-2 gap-10 items-center">
-
-      <div class="space-y-6">
-
-        <div class="inline-block bg-amber-500/10 border border-amber-500/20 text-amber-300 px-4 py-2 rounded-full">
-          ⚔️ Dungeons & Dragons Campaign Manager
-        </div>
-
-        <h2 class="text-5xl font-black leading-tight">
-          Храни весь лор своей кампании в одном месте
-        </h2>
-
-        <p class="text-zinc-400 text-lg">
-          Создавай персонажей, NPC, карты, локации и заметки.
-          Работай вместе с друзьями и веди историю вашей кампании.
-        </p>
-
-        <div class="flex gap-4 flex-wrap">
-          <button class="bg-amber-500 hover:bg-amber-400 text-black px-6 py-3 rounded-2xl font-semibold">
-            Создать кампанию
-          </button>
-
-          <button class="border border-zinc-700 hover:border-zinc-500 px-6 py-3 rounded-2xl">
-            Экспорт данных
-          </button>
+  <main class="max-w-6xl mx-auto px-5 py-8 sm:py-10 space-y-12">
+    <section class="rounded-3xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 sm:p-8">
+      <div class="max-w-2xl">
+        <div class="text-amber-300 text-sm font-semibold tracking-wide mb-3">⚔️ DUNGEONS & DRAGONS</div>
+        <h2 class="text-3xl sm:text-4xl font-black leading-tight">Всё приключение — в одном месте</h2>
+        <p class="text-zinc-400 mt-3">Создавай кампании, возвращайся к своим историям и отмечай на карте, где сейчас находятся герои.</p>
+        <div class="flex flex-wrap gap-3 mt-6">
+          <button id="createCampaignBtn" class="bg-amber-500 hover:bg-amber-400 text-black px-5 py-3 rounded-xl font-bold">＋ Создать кампанию</button>
+          <button id="exportBtn" class="border border-zinc-700 hover:border-amber-400 px-5 py-3 rounded-xl font-semibold">↓ Экспорт данных</button>
         </div>
       </div>
-
-      <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
-        <img
-          src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?q=80&w=1600&auto=format&fit=crop"
-          class="rounded-2xl w-full"
-        />
-      </div>
-
     </section>
-
-    <!-- CAMPAIGNS -->
 
     <section id="campaigns">
-
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-3xl font-bold">Кампании</h3>
-
-        <button class="bg-zinc-800 px-4 py-2 rounded-xl">
-          + Новая кампания
-        </button>
-      </div>
-
-      <div id="campaignList" class="grid md:grid-cols-2 gap-6"></div>
-
-      <section id="campaignDetail" class="hidden mt-8 bg-zinc-900 border border-amber-500/30 rounded-3xl p-6 md:p-8" aria-live="polite">
-        <button id="backToCampaigns" class="border border-zinc-700 hover:border-amber-400 px-4 py-2 rounded-xl mb-6">← Назад к кампаниям</button>
-        <div class="text-amber-300 text-sm font-semibold tracking-wide uppercase">Dungeons & Dragons 5e</div>
-        <h4 id="detailTitle" class="text-3xl md:text-4xl font-black text-amber-300 mt-2 mb-4"></h4>
-        <p id="detailDescription" class="text-zinc-300 text-lg leading-relaxed"></p>
-        <div id="detailMeta" class="flex flex-wrap gap-2 mt-5"></div>
-        <div class="mt-8">
-          <h5 class="text-2xl font-bold mb-3">О чём эта кампания</h5>
-          <p id="detailStory" class="text-zinc-300 leading-relaxed"></p>
+      <div class="flex flex-wrap justify-between items-end gap-3 mb-5">
+        <div>
+          <h3 class="text-2xl sm:text-3xl font-bold">Мои кампании</h3>
+          <p class="text-zinc-500 mt-1 text-sm">Выбери кампанию, чтобы открыть её страницу.</p>
         </div>
-        <div class="mt-8">
-          <h5 class="text-2xl font-bold mb-2">Персонажи и NPC, которых можно встретить</h5>
-          <p class="text-zinc-400 mb-4">Состав встреч зависит от решений группы и выбранного маршрута. Ниже — важные персонажи приключения.</p>
-          <div id="detailCharacters" class="grid md:grid-cols-2 gap-4"></div>
-        </div>
-        <p class="text-xs text-zinc-500 mt-6">Внимание: подробности о ключевых персонажах могут содержать сюжетные спойлеры.</p>
-      </section>
-
-    </section>
-
-    <!-- CHARACTERS -->
-
-    <section id="characters">
-
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-3xl font-bold">Персонажи</h3>
-
-        <button class="bg-zinc-800 px-4 py-2 rounded-xl">
-          + Добавить персонажа
-        </button>
+        <button id="createCampaignSmall" class="control-btn text-sm">＋ Новая кампания</button>
       </div>
-
-      <div id="characterList" class="grid lg:grid-cols-2 gap-6"></div>
-
+      <div id="campaignList" class="grid md:grid-cols-2 gap-4"></div>
+      <p id="emptyCampaigns" class="hidden text-zinc-500 border border-dashed border-zinc-700 rounded-2xl p-6 text-center">Пока нет кампаний. Создай первую с помощью кнопки выше.</p>
     </section>
-
-    <!-- NPC -->
-
-    <section>
-
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-3xl font-bold">NPC</h3>
-
-        <button class="bg-zinc-800 px-4 py-2 rounded-xl">
-          + NPC
-        </button>
-      </div>
-
-      <div id="npcList" class="space-y-4"></div>
-
-    </section>
-
-    <!-- LOCATIONS -->
-
-    <section>
-
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-3xl font-bold">Локации</h3>
-
-        <button class="bg-zinc-800 px-4 py-2 rounded-xl">
-          + Локация
-        </button>
-      </div>
-
-      <div id="locationList" class="space-y-4"></div>
-
-    </section>
-
-    <!-- MAP -->
 
     <section id="map">
-
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-3xl font-bold">
-          Интерактивная карта
-        </h3>
-
-        <button class="bg-amber-500 text-black px-4 py-2 rounded-xl font-semibold">
-          + Маркер
-        </button>
+      <div class="flex flex-wrap justify-between items-end gap-4 mb-5">
+        <div>
+          <div class="text-amber-300 text-sm font-semibold mb-1">КАРТА МИРА</div>
+          <h3 class="text-2xl sm:text-3xl font-bold">Фаэрун</h3>
+          <p class="text-zinc-400 text-sm mt-1">Приближай, перетаскивай карту и добавляй собственные метки.</p>
+        </div>
+        <button id="addMarkerBtn" class="bg-amber-500 hover:bg-amber-400 text-black px-4 py-3 rounded-xl font-bold">＋ Поставить маркер</button>
       </div>
 
-      <div class="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1521295121783-8a321d551ad2?q=80&w=1600&auto=format&fit=crop"
-          class="w-full"
-        />
+      <div class="rounded-2xl border border-zinc-800 overflow-hidden bg-zinc-900">
+        <div class="flex flex-wrap items-center gap-2 p-3 border-b border-zinc-800">
+          <button id="zoomOut" class="control-btn" aria-label="Уменьшить карту">−</button>
+          <button id="zoomIn" class="control-btn" aria-label="Увеличить карту">＋</button>
+          <button id="resetMap" class="control-btn text-sm">Сбросить вид</button>
+          <span id="zoomLabel" class="text-xs text-zinc-500 ml-1">100%</span>
+          <span class="text-xs text-zinc-500 sm:ml-auto">Колёсико / pinch — масштаб · перетаскивание — перемещение</span>
+        </div>
+        <div id="mapViewport" aria-label="Интерактивная карта Фаэруна">
+          <div id="mapStage">
+            <img id="faerunMap" alt="Карта континента Фаэрун" draggable="false" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d9/Faerun_-_Mappa_Completa.jpg/2560px-Faerun_-_Mappa_Completa.jpg" />
+            <div id="markerLayer"></div>
+          </div>
+        </div>
+        <div class="p-3 sm:px-4 border-t border-zinc-800 flex flex-wrap items-center justify-between gap-2">
+          <p id="mapHint" class="text-sm text-zinc-400">Метки сохраняются в этом браузере на этом устройстве.</p>
+          <a class="text-xs text-zinc-500 underline hover:text-amber-300" href="https://commons.wikimedia.org/wiki/File:Faerun_-_Mappa_Completa.jpg" target="_blank" rel="noopener noreferrer">Карта: Dareios987 · CC BY-SA 4.0</a>
+        </div>
       </div>
 
+      <div class="mt-5 rounded-2xl border border-zinc-800 bg-zinc-900 p-4 sm:p-5">
+        <div class="flex items-center justify-between gap-3 mb-3">
+          <h4 class="font-bold text-lg">Метки отряда</h4>
+          <span id="markerCount" class="text-xs text-zinc-500">0 меток</span>
+        </div>
+        <div id="markerList" class="space-y-2"></div>
+        <p id="emptyMarkers" class="text-sm text-zinc-500">Маркеров пока нет. Нажми «Поставить маркер», затем выбери место на карте.</p>
+      </div>
+      <p class="text-xs text-zinc-600 mt-3">Это локальная версия: метки доступны только в этом браузере. Совместная синхронизация между игроками — следующий этап.</p>
     </section>
-
-    <!-- SESSIONS -->
-
-    <section id="sessions">
-
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-3xl font-bold">Журнал сессий</h3>
-
-        <button class="bg-zinc-800 px-4 py-2 rounded-xl">
-          + Сессия
-        </button>
-      </div>
-
-      <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
-        <h4 class="text-2xl font-bold text-amber-300 mb-2">
-          Сессия #12
-        </h4>
-
-        <p class="text-zinc-400 mb-4">
-          10 мая 2026
-        </p>
-
-        <p class="text-zinc-300">
-          Группа добралась до разрушенного Элтюреля,
-          встретила Лулу и обнаружила следы демонического ритуала.
-        </p>
-      </div>
-
-    </section>
-
   </main>
 
-  <footer class="border-t border-zinc-800 mt-20">
-    <div class="max-w-7xl mx-auto px-6 py-8 text-zinc-500 flex justify-between">
-      <div>
-        DnD Lore Portal • Русская DnD Wiki
-      </div>
-
-      <div class="flex gap-4">
-        <span>JavaScript</span>
-        <span>TailwindCSS</span>
-        <span>IndexedDB</span>
-      </div>
+  <footer class="border-t border-zinc-800 mt-14">
+    <div class="max-w-6xl mx-auto px-5 py-6 text-sm text-zinc-600 flex flex-wrap justify-between gap-2">
+      <span>DnD Lore Portal</span>
+      <span>Кампании и карта Фаэруна</span>
     </div>
   </footer>
 
   <script>
+    const STORAGE_KEYS = {
+      campaigns: 'dndLorePortal.campaigns.v1',
+      markers: 'dndLorePortal.faerunMarkers.v1'
+    };
 
-    const campaigns = [
-      {
-        title: 'Нисхождение в Авернус',
-        description: 'Кампания по Forgotten Realms с путешествием в Авернус.'
-      },
-      {
-        title: 'Проклятие Страда',
-        description: 'Мрачное приключение в Баровии.'
-      },
-      {
-        title: 'Гром штурмового короля',
-        description: 'Эпическое приключение по Дикому Северу Фаэруна. Древний порядок великанов — Ординг — разрушен, и великаны разных родов начинают угрожать поселениям и городам.',
-        levels: '1–11 уровень',
-        setting: 'Forgotten Realms · Дикий Север',
-        themes: 'Великаны, древние руны, исследование мира, политические интриги',
-        details: 'Героям предстоит выяснить, почему рушится привычный порядок великанов, разобраться в конфликте между их родами и раскрыть силу, стоящую за хаосом. Кампания сочетает путешествия по открытому миру, опасные встречи и исследование древних мест.',
-        story: 'После распада Ординга — древней иерархии великанов — по Дикому Северу прокатывается волна беспорядков. Герои отправятся в путешествие по Фаэруну, будут искать союзников среди великанов и других народов, исследовать древние места и выяснять, кто стоит за кризисом. Их решения влияют на то, какие фракции станут союзниками, а какие — врагами.',
-        characters: [
-          { name: 'Хекатон', role: 'Король штормовых великанов', lore: 'Могущественный правитель, чьё исчезновение становится одной из центральных загадок приключения.' },
-          { name: 'Серисса', role: 'Принцесса штормовых великанов', lore: 'Дочь Хекатона. Может стать важным союзником героев в попытке восстановить порядок.' },
-          { name: 'Харшнаг', role: 'Ледяной великан-следопыт', lore: 'Опытный путешественник, который помогает героям понять мир великанов и угрозы Дикого Севера.' },
-          { name: 'Иимрит', role: 'Древняя синяя драконица', lore: 'Опасная фигура, чьи планы тесно связаны с кризисом среди великанов.' },
-          { name: 'Зефирос', role: 'Облачный великан', lore: 'Загадочный учёный-великан, способный неожиданно вмешаться в путешествие отряда.' },
-          { name: 'Фелгос', role: 'Золотой дракон', lore: 'Необычный возможный союзник, связанный с опасностями и тайнами Севера.' },
-          { name: 'Клаут', role: 'Древний красный дракон', lore: 'Грозная сила, с которой героям лучше не сталкиваться без подготовки.' },
-          { name: 'Нери', role: 'Королева штормовых великанов', lore: 'Супруга Хекатона; её судьба и история семьи важны для понимания событий.' }
-        ]
-      }
+    const defaultCampaigns = [
+      { title: 'Нисхождение в Авернус', description: 'Кампания по Forgotten Realms с путешествием в Авернус.', href: null },
+      { title: 'Проклятие Страда', description: 'Мрачное приключение в Баровии.', href: null },
+      { title: 'Гром штурмового короля', description: 'Эпическое приключение по Дикому Северу Фаэруна: великаны, древние руны и тайны Севера.', href: 'campaign.html', levels: '1–11 уровень', setting: 'Forgotten Realms · Дикий Север' }
     ];
 
-    const characters = [
-      {
-        name: 'Талис',
-        race: 'Тифлинг',
-        cls: 'Колдун',
-        lore: 'Изгнанник из Элтюреля.'
-      },
-      {
-        name: 'Бром',
-        race: 'Дварф',
-        cls: 'Паладин',
-        lore: 'Поклялся очистить Авернус.'
+    function readStorage(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return fallback;
+        const value = JSON.parse(raw);
+        return Array.isArray(value) ? value : fallback;
+      } catch (error) {
+        console.warn('Не удалось прочитать локальные данные:', error);
+        return fallback;
       }
-    ];
-
-    const npcs = [
-      {
-        name: 'Зариэль',
-        role: 'Архидьявол'
-      },
-      {
-        name: 'Лулу',
-        role: 'Небесный слон'
+    }
+    function saveStorage(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+        return true;
+      } catch (error) {
+        alert('Не удалось сохранить данные в браузере. Проверь свободное место или настройки приватности.');
+        return false;
       }
-    ];
+    }
 
-    const locations = [
-      {
-        name: 'Элтюрель',
-        type: 'Город'
-      },
-      {
-        name: 'Кровавая Цитадель',
-        type: 'Подземелье'
-      }
-    ];
-
-    // CAMPAIGNS
-
+    let campaigns = readStorage(STORAGE_KEYS.campaigns, defaultCampaigns);
+    let markers = readStorage(STORAGE_KEYS.markers, []);
     const campaignList = document.getElementById('campaignList');
+    const emptyCampaigns = document.getElementById('emptyCampaigns');
 
-    campaigns.forEach(campaign => {
-
-      campaignList.innerHTML += `
-        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
-          <h4 class="text-2xl font-bold text-amber-300 mb-3">
-            ${campaign.title}
-          </h4>
-
-          <p class="text-zinc-400">
-            ${campaign.description}
-          </p>
-          ${campaign.levels ? `
-            <div class="flex flex-wrap gap-2 mt-4">
-              <span class="inline-block text-xs border border-amber-500/30 bg-amber-500/10 text-amber-200 rounded-full px-3 py-1">⚔️ ${campaign.levels}</span>
-              <span class="inline-block text-xs border border-zinc-700 text-zinc-300 rounded-full px-3 py-1">🗺️ ${campaign.setting}</span>
-            </div>
-            <p class="text-zinc-300 text-sm mt-4"><strong class="text-amber-300">Темы:</strong> ${campaign.themes}</p>
-            <p class="text-amber-300 font-semibold mt-5">Открыть страницу кампании →</p>
-          ` : ''}
-        </div>
-      `;
-    });
-
-    // CAMPAIGN DETAIL PAGE
-    const campaignDetail = document.getElementById('campaignDetail');
-    const campaignCards = campaignList.children;
-
-    campaigns.forEach((campaign, index) => {
-      const card = campaignCards[index];
-      if (!card) return;
-      card.classList.add('cursor-pointer', 'transition', 'hover:border-amber-500', 'hover:-translate-y-0.5');
-      card.setAttribute('role', 'button');
-      card.setAttribute('tabindex', '0');
-      card.setAttribute('aria-label', 'Открыть кампанию: ' + campaign.title);
-
-      const openCampaign = () => {
-        if (campaign.title === 'Гром штурмового короля') {
-          window.location.href = 'campaign.html';
-          return;
+    function renderCampaigns() {
+      campaignList.innerHTML = '';
+      emptyCampaigns.classList.toggle('hidden', campaigns.length > 0);
+      campaigns.forEach(function(campaign) {
+        const card = document.createElement('article');
+        card.className = 'campaign-card bg-zinc-900 border border-zinc-800 rounded-2xl p-5 sm:p-6';
+        const title = document.createElement('h4');
+        title.className = 'text-xl font-bold text-amber-300';
+        title.textContent = campaign.title;
+        const description = document.createElement('p');
+        description.className = 'text-zinc-400 mt-2 leading-relaxed';
+        description.textContent = campaign.description || 'Описание пока не добавлено.';
+        card.append(title, description);
+        if (campaign.levels || campaign.setting) {
+          const meta = document.createElement('p');
+          meta.className = 'text-xs text-zinc-500 mt-4';
+          meta.textContent = [campaign.levels, campaign.setting].filter(Boolean).join(' · ');
+          card.appendChild(meta);
         }
-        if (campaign.title !== 'Гром штурмового короля') {
-          document.getElementById('detailTitle').textContent = campaign.title;
-          document.getElementById('detailDescription').textContent = campaign.description;
-          document.getElementById('detailStory').textContent = 'Подробная страница этой кампании пока находится в разработке.';
-          document.getElementById('detailMeta').innerHTML = '';
-          document.getElementById('detailCharacters').innerHTML = '<p class="text-zinc-400">Список персонажей будет добавлен позже.</p>';
-        } else {
-          document.getElementById('detailTitle').textContent = campaign.title;
-          document.getElementById('detailDescription').textContent = campaign.description;
-          document.getElementById('detailStory').textContent = campaign.story;
-          document.getElementById('detailMeta').innerHTML = [
-            campaign.levels, campaign.setting, campaign.themes
-          ].map(item => '<span class="text-sm border border-zinc-700 bg-zinc-950 text-zinc-300 rounded-full px-3 py-2">' + item + '</span>').join('');
-          document.getElementById('detailCharacters').innerHTML = campaign.characters.map(person =>
-            '<article class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">' +
-              '<h6 class="text-lg font-bold text-amber-300">' + person.name + '</h6>' +
-              '<p class="text-sm text-zinc-400 mt-1">' + person.role + '</p>' +
-              '<p class="text-zinc-300 mt-3 leading-relaxed">' + person.lore + '</p>' +
-            '</article>'
-          ).join('');
+        const action = document.createElement('p');
+        action.className = 'text-amber-300 text-sm font-semibold mt-5';
+        action.textContent = campaign.href ? 'Открыть кампанию →' : 'Страница кампании пока не создана';
+        card.appendChild(action);
+        if (campaign.href) {
+          card.tabIndex = 0;
+          card.setAttribute('role', 'link');
+          card.setAttribute('aria-label', 'Открыть кампанию ' + campaign.title);
+          card.style.cursor = 'pointer';
+          card.addEventListener('click', function() { window.location.href = campaign.href; });
+          card.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              window.location.href = campaign.href;
+            }
+          });
         }
-        campaignDetail.classList.remove('hidden');
-        campaignDetail.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      };
-
-      card.addEventListener('click', openCampaign);
-      card.addEventListener('keydown', event => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          openCampaign();
-        }
+        campaignList.appendChild(card);
       });
+    }
+
+    function createCampaign() {
+      const title = prompt('Как называется новая кампания?');
+      if (title === null || !title.trim()) return;
+      const description = prompt('Краткое описание кампании (можно оставить пустым):') || '';
+      campaigns.push({ title: title.trim(), description: description.trim(), href: null, createdAt: new Date().toISOString() });
+      if (saveStorage(STORAGE_KEYS.campaigns, campaigns)) renderCampaigns();
+    }
+
+    document.getElementById('createCampaignBtn').addEventListener('click', createCampaign);
+    document.getElementById('createCampaignSmall').addEventListener('click', createCampaign);
+
+    document.getElementById('exportBtn').addEventListener('click', function() {
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        campaigns: campaigns,
+        faerunMarkers: markers,
+        note: 'Маркеры и кампании в этой версии хранятся локально в браузере.'
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'dnd-lore-portal-export.json';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
     });
 
-    document.getElementById('backToCampaigns').addEventListener('click', () => {
-      campaignDetail.classList.add('hidden');
-      document.getElementById('campaigns').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const viewport = document.getElementById('mapViewport');
+    const stage = document.getElementById('mapStage');
+    const markerLayer = document.getElementById('markerLayer');
+    const zoomLabel = document.getElementById('zoomLabel');
+    const mapHint = document.getElementById('mapHint');
+    let zoom = 0.7;
+    let panX = 0;
+    let panY = 0;
+    let placingMarker = false;
+    let dragState = null;
+    let suppressClick = false;
+    const mapWidth = 1280;
+    const mapHeight = 960;
+    const markerColors = ['#dc2626', '#2563eb', '#16a34a', '#9333ea', '#ea580c', '#0891b2', '#db2777'];
+
+    function applyMapTransform() {
+      stage.style.transform = 'translate(' + panX + 'px, ' + panY + 'px) scale(' + zoom + ')';
+      zoomLabel.textContent = Math.round(zoom * 100) + '%';
+    }
+    function zoomAt(nextZoom, clientX, clientY) {
+      const rect = viewport.getBoundingClientRect();
+      const x = clientX === undefined ? rect.left + rect.width / 2 : clientX;
+      const y = clientY === undefined ? rect.top + rect.height / 2 : clientY;
+      const localX = x - rect.left;
+      const localY = y - rect.top;
+      const worldX = (localX - panX) / zoom;
+      const worldY = (localY - panY) / zoom;
+      zoom = Math.max(0.35, Math.min(2.5, nextZoom));
+      panX = localX - worldX * zoom;
+      panY = localY - worldY * zoom;
+      applyMapTransform();
+    }
+    function resetMap() {
+      zoom = Math.min(0.7, (viewport.clientWidth - 24) / mapWidth);
+      zoom = Math.max(0.35, zoom);
+      panX = (viewport.clientWidth - mapWidth * zoom) / 2;
+      panY = (viewport.clientHeight - mapHeight * zoom) / 2;
+      applyMapTransform();
+    }
+
+    function renderMarkers() {
+      markerLayer.innerHTML = '';
+      const list = document.getElementById('markerList');
+      list.innerHTML = '';
+      document.getElementById('markerCount').textContent = markers.length + (markers.length === 1 ? ' метка' : markers.length > 1 && markers.length < 5 ? ' метки' : ' меток');
+      document.getElementById('emptyMarkers').classList.toggle('hidden', markers.length > 0);
+
+      markers.forEach(function(marker, index) {
+        const pin = document.createElement('button');
+        pin.type = 'button';
+        pin.className = 'map-marker';
+        pin.style.left = (marker.x * 100) + '%';
+        pin.style.top = (marker.y * 100) + '%';
+        pin.style.backgroundColor = marker.color || markerColors[index % markerColors.length];
+        pin.textContent = String(index + 1);
+        pin.title = marker.label + (marker.hero ? ' — ' + marker.hero : '');
+        pin.setAttribute('aria-label', 'Метка: ' + marker.label);
+        pin.addEventListener('click', function(event) {
+          event.stopPropagation();
+          const detail = marker.label + (marker.hero ? '\nГерой: ' + marker.hero : '') + (marker.note ? '\nЗаметка: ' + marker.note : '');
+          if (confirm(detail + '\n\nУдалить эту метку?')) {
+            markers = markers.filter(function(item) { return item.id !== marker.id; });
+            saveStorage(STORAGE_KEYS.markers, markers);
+            renderMarkers();
+          }
+        });
+        const label = document.createElement('span');
+        label.textContent = marker.label;
+        pin.appendChild(label);
+        markerLayer.appendChild(pin);
+
+        const row = document.createElement('div');
+        row.className = 'flex items-start gap-3 rounded-xl bg-zinc-950 border border-zinc-800 p-3';
+        const dot = document.createElement('span');
+        dot.className = 'mt-1.5 shrink-0 rounded-full w-3 h-3';
+        dot.style.backgroundColor = marker.color || markerColors[index % markerColors.length];
+        const details = document.createElement('div');
+        details.className = 'min-w-0 flex-1';
+        const labelText = document.createElement('div');
+        labelText.className = 'font-semibold text-sm';
+        labelText.textContent = marker.label;
+        const subText = document.createElement('div');
+        subText.className = 'text-xs text-zinc-500 mt-1';
+        subText.textContent = [marker.hero, marker.note].filter(Boolean).join(' · ') || 'Метка на карте';
+        details.append(labelText, subText);
+        const goButton = document.createElement('button');
+        goButton.className = 'text-xs text-amber-300 hover:text-amber-200 px-2';
+        goButton.textContent = 'Показать';
+        goButton.addEventListener('click', function() {
+          zoomAt(Math.max(zoom, 1), viewport.getBoundingClientRect().left + viewport.clientWidth / 2, viewport.getBoundingClientRect().top + viewport.clientHeight / 2);
+          panX = viewport.clientWidth / 2 - marker.x * mapWidth * zoom;
+          panY = viewport.clientHeight / 2 - marker.y * mapHeight * zoom;
+          applyMapTransform();
+        });
+        row.append(dot, details, goButton);
+        list.appendChild(row);
+      });
+    }
+
+    document.getElementById('addMarkerBtn').addEventListener('click', function() {
+      placingMarker = !placingMarker;
+      this.textContent = placingMarker ? 'Отмена размещения' : '＋ Поставить маркер';
+      this.classList.toggle('ring-2', placingMarker);
+      this.classList.toggle('ring-amber-300', placingMarker);
+      viewport.style.cursor = placingMarker ? 'crosshair' : '';
+      mapHint.textContent = placingMarker ? 'Теперь нажми на нужное место карты, чтобы поставить маркер.' : 'Метки сохраняются в этом браузере на этом устройстве.';
     });
 
-    // CHARACTERS
+    viewport.addEventListener('pointerdown', function(event) {
+      if (event.button !== undefined && event.button !== 0) return;
+      dragState = { x: event.clientX, y: event.clientY, panX: panX, panY: panY, moved: false, pointerId: event.pointerId };
+      suppressClick = false;
+      viewport.setPointerCapture(event.pointerId);
+      viewport.classList.add('dragging');
+    });
+    viewport.addEventListener('pointermove', function(event) {
+      if (!dragState || dragState.pointerId !== event.pointerId || placingMarker) return;
+      const dx = event.clientX - dragState.x;
+      const dy = event.clientY - dragState.y;
+      if (Math.abs(dx) + Math.abs(dy) > 4) dragState.moved = true;
+      if (dragState.moved) {
+        panX = dragState.panX + dx;
+        panY = dragState.panY + dy;
+        suppressClick = true;
+        applyMapTransform();
+      }
+    });
+    function finishPointer(event) {
+      if (!dragState || dragState.pointerId !== event.pointerId) return;
+      const didMove = dragState.moved;
+      dragState = null;
+      viewport.classList.remove('dragging');
+      if (placingMarker && !didMove) {
+        const rect = viewport.getBoundingClientRect();
+        const x = (event.clientX - rect.left - panX) / zoom / mapWidth;
+        const y = (event.clientY - rect.top - panY) / zoom / mapHeight;
+        if (x >= 0 && x <= 1 && y >= 0 && y <= 1) {
+          const label = prompt('Что отмечаем? Например: «Наша группа» или «Врата Балдура».');
+          if (label && label.trim()) {
+            const hero = prompt('Имя героя / игрока (необязательно):') || '';
+            const note = prompt('Короткая заметка (необязательно):') || '';
+            markers.push({
+              id: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + '-' + Math.random().toString(16).slice(2),
+              label: label.trim(),
+              hero: hero.trim(),
+              note: note.trim(),
+              x: x,
+              y: y,
+              color: markerColors[markers.length % markerColors.length],
+              createdAt: new Date().toISOString()
+            });
+            if (saveStorage(STORAGE_KEYS.markers, markers)) renderMarkers();
+          }
+          placingMarker = false;
+          const button = document.getElementById('addMarkerBtn');
+          button.textContent = '＋ Поставить маркер';
+          button.classList.remove('ring-2', 'ring-amber-300');
+          viewport.style.cursor = '';
+          mapHint.textContent = 'Метки сохраняются в этом браузере на этом устройстве.';
+        }
+      }
+      setTimeout(function() { suppressClick = false; }, 0);
+    }
+    viewport.addEventListener('pointerup', finishPointer);
+    viewport.addEventListener('pointercancel', finishPointer);
+    viewport.addEventListener('click', function(event) {
+      if (suppressClick) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }, true);
+    viewport.addEventListener('wheel', function(event) {
+      event.preventDefault();
+      zoomAt(zoom * (event.deltaY < 0 ? 1.12 : 0.89), event.clientX, event.clientY);
+    }, { passive: false });
 
-    const characterList = document.getElementById('characterList');
+    let lastPinchDistance = null;
+    viewport.addEventListener('touchstart', function(event) {
+      if (event.touches.length === 2) {
+        const dx = event.touches[0].clientX - event.touches[1].clientX;
+        const dy = event.touches[0].clientY - event.touches[1].clientY;
+        lastPinchDistance = Math.hypot(dx, dy);
+      }
+    }, { passive: true });
+    viewport.addEventListener('touchmove', function(event) {
+      if (event.touches.length !== 2 || !lastPinchDistance) return;
+      const dx = event.touches[0].clientX - event.touches[1].clientX;
+      const dy = event.touches[0].clientY - event.touches[1].clientY;
+      const distance = Math.hypot(dx, dy);
+      const centerX = (event.touches[0].clientX + event.touches[1].clientX) / 2;
+      const centerY = (event.touches[0].clientY + event.touches[1].clientY) / 2;
+      zoomAt(zoom * (distance / lastPinchDistance), centerX, centerY);
+      lastPinchDistance = distance;
+      event.preventDefault();
+    }, { passive: false });
+    viewport.addEventListener('touchend', function() { lastPinchDistance = null; }, { passive: true });
 
-    characters.forEach(char => {
-
-      characterList.innerHTML += `
-        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
-          <h4 class="text-2xl font-bold text-amber-300 mb-2">
-            ${char.name}
-          </h4>
-
-          <div class="text-zinc-400 mb-3">
-            ${char.race} • ${char.cls}
-          </div>
-
-          <p class="text-zinc-300">
-            ${char.lore}
-          </p>
-        </div>
-      `;
+    document.getElementById('zoomIn').addEventListener('click', function() { zoomAt(zoom * 1.2); });
+    document.getElementById('zoomOut').addEventListener('click', function() { zoomAt(zoom / 1.2); });
+    document.getElementById('resetMap').addEventListener('click', resetMap);
+    document.getElementById('faerunMap').addEventListener('error', function() {
+      mapHint.textContent = 'Карта не загрузилась. Проверь подключение к интернету; исходная карта доступна по ссылке Wikimedia ниже.';
     });
 
-    // NPC
-
-    const npcList = document.getElementById('npcList');
-
-    npcs.forEach(npc => {
-
-      npcList.innerHTML += `
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex justify-between">
-          <div>
-            <div class="text-xl font-semibold text-amber-300">
-              ${npc.name}
-            </div>
-
-            <div class="text-zinc-400">
-              ${npc.role}
-            </div>
-          </div>
-
-          <button class="border border-zinc-700 px-4 py-2 rounded-xl">
-            Открыть
-          </button>
-        </div>
-      `;
-    });
-
-    // LOCATIONS
-
-    const locationList = document.getElementById('locationList');
-
-    locations.forEach(location => {
-
-      locationList.innerHTML += `
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex justify-between">
-          <div>
-            <div class="text-xl font-semibold text-amber-300">
-              ${location.name}
-            </div>
-
-            <div class="text-zinc-400">
-              ${location.type}
-            </div>
-          </div>
-
-          <button class="border border-zinc-700 px-4 py-2 rounded-xl">
-            Открыть
-          </button>
-        </div>
-      `;
-    });
-
+    renderCampaigns();
+    renderMarkers();
+    resetMap();
+    window.addEventListener('resize', resetMap);
   </script>
-
 </body>
 </html>
