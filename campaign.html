@@ -53,6 +53,7 @@
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-dashboard" role="tab" aria-controls="panel-dashboard" aria-selected="false" data-tab="dashboard">Панель мастера</button>
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-overview" role="tab" aria-controls="panel-overview" aria-selected="true" data-tab="overview">Обзор</button>
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-map" role="tab" aria-controls="panel-map" aria-selected="false" data-tab="map">Карта</button>
+      <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-battlemaps" role="tab" aria-controls="panel-battlemaps" aria-selected="false" data-tab="battlemaps">Боевые карты · мастер</button>
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-players" role="tab" aria-controls="panel-players" aria-selected="false" data-tab="players">Персонажи игроков</button>
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-npcs" role="tab" aria-controls="panel-npcs" aria-selected="false" data-tab="npcs">NPC и фракции</button>
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-sessions" role="tab" aria-controls="panel-sessions" aria-selected="false" data-tab="sessions">Журнал сессий</button>
@@ -181,6 +182,37 @@
       </div>
     </section>
 
+    <section id="panel-battlemaps" class="tab-panel py-8" role="tabpanel" aria-labelledby="tab-battlemaps" hidden>
+      <div class="mb-6"><p class="text-xs uppercase tracking-[.2em] text-amber-400">Инструменты ведущего</p><h2 class="mt-2 text-3xl font-black">Библиотека боевых карт</h2><p class="mt-2 max-w-3xl text-zinc-400">Подборка источников с картами для D&D и личный список карт, которые пригодятся в будущих столкновениях.</p></div>
+      <div class="mb-6 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm leading-relaxed text-amber-100"><strong>На будущее:</strong> вкладка пока не защищена авторизацией и видна всем, кто откроет страницу. Не добавляй сюда секретные сюжетные детали. Записи хранятся локально в этом браузере.</div>
+      <h3 class="mb-4 text-xl font-bold text-amber-200">Каталоги карт</h3>
+      <div class="grid gap-4 md:grid-cols-3">
+        <article class="rounded-2xl border border-zinc-800 bg-zinc-900 p-5"><p class="text-xs uppercase tracking-wide text-emerald-300">Есть бесплатные карты</p><h4 class="mt-2 text-lg font-bold">2-Minute Tabletop</h4><p class="mt-2 text-sm leading-relaxed text-zinc-400">Рисованные карты лесов, подземелий, городских сцен и таверн; многие подходят для виртуальных столов и печати.</p><a href="https://2minutetabletop.com/product-category/free/" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex rounded-xl border border-amber-500/30 px-3 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-500/10">Открыть каталог ↗</a></article>
+        <article class="rounded-2xl border border-zinc-800 bg-zinc-900 p-5"><p class="text-xs uppercase tracking-wide text-emerald-300">Есть бесплатные версии</p><h4 class="mt-2 text-lg font-bold">Forgotten Adventures</h4><p class="mt-2 text-sm leading-relaxed text-zinc-400">Детализированные карты перевалов, пещер, лагерей и поселений — особенно полезно для Дикого Севера.</p><a href="https://www.forgotten-adventures.net/battlemaps/" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex rounded-xl border border-amber-500/30 px-3 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-500/10">Открыть каталог ↗</a></article>
+        <article class="rounded-2xl border border-zinc-800 bg-zinc-900 p-5"><p class="text-xs uppercase tracking-wide text-amber-300">Карты по приключениям</p><h4 class="mt-2 text-lg font-bold">The Cartographer’s Vault</h4><p class="mt-2 text-sm leading-relaxed text-zinc-400">Каталог карт, организованный по приключениям и областям, с возможностью просматривать и скачивать доступные материалы.</p><a href="https://freedndmaps.com/maps" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex rounded-xl border border-amber-500/30 px-3 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-500/10">Открыть каталог ↗</a></article>
+      </div>
+      <div class="mt-8 grid gap-6 xl:grid-cols-[minmax(0,.85fr)_minmax(0,1.15fr)]">
+        <section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 md:p-7"><h3 class="text-xl font-bold text-amber-200">Добавить карту в свою подборку</h3><p class="mt-2 text-sm text-zinc-400">Сохраняй ссылку на карту, чтобы быстро открыть её перед боем. Можно добавить заметку о встрече или местности.</p>
+          <form id="battlemap-form" class="mt-5 space-y-4">
+            <label class="block text-sm text-zinc-300">Название карты <span class="text-amber-300">*</span><input id="battlemap-title" required maxlength="140" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например, Горный перевал"></label>
+            <label class="block text-sm text-zinc-300">Ссылка на оригинал <span class="text-amber-300">*</span><input id="battlemap-url" type="url" required maxlength="1000" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="https://..."></label>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <label class="block text-sm text-zinc-300">Тип местности<select id="battlemap-type" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white"><option value="forest">Лес / природа</option><option value="dungeon">Подземелье / пещера</option><option value="settlement">Город / поселение</option><option value="mountain">Горы / снег</option><option value="road">Дорога / лагерь</option><option value="other">Другое</option></select></label>
+              <label class="block text-sm text-zinc-300">Источник<input id="battlemap-source" maxlength="120" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например, Forgotten Adventures"></label>
+            </div>
+            <label class="block text-sm text-zinc-300">Заметка<textarea id="battlemap-notes" maxlength="2000" rows="3" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Для какой встречи подойдёт, размер сетки, важные детали..."></textarea></label>
+            <p id="battlemap-form-error" class="hidden text-sm text-red-300" role="alert"></p>
+            <button type="submit" class="rounded-xl bg-amber-400 px-5 py-3 font-semibold text-zinc-950">＋ Сохранить карту</button>
+          </form>
+        </section>
+        <section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 md:p-7"><div class="flex flex-wrap items-center justify-between gap-3"><h3 class="text-xl font-bold text-amber-200">Моя подборка</h3><span id="battlemap-count" class="rounded-full border border-zinc-700 px-3 py-1 text-xs text-zinc-400">0 карт</span></div>
+          <label class="mt-4 block text-sm text-zinc-300">Фильтр по типу<select id="battlemap-filter" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white"><option value="all">Все карты</option><option value="forest">Лес / природа</option><option value="dungeon">Подземелье / пещера</option><option value="settlement">Город / поселение</option><option value="mountain">Горы / снег</option><option value="road">Дорога / лагерь</option><option value="other">Другое</option></select></label>
+          <div id="battlemap-list" class="mt-5 space-y-3" aria-live="polite"></div>
+        </section>
+      </div>
+      <p class="mt-5 text-xs leading-relaxed text-zinc-500">Библиотека хранит названия, ссылки и заметки, но не скачивает и не копирует чужие изображения автоматически. Перед использованием проверяй лицензию и условия конкретной карты.</p>
+    </section>
+
     <section id="panel-sessions" class="tab-panel py-8" role="tabpanel" aria-labelledby="tab-sessions" hidden>
       <div class="mb-6"><p class="text-xs uppercase tracking-[.2em] text-amber-400">История приключения</p><h2 class="mt-2 text-3xl font-black">Журнал сессий и заметки</h2><p class="mt-2 text-zinc-400">Итоги встреч, квесты группы, личные записи игроков и заметки ведущего.</p></div>
       <div class="grid gap-6 xl:grid-cols-2">
@@ -230,7 +262,7 @@
     });
     // Панель мастера, журнал, квесты и авторские заметки.
     const CAMPAIGN_DATA_KEY = 'dnd-lore-stormking-dm-tools-v1';
-    const defaultCampaignData = { sessions: [], quests: [], playerNotes: [], secretNotes: [], quickNotes: [], worldEntries: [{id:'npc-zephyros',type:'npc',name:'Зефирос',role:'Облачный великан · учёный',stance:'unknown',description:'Загадочный исследователь, способный неожиданно вмешаться в путешествие героев.',notes:''},{id:'npc-neri',type:'npc',name:'Нери',role:'Королева штормовых великанов',stance:'unknown',description:'Супруга Хекатона; её судьба связана с историей королевской семьи.',notes:''}] };
+    const defaultCampaignData = { sessions: [], quests: [], playerNotes: [], secretNotes: [], quickNotes: [], battleMaps: [], worldEntries: [{id:'npc-zephyros',type:'npc',name:'Зефирос',role:'Облачный великан · учёный',stance:'unknown',description:'Загадочный исследователь, способный неожиданно вмешаться в путешествие героев.',notes:''},{id:'npc-neri',type:'npc',name:'Нери',role:'Королева штормовых великанов',stance:'unknown',description:'Супруга Хекатона; её судьба связана с историей королевской семьи.',notes:''}] };
     let campaignData = loadCampaignData();
     function loadCampaignData() {
       try { const saved = JSON.parse(localStorage.getItem(CAMPAIGN_DATA_KEY) || '{}'); return Object.assign({}, defaultCampaignData, saved && typeof saved === 'object' ? saved : {}); }
@@ -372,6 +404,57 @@
       }
     });
     renderWorldEntries();
+
+    // Библиотека боевых карт: сохраняем ссылки и заметки, не копируя чужие изображения.
+    const battleMapTypes = {forest:'Лес / природа',dungeon:'Подземелье / пещера',settlement:'Город / поселение',mountain:'Горы / снег',road:'Дорога / лагерь',other:'Другое'};
+    const battleMapForm = document.getElementById('battlemap-form');
+    function renderBattleMaps() {
+      if (!Array.isArray(campaignData.battleMaps)) campaignData.battleMaps = [];
+      const filter = document.getElementById('battlemap-filter').value;
+      const entries = campaignData.battleMaps.filter(item => filter === 'all' || item.type === filter);
+      document.getElementById('battlemap-count').textContent = campaignData.battleMaps.length + (campaignData.battleMaps.length === 1 ? ' карта' : campaignData.battleMaps.length >= 2 && campaignData.battleMaps.length <= 4 ? ' карты' : ' карт');
+      const list = document.getElementById('battlemap-list');
+      if (!entries.length) {
+        list.innerHTML = '<p class="rounded-xl border border-dashed border-zinc-800 p-5 text-sm text-zinc-500">Пока нет сохранённых карт. Добавь ссылку на карту из одного из каталогов выше.</p>';
+        return;
+      }
+      list.innerHTML = entries.slice().reverse().map(item => '<article class="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">' +
+        '<div class="flex flex-wrap items-start justify-between gap-2"><div class="min-w-0"><h4 class="break-words font-semibold text-amber-200">' + safeText(item.title) + '</h4><p class="mt-1 text-xs text-zinc-500">' + safeText(battleMapTypes[item.type] || 'Другое') + (item.source ? ' · ' + safeText(item.source) : '') + '</p></div><button type="button" data-battlemap-delete="' + safeText(item.id) + '" class="rounded-lg border border-zinc-800 px-3 py-2 text-xs text-red-300 hover:border-red-400">Удалить</button></div>' +
+        (item.notes ? '<p class="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed text-zinc-300">' + safeText(item.notes) + '</p>' : '') +
+        '<a href="' + safeText(item.url) + '" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex max-w-full break-all rounded-xl border border-amber-500/30 px-3 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-500/10">Открыть карту / источник ↗</a></article>').join('');
+    }
+    function showBattleMapError(message) {
+      const el = document.getElementById('battlemap-form-error');
+      el.textContent = message;
+      el.classList.remove('hidden');
+    }
+    battleMapForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const title = document.getElementById('battlemap-title').value.trim();
+      const rawUrl = document.getElementById('battlemap-url').value.trim();
+      let parsedUrl;
+      try { parsedUrl = new URL(rawUrl); } catch (error) { showBattleMapError('Укажи корректную ссылку, начинающуюся с https:// или http://.'); return; }
+      if (!['https:','http:'].includes(parsedUrl.protocol)) { showBattleMapError('Разрешены только ссылки http:// и https://.'); return; }
+      if (!title) { showBattleMapError('Укажи название карты.'); return; }
+      const item = {id:'battlemap-' + Date.now(),title,url:parsedUrl.href,type:document.getElementById('battlemap-type').value,source:document.getElementById('battlemap-source').value.trim(),notes:document.getElementById('battlemap-notes').value.trim(),createdAt:new Date().toISOString()};
+      if (!Array.isArray(campaignData.battleMaps)) campaignData.battleMaps = [];
+      campaignData.battleMaps.push(item);
+      if (saveCampaignData()) {
+        battleMapForm.reset();
+        document.getElementById('battlemap-form-error').classList.add('hidden');
+        renderBattleMaps();
+      }
+    });
+    document.getElementById('battlemap-filter').addEventListener('change', renderBattleMaps);
+    document.getElementById('battlemap-list').addEventListener('click', event => {
+      const button = event.target.closest('[data-battlemap-delete]');
+      if (!button) return;
+      const item = campaignData.battleMaps.find(entry => entry.id === button.dataset.battlemapDelete);
+      if (!item || !confirm('Удалить карту «' + item.title + '» из подборки?')) return;
+      campaignData.battleMaps = campaignData.battleMaps.filter(entry => entry.id !== item.id);
+      if (saveCampaignData()) renderBattleMaps();
+    });
+    renderBattleMaps();
 
     // Карточки персонажей сохраняются локально в браузере: GitHub Pages не предоставляет базу данных.
     const PLAYER_STORAGE_KEY = 'dnd-lore-stormking-players-v1';
