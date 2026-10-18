@@ -50,12 +50,30 @@
     </section>
 
     <nav class="tab-strip mt-8 flex flex-wrap gap-2 border-b border-zinc-800 pb-4" role="tablist" aria-label="Разделы кампании">
+      <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-dashboard" role="tab" aria-controls="panel-dashboard" aria-selected="false" data-tab="dashboard">Панель мастера</button>
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-overview" role="tab" aria-controls="panel-overview" aria-selected="true" data-tab="overview">Обзор</button>
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-map" role="tab" aria-controls="panel-map" aria-selected="false" data-tab="map">Карта</button>
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-players" role="tab" aria-controls="panel-players" aria-selected="false" data-tab="players">Персонажи игроков</button>
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-npcs" role="tab" aria-controls="panel-npcs" aria-selected="false" data-tab="npcs">NPC и фракции</button>
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-sessions" role="tab" aria-controls="panel-sessions" aria-selected="false" data-tab="sessions">Журнал сессий</button>
     </nav>
+
+    <section id="panel-dashboard" class="tab-panel py-8" role="tabpanel" aria-labelledby="tab-dashboard" hidden>
+      <div class="mb-6"><p class="text-xs uppercase tracking-[.2em] text-amber-400">Рабочее место ведущего</p><h2 class="mt-2 text-3xl font-black md:text-4xl">Панель мастера</h2><p class="mt-2 text-zinc-400">Главное по кампании — перед сессией и во время игры.</p></div>
+      <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <article class="rounded-2xl border border-zinc-800 bg-zinc-900 p-5"><p class="text-sm text-zinc-400">Записи сессий</p><p id="dashboard-session-count" class="mt-2 text-3xl font-black text-amber-200">0</p><button type="button" data-open-tab="sessions" class="mt-3 text-sm text-amber-300">Открыть журнал →</button></article>
+        <article class="rounded-2xl border border-zinc-800 bg-zinc-900 p-5"><p class="text-sm text-zinc-400">Активные квесты</p><p id="dashboard-quest-count" class="mt-2 text-3xl font-black text-amber-200">0</p><button type="button" data-open-tab="sessions" class="mt-3 text-sm text-amber-300">К целям группы →</button></article>
+        <article class="rounded-2xl border border-zinc-800 bg-zinc-900 p-5"><p class="text-sm text-zinc-400">Заметки игроков</p><p id="dashboard-player-note-count" class="mt-2 text-3xl font-black text-amber-200">0</p><button type="button" data-open-tab="sessions" class="mt-3 text-sm text-amber-300">Читать заметки →</button></article>
+        <article class="rounded-2xl border border-zinc-800 bg-zinc-900 p-5"><p class="text-sm text-zinc-400">Персонажи партии</p><p id="dashboard-player-count" class="mt-2 text-3xl font-black text-amber-200">0</p><button type="button" data-open-tab="players" class="mt-3 text-sm text-amber-300">Карточки героев →</button></article>
+      </div>
+      <div class="mt-6 grid gap-6 lg:grid-cols-[1.2fr_.8fr]">
+        <section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 md:p-7"><h3 class="text-xl font-bold text-amber-200">Быстрая заметка мастера</h3><p class="mt-1 text-sm text-zinc-400">Идея или напоминание для следующей сцены.</p>
+          <form id="dm-quick-note-form" class="mt-4 space-y-3"><label class="block text-sm text-zinc-300">Заметка<textarea id="dm-quick-note" maxlength="5000" rows="4" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white focus:border-amber-400" placeholder="Например: торговец узнает символ на амулете..."></textarea></label><div class="flex flex-wrap items-center gap-3"><button type="submit" class="rounded-xl bg-amber-400 px-4 py-3 font-semibold text-zinc-950">Сохранить заметку</button><span id="dm-quick-note-status" class="text-sm text-zinc-500" aria-live="polite"></span></div></form><div id="dm-quick-note-list" class="mt-5 space-y-3"></div>
+        </section>
+        <section class="rounded-3xl border border-amber-500/20 bg-gradient-to-br from-zinc-900 to-amber-950/20 p-5 md:p-7"><h3 class="text-xl font-bold text-amber-200">Перед следующей игрой</h3><ul class="mt-4 space-y-3 text-sm leading-relaxed text-zinc-300"><li>✦ Запиши итоги предыдущей встречи.</li><li>✦ Отметь активные квесты и незакрытые зацепки.</li><li>✦ Добавь личные заметки игроков — автор будет указан.</li><li>✦ Секреты мастера находятся в отдельном разделе.</li></ul><button type="button" data-open-tab="sessions" class="mt-6 w-full rounded-xl border border-amber-500/30 px-4 py-3 font-semibold text-amber-200">Открыть журнал и заметки →</button></section>
+      </div>
+      <p class="mt-5 text-xs leading-relaxed text-zinc-500">Записи сохраняются в браузере на этом устройстве. Для синхронизации между игроками на разных устройствах понадобится сервер и авторизация. Сейчас имя автора вводится самим игроком.</p>
+    </section>
 
     <section id="panel-overview" class="tab-panel py-8" role="tabpanel" aria-labelledby="tab-overview">
       <div class="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
@@ -150,10 +168,23 @@
     </section>
 
     <section id="panel-sessions" class="tab-panel py-8" role="tabpanel" aria-labelledby="tab-sessions" hidden>
-      <div class="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 md:p-8">
-        <h2 class="text-2xl font-bold">Журнал сессий</h2><p class="mt-2 text-zinc-400">Краткие итоги игровых встреч, важные решения и незакрытые зацепки.</p>
-        <div class="mt-6 rounded-2xl border border-dashed border-zinc-700 p-8 text-center"><span class="text-4xl" aria-hidden="true">📜</span><h3 class="mt-3 font-semibold">Журнал ещё не заполнен</h3><p class="mt-2 text-sm text-zinc-500">Добавим записи с датой, кратким пересказом, NPC и зацепками для следующей встречи.</p></div>
+      <div class="mb-6"><p class="text-xs uppercase tracking-[.2em] text-amber-400">История приключения</p><h2 class="mt-2 text-3xl font-black">Журнал сессий и заметки</h2><p class="mt-2 text-zinc-400">Итоги встреч, квесты группы, личные записи игроков и заметки ведущего.</p></div>
+      <div class="grid gap-6 xl:grid-cols-2">
+        <section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 md:p-7"><h3 class="text-xl font-bold text-amber-200">Добавить сессию</h3><form id="session-form" class="mt-4 space-y-4">
+          <label class="block text-sm text-zinc-300">Название встречи<input id="session-title" required maxlength="120" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например, Следы в снегу"></label>
+          <label class="block text-sm text-zinc-300">Дата<input id="session-date" type="date" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white"></label>
+          <label class="block text-sm text-zinc-300">Что произошло<textarea id="session-summary" required maxlength="8000" rows="4" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="События, решения и последствия..."></textarea></label>
+          <label class="block text-sm text-zinc-300">Зацепки на будущее<textarea id="session-hooks" maxlength="3000" rows="2" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Что осталось нерешённым?"></textarea></label><button class="rounded-xl bg-amber-400 px-5 py-3 font-semibold text-zinc-950" type="submit">Добавить в журнал</button></form><div id="session-list" class="mt-6 space-y-3"></div>
+        </section>
+        <section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 md:p-7"><h3 class="text-xl font-bold text-amber-200">Квесты и зацепки</h3><form id="quest-form" class="mt-4 space-y-4">
+          <label class="block text-sm text-zinc-300">Название цели<input id="quest-title" required maxlength="160" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например, Найти пропавший караван"></label>
+          <label class="block text-sm text-zinc-300">Описание<textarea id="quest-detail" maxlength="4000" rows="3" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Кто дал задание, что известно, награда..."></textarea></label>
+          <label class="block text-sm text-zinc-300">Статус<select id="quest-status" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white"><option value="active">Активен</option><option value="pending">Отложен</option><option value="done">Выполнен</option></select></label><button class="rounded-xl bg-amber-400 px-5 py-3 font-semibold text-zinc-950" type="submit">Добавить квест</button></form><div id="quest-list" class="mt-6 space-y-3"></div></section>
       </div>
+      <section class="mt-6 rounded-3xl border border-emerald-500/20 bg-zinc-900 p-5 md:p-7"><h3 class="text-xl font-bold text-emerald-200">Заметки игроков</h3><p class="mt-2 text-sm text-zinc-400">Каждый игрок пишет под своим именем. Автор и дата отображаются у каждой записи. Эти записи отдельно от секретов ведущего.</p>
+        <form id="player-note-form" class="mt-4 grid gap-4 md:grid-cols-[minmax(0,.7fr)_minmax(0,1.3fr)]"><label class="block text-sm text-zinc-300">Имя игрока / персонажа<input id="player-note-author" required maxlength="100" autocomplete="nickname" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например, Булат / Эйдан"></label><label class="block text-sm text-zinc-300 md:row-span-2">Твоя заметка<textarea id="player-note-content" required maxlength="5000" rows="4" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Догадки, имена, найденные улики..."></textarea></label><button type="submit" class="self-start rounded-xl bg-emerald-400 px-5 py-3 font-semibold text-zinc-950">Опубликовать заметку</button></form><div id="player-note-list" class="mt-6 grid gap-3 md:grid-cols-2"></div>
+      </section>
+      <section class="mt-6 rounded-3xl border border-red-500/20 bg-zinc-900 p-5 md:p-7"><h3 class="text-xl font-bold text-red-200">Секретные заметки мастера</h3><p class="mt-2 text-sm text-zinc-400">Скрытые подсказки, будущие повороты сюжета и тайны за ширмой.</p><form id="secret-note-form" class="mt-4 flex flex-col gap-3 sm:flex-row"><textarea id="secret-note-content" required maxlength="5000" rows="3" class="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Секрет мастера..."></textarea><button type="submit" class="shrink-0 rounded-xl border border-red-500/40 px-5 py-3 font-semibold text-red-200">Сохранить секрет</button></form><div id="secret-note-list" class="mt-5 space-y-3"></div></section>
     </section>
     <footer class="mt-8 border-t border-zinc-800 py-6 text-sm text-zinc-500 flex flex-wrap justify-between gap-3"><span>DnD Lore Portal · Гром штурмового короля</span><a href="index.html#campaigns" class="hover:text-amber-300">Вернуться к кампаниям ↑</a></footer>
   </main>
@@ -183,6 +214,78 @@
         activateTab(tabs[next], true);
       });
     });
+    // Панель мастера, журнал, квесты и авторские заметки.
+    const CAMPAIGN_DATA_KEY = 'dnd-lore-stormking-dm-tools-v1';
+    const defaultCampaignData = { sessions: [], quests: [], playerNotes: [], secretNotes: [], quickNotes: [] };
+    let campaignData = loadCampaignData();
+    function loadCampaignData() {
+      try { const saved = JSON.parse(localStorage.getItem(CAMPAIGN_DATA_KEY) || '{}'); return Object.assign({}, defaultCampaignData, saved && typeof saved === 'object' ? saved : {}); }
+      catch (error) { return Object.assign({}, defaultCampaignData); }
+    }
+    function saveCampaignData() {
+      try { localStorage.setItem(CAMPAIGN_DATA_KEY, JSON.stringify(campaignData)); updateDashboard(); return true; }
+      catch (error) { alert('Не удалось сохранить запись. Возможно, хранилище браузера заполнено.'); return false; }
+    }
+    function safeText(value) { return String(value || '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char])); }
+    function displayDate(value) {
+      if (!value) return 'Дата не указана';
+      const date = new Date(value.length === 10 ? value + 'T12:00:00' : value);
+      return Number.isNaN(date.getTime()) ? 'Дата не указана' : date.toLocaleDateString('ru-RU', {day:'numeric',month:'long',year:'numeric'});
+    }
+    function entryCard(title, meta, body, extraClass = '') {
+      return '<article class="rounded-2xl border border-zinc-800 bg-zinc-950 p-4 ' + extraClass + '"><div class="flex flex-wrap items-start justify-between gap-2"><h4 class="font-semibold text-amber-200 break-words">' + safeText(title) + '</h4><span class="text-xs text-zinc-500">' + safeText(meta) + '</span></div><p class="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed text-zinc-300">' + safeText(body) + '</p></article>';
+    }
+    function renderCollection(id, entries, renderer, emptyText) {
+      const element = document.getElementById(id);
+      if (element) element.innerHTML = entries.length ? entries.slice().reverse().map(renderer).join('') : '<p class="rounded-xl border border-dashed border-zinc-800 p-4 text-sm text-zinc-500">' + safeText(emptyText) + '</p>';
+    }
+    function renderCampaignData() {
+      renderCollection('session-list', campaignData.sessions, item => entryCard(item.title, displayDate(item.date), item.summary + (item.hooks ? '\n\nЗацепки: ' + item.hooks : '')), 'Пока нет записей сессий.');
+      const labels = {active:'Активен',pending:'Отложен',done:'Выполнен'};
+      renderCollection('quest-list', campaignData.quests, item => entryCard(item.title, labels[item.status] || 'Активен', item.detail || 'Описание пока не добавлено.', item.status === 'done' ? 'opacity-70' : ''), 'Квестов пока нет — добавь первую цель группы.');
+      renderCollection('player-note-list', campaignData.playerNotes, item => entryCard(item.author, 'Автор · ' + displayDate(item.createdAt), item.content, 'border-emerald-500/20'), 'Игроки ещё не добавили заметки.');
+      renderCollection('secret-note-list', campaignData.secretNotes, item => entryCard('🔒 Заметка мастера', displayDate(item.createdAt), item.content, 'border-red-500/20'), 'Секретных заметок пока нет.');
+      renderCollection('dm-quick-note-list', campaignData.quickNotes, item => entryCard('Заметка мастера', displayDate(item.createdAt), item.content), 'Быстрых заметок пока нет.');
+      updateDashboard();
+    }
+    function updateDashboard() {
+      const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+      set('dashboard-session-count', campaignData.sessions.length);
+      set('dashboard-quest-count', campaignData.quests.filter(item => item.status !== 'done').length);
+      set('dashboard-player-note-count', campaignData.playerNotes.length);
+      set('dashboard-player-count', players.length);
+    }
+    document.getElementById('session-form').addEventListener('submit', event => {
+      event.preventDefault();
+      campaignData.sessions.push({id:'session-'+Date.now(),title:document.getElementById('session-title').value.trim(),date:document.getElementById('session-date').value,summary:document.getElementById('session-summary').value.trim(),hooks:document.getElementById('session-hooks').value.trim(),createdAt:new Date().toISOString()});
+      if (saveCampaignData()) { event.target.reset(); renderCampaignData(); }
+    });
+    document.getElementById('quest-form').addEventListener('submit', event => {
+      event.preventDefault();
+      campaignData.quests.push({id:'quest-'+Date.now(),title:document.getElementById('quest-title').value.trim(),detail:document.getElementById('quest-detail').value.trim(),status:document.getElementById('quest-status').value,createdAt:new Date().toISOString()});
+      if (saveCampaignData()) { event.target.reset(); renderCampaignData(); }
+    });
+    document.getElementById('player-note-form').addEventListener('submit', event => {
+      event.preventDefault();
+      campaignData.playerNotes.push({id:'note-'+Date.now(),author:document.getElementById('player-note-author').value.trim(),content:document.getElementById('player-note-content').value.trim(),createdAt:new Date().toISOString()});
+      if (saveCampaignData()) { event.target.reset(); renderCampaignData(); }
+    });
+    document.getElementById('secret-note-form').addEventListener('submit', event => {
+      event.preventDefault();
+      campaignData.secretNotes.push({id:'secret-'+Date.now(),content:document.getElementById('secret-note-content').value.trim(),createdAt:new Date().toISOString()});
+      if (saveCampaignData()) { event.target.reset(); renderCampaignData(); }
+    });
+    document.getElementById('dm-quick-note-form').addEventListener('submit', event => {
+      event.preventDefault(); const value = document.getElementById('dm-quick-note').value.trim(); if (!value) return;
+      campaignData.quickNotes.push({id:'quick-'+Date.now(),content:value,createdAt:new Date().toISOString()});
+      if (saveCampaignData()) { event.target.reset(); document.getElementById('dm-quick-note-status').textContent = 'Сохранено'; renderCampaignData(); }
+    });
+    document.addEventListener('click', event => {
+      const button = event.target.closest('[data-open-tab]'); if (!button) return;
+      const tab = tabs.find(item => item.dataset.tab === button.dataset.openTab);
+      if (tab) { activateTab(tab); tab.scrollIntoView({behavior:'smooth',block:'start'}); }
+    });
+
     // Карточки персонажей сохраняются локально в браузере: GitHub Pages не предоставляет базу данных.
     const PLAYER_STORAGE_KEY = 'dnd-lore-stormking-players-v1';
     const playerForm = document.getElementById('player-form');
@@ -354,10 +457,11 @@
       }
     });
     renderPlayers();
+    renderCampaignData();
 
     const initial = tabs.find(tab => tab.dataset.tab === location.hash.slice(1));
     if (initial) activateTab(initial);
-    else activateTab(tabs[0]);
+    else activateTab(tabs.find(tab => tab.dataset.tab === 'dashboard') || tabs[0]);
   </script>
 </body>
 </html>
