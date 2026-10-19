@@ -349,6 +349,7 @@
               <div class="mt-3 grid grid-cols-2 gap-3">
                 <label class="text-sm text-zinc-300">Сторона<select id="battle-combatant-side" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"><option value="hero">Герой</option><option value="enemy">Враг</option><option value="ally">Союзник</option></select></label>
                 <label class="text-sm text-zinc-300">Инициатива<input id="battle-combatant-initiative" type="number" min="-20" max="50" value="10" required class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"></label>
+                <label class="text-sm text-zinc-300">Класс доспеха (КД)<input id="battle-combatant-ac" type="number" min="0" max="40" step="1" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-white" placeholder="Например, 16"></label>
                 <label class="text-sm text-zinc-300">Текущие HP<input id="battle-combatant-hp" type="number" min="0" max="9999" value="10" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"></label>
                 <label class="text-sm text-zinc-300">Макс. HP<input id="battle-combatant-maxhp" type="number" min="1" max="9999" value="10" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"></label>
               </div>
@@ -356,7 +357,7 @@
                 <label for="battle-player-character" class="block text-sm font-semibold text-blue-200">Взять героя из «Персонажи игроков»</label>
                 <select id="battle-player-character" class="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white"><option value="">— Заполнить вручную —</option></select>
                 <p id="battle-player-selected" class="mt-2 hidden text-xs text-emerald-300" role="status"></p>
-                <p class="mt-2 text-xs text-zinc-500">Имя и портрет подставятся автоматически. HP и инициатива остаются редактируемыми, потому что в карточке персонажа пока нет игровых характеристик.</p>
+                <p class="mt-2 text-xs text-zinc-500">Имя, портрет и КД подставятся автоматически (если КД заполнен в карточке). HP и инициатива остаются редактируемыми.</p>
               </section>
               <section id="battle-enemy-monster-picker" class="mt-4 hidden rounded-xl border border-red-500/30 bg-zinc-900 p-3">
                 <h5 class="font-semibold text-red-200">Выбрать врага из бестиария</h5>
@@ -958,12 +959,14 @@
       const monster = side === 'enemy' ? selectedBattleFormMonster : null;
       const maxHp = Math.max(1, Math.min(9999, Number(document.getElementById('battle-combatant-maxhp').value) || 1));
       const hp = Math.max(0, Math.min(maxHp, Number(document.getElementById('battle-combatant-hp').value) || 0));
+      const acInput = document.getElementById('battle-combatant-ac').value;
+      const armorClass = side === 'enemy' && monster ? Number(monster.ac) : (acInput === '' ? null : Math.max(0, Math.min(40, Math.floor(Number(acInput)))));
       const id = 'combatant-' + Date.now() + '-' + Math.random().toString(36).slice(2,7);
       const count = battleScene.combatants.length;
       const playerId = side !== 'enemy' && selectedBattleFormPlayer ? selectedBattleFormPlayer.id : null;
-      battleScene.combatants.push({id,name,side,initiative:Math.max(-20,Math.min(50,Number(document.getElementById('battle-combatant-initiative').value)||0)),hp,maxHp,x:8+(count%6)*16,y:12+(Math.floor(count/6)%6)*15,...(playerId ? {playerId} : {}),...(monster ? {monsterId:monster.id,monsterEdition:monster.edition,armorClass:monster.ac,conditions:[],defeated:false} : {})});
+      battleScene.combatants.push({id,name,side,initiative:Math.max(-20,Math.min(50,Number(document.getElementById('battle-combatant-initiative').value)||0)),hp,maxHp,x:8+(count%6)*16,y:12+(Math.floor(count/6)%6)*15,...(playerId ? {playerId} : {}),...(armorClass !== null && Number.isFinite(armorClass) ? {armorClass} : {}),...(monster ? {monsterId:monster.id,monsterEdition:monster.edition,conditions:[],defeated:false} : {})});
       if (!battleScene.activeId) battleScene.activeId = id;
-      if (saveBattleScene()) { event.target.reset(); document.getElementById('battle-combatant-initiative').value = 10; document.getElementById('battle-combatant-hp').value = 10; document.getElementById('battle-combatant-maxhp').value = 10; renderBattleScene(); }
+      if (saveBattleScene()) { event.target.reset(); document.getElementById('battle-combatant-initiative').value = 10; document.getElementById('battle-combatant-hp').value = 10; document.getElementById('battle-combatant-maxhp').value = 10; document.getElementById('battle-combatant-ac').value = ''; renderBattleScene(); }
     });
     document.getElementById('battle-initiative-list').addEventListener('click', event => {
       const activeButton = event.target.closest('[data-battle-active]');
@@ -1402,6 +1405,7 @@
       battlePlayerSelected.classList.toggle('hidden', !player);
       if (player) {
         document.getElementById('battle-combatant-name').value = player.name;
+        document.getElementById('battle-combatant-ac').value = player.armorClass != null && player.armorClass !== '' ? player.armorClass : '';
         battlePlayerSelected.textContent = 'Выбран: ' + player.name + (player.photo ? ' · портрет будет на фишке' : ' · портрет не добавлен в карточку');
       } else {
         battlePlayerSelected.textContent = '';
@@ -1448,6 +1452,7 @@
         document.getElementById('battle-combatant-maxhp').value = maxHp;
         document.getElementById('battle-combatant-hp').value = maxHp;
         document.getElementById('battle-combatant-initiative').value = Math.max(-20,Math.min(50,Math.floor(Math.random()*20)+1+monsterAbilityMod(monster.dex||10)));
+        document.getElementById('battle-combatant-ac').value = monster.ac != null && monster.ac !== '' ? monster.ac : '';
         battleEnemySelected.textContent = 'Выбран: '+monster.name+' · HP '+maxHp+' · КД '+(monster.ac||'—')+'. Можно добавить на поле.';
         battleEnemySelected.classList.remove('hidden');
         const bestiary = document.getElementById('battle-bestiary');
