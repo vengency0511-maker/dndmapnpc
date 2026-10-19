@@ -269,6 +269,7 @@
     <details id="battle-bestiary" class="mb-8 rounded-3xl border border-amber-500/30 bg-zinc-900/70 p-4 sm:p-6">
       <summary class="cursor-pointer list-none flex flex-wrap items-center justify-between gap-3"><span><span class="block text-xs uppercase tracking-[.2em] text-amber-400">Инструмент боевой сцены</span><span class="mt-1 block text-xl font-black text-amber-200">📚 Бестиарий — выбрать монстров</span><span class="mt-1 block text-sm text-zinc-400">Поиск, характеристики, авторские монстры и добавление прямо на карту</span></span><span class="rounded-xl border border-amber-500/40 px-4 py-2 text-sm font-semibold text-amber-200">Открыть / свернуть</span></summary>
       <div class="mt-5">
+        <div class="mb-4 flex justify-end"><button id="battle-bestiary-close" type="button" class="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300 hover:border-amber-400 hover:text-amber-200">Свернуть бестиарий ✕</button></div>
         <div class="mb-6"><p class="text-xs uppercase tracking-[.2em] text-amber-400">Бестиарий и тактика</p><h2 class="mt-2 text-2xl font-black">Бестиарий монстров</h2><p class="mt-2 max-w-3xl text-zinc-400">Найди существо по названию, проверь характеристики и добавь его прямо на поле боя. Монстр получит HP и инициативу автоматически.</p></div>
         <div class="mb-5 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm leading-relaxed text-amber-100">Открытые материалы SRD 5.1 (2014) и SRD 5.2 (2024). Это не полный платный Monster Manual. Статблоки загружаются из открытого D&D 5e API; для загрузки нужен интернет. Собственные записи доступны без сети после сохранения.</div>
         <div class="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,.8fr)]">
@@ -350,6 +351,12 @@
                 <label class="text-sm text-zinc-300">Текущие HP<input id="battle-combatant-hp" type="number" min="0" max="9999" value="10" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"></label>
                 <label class="text-sm text-zinc-300">Макс. HP<input id="battle-combatant-maxhp" type="number" min="1" max="9999" value="10" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"></label>
               </div>
+              <section id="battle-player-picker" class="mt-4 hidden rounded-xl border border-blue-500/30 bg-zinc-900 p-3">
+                <label for="battle-player-character" class="block text-sm font-semibold text-blue-200">Взять героя из «Персонажи игроков»</label>
+                <select id="battle-player-character" class="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white"><option value="">— Заполнить вручную —</option></select>
+                <p id="battle-player-selected" class="mt-2 hidden text-xs text-emerald-300" role="status"></p>
+                <p class="mt-2 text-xs text-zinc-500">Имя и портрет подставятся автоматически. HP и инициатива остаются редактируемыми, потому что в карточке персонажа пока нет игровых характеристик.</p>
+              </section>
               <section id="battle-enemy-monster-picker" class="mt-4 hidden rounded-xl border border-red-500/30 bg-zinc-900 p-3">
                 <h5 class="font-semibold text-red-200">Выбрать врага из бестиария</h5>
                 <p class="mt-1 text-xs text-zinc-400">Найди монстра — его HP, КД и модификатор Ловкости подставятся автоматически.</p>
@@ -876,6 +883,14 @@
       ).join('');
       if (maps.some(item => item.id === selected)) select.value = selected;
     }
+    function getBattlePlayerPhoto(playerId) {
+      if (!playerId) return '';
+      try {
+        const savedPlayers = JSON.parse(localStorage.getItem('dnd-lore-stormking-players-v1') || '[]');
+        const player = Array.isArray(savedPlayers) ? savedPlayers.find(item => item && item.id === playerId) : null;
+        return player && typeof player.photo === 'string' ? player.photo : '';
+      } catch (error) { return ''; }
+    }
     function renderBattleScene() {
       renderSavedBattleMapOptions();
       document.getElementById('battle-scene-grid-size').value = battleScene.gridSize;
@@ -892,8 +907,9 @@
         const x = Math.max(2, Math.min(98, Number(c.x) || 10 + (i % 5) * 16));
         const y = Math.max(5, Math.min(95, Number(c.y) || 14 + (Math.floor(i / 5) % 5) * 16));
         const color = sideColors[c.side] || sideColors.enemy;
+        const portrait = getBattlePlayerPhoto(c.playerId);
         return '<button type="button" draggable="false" data-battle-marker="' + safeText(c.id) + '" title="' + safeText(c.name) + ' — перетащи фишку" class="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 focus:outline-none focus:ring-2 focus:ring-amber-300" style="left:' + x + '%;top:' + y + '%;touch-action:none;max-width:92px">' +
-          '<span class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white text-lg font-black text-white shadow-lg" style="background:' + color + '">' + (c.side === 'enemy' ? '☠' : c.side === 'ally' ? '✦' : '♟') + '</span>' +
+          '<span class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-white text-lg font-black text-white shadow-lg" style="background:' + color + '">' + (portrait ? '<img src="' + safeText(portrait) + '" alt="" class="h-full w-full object-cover">' : (c.side === 'enemy' ? '☠' : c.side === 'ally' ? '✦' : '♟')) + '</span>' +
           '<span class="max-w-[92px] rounded-md bg-zinc-950/90 px-1.5 py-0.5 text-center text-[11px] font-semibold leading-tight text-white">' + safeText(c.name) + '</span></button>';
       }).join('');
       const sorted = sortedCombatants();
@@ -943,7 +959,8 @@
       const hp = Math.max(0, Math.min(maxHp, Number(document.getElementById('battle-combatant-hp').value) || 0));
       const id = 'combatant-' + Date.now() + '-' + Math.random().toString(36).slice(2,7);
       const count = battleScene.combatants.length;
-      battleScene.combatants.push({id,name,side,initiative:Math.max(-20,Math.min(50,Number(document.getElementById('battle-combatant-initiative').value)||0)),hp,maxHp,x:8+(count%6)*16,y:12+(Math.floor(count/6)%6)*15,...(monster ? {monsterId:monster.id,monsterEdition:monster.edition,armorClass:monster.ac,conditions:[],defeated:false} : {})});
+      const playerId = side !== 'enemy' && selectedBattleFormPlayer ? selectedBattleFormPlayer.id : null;
+      battleScene.combatants.push({id,name,side,initiative:Math.max(-20,Math.min(50,Number(document.getElementById('battle-combatant-initiative').value)||0)),hp,maxHp,x:8+(count%6)*16,y:12+(Math.floor(count/6)%6)*15,...(playerId ? {playerId} : {}),...(monster ? {monsterId:monster.id,monsterEdition:monster.edition,armorClass:monster.ac,conditions:[],defeated:false} : {})});
       if (!battleScene.activeId) battleScene.activeId = id;
       if (saveBattleScene()) { event.target.reset(); document.getElementById('battle-combatant-initiative').value = 10; document.getElementById('battle-combatant-hp').value = 10; document.getElementById('battle-combatant-maxhp').value = 10; renderBattleScene(); }
     });
@@ -1334,7 +1351,11 @@
       battleScene.combatants.push({id,name:m.name,side:'enemy',initiative,hp:maxHp,maxHp,x:8+(count%6)*16,y:12+(Math.floor(count/6)%6)*15,monsterId:m.id,monsterEdition:m.edition,armorClass:m.ac,conditions:[], defeated:false});
       if (!battleScene.activeId) battleScene.activeId = id;
       if (saveBattleScene()) { renderBattleScene(); monsterStatus.textContent = m.name+' добавлен в бой. Инициатива: '+initiative+'.'; }
+      const bestiary = document.getElementById('battle-bestiary');
+      if (bestiary) bestiary.open = false;
     }
+    const bestiaryCloseButton = document.getElementById('battle-bestiary-close');
+    if (bestiaryCloseButton) bestiaryCloseButton.addEventListener('click', () => { document.getElementById('battle-bestiary').open = false; });
     // Тот же бестиарий доступен прямо из формы «Добавить участника».
     let selectedBattleFormMonster = null;
     const battleEnemyPicker = document.getElementById('battle-enemy-monster-picker');
@@ -1343,6 +1364,46 @@
     const battleEnemyResults = document.getElementById('battle-enemy-monster-results');
     const battleEnemySelected = document.getElementById('battle-enemy-monster-selected');
     const battleCombatantSide = document.getElementById('battle-combatant-side');
+    const battlePlayerPicker = document.getElementById('battle-player-picker');
+    const battlePlayerSelect = document.getElementById('battle-player-character');
+    const battlePlayerSelected = document.getElementById('battle-player-selected');
+    let selectedBattleFormPlayer = null;
+    function getSavedBattlePlayers() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('dnd-lore-stormking-players-v1') || '[]');
+        return Array.isArray(saved) ? saved.filter(player => player && typeof player.id === 'string' && player.name) : [];
+      } catch (error) { return []; }
+    }
+    function renderBattlePlayerOptions() {
+      if (!battlePlayerSelect) return;
+      const selectedId = battlePlayerSelect.value;
+      const savedPlayers = getSavedBattlePlayers();
+      battlePlayerSelect.innerHTML = '<option value="">— Заполнить вручную —</option>' + savedPlayers.map(player => '<option value="' + safeText(player.id) + '">' + safeText(player.name) + (player.class ? ' · ' + safeText(player.class) : '') + '</option>').join('');
+      if (savedPlayers.some(player => player.id === selectedId)) battlePlayerSelect.value = selectedId;
+    }
+    function toggleBattlePlayerPicker() {
+      const canPickPlayer = battleCombatantSide.value !== 'enemy';
+      battlePlayerPicker.classList.toggle('hidden', !canPickPlayer);
+      renderBattlePlayerOptions();
+      if (!canPickPlayer) {
+        selectedBattleFormPlayer = null;
+        battlePlayerSelect.value = '';
+        battlePlayerSelected.classList.add('hidden');
+        battlePlayerSelected.textContent = '';
+      }
+    }
+    battlePlayerSelect.addEventListener('focus', renderBattlePlayerOptions);
+    battlePlayerSelect.addEventListener('change', () => {
+      const player = getSavedBattlePlayers().find(item => item.id === battlePlayerSelect.value);
+      selectedBattleFormPlayer = player || null;
+      battlePlayerSelected.classList.toggle('hidden', !player);
+      if (player) {
+        document.getElementById('battle-combatant-name').value = player.name;
+        battlePlayerSelected.textContent = 'Выбран: ' + player.name + (player.photo ? ' · портрет будет на фишке' : ' · портрет не добавлен в карточку');
+      } else {
+        battlePlayerSelected.textContent = '';
+      }
+    });
     function renderBattleEnemyMonsterOptions() {
       if (!battleEnemyResults) return;
       const edition = battleEnemyEdition.value;
@@ -1363,6 +1424,8 @@
       } else renderBattleEnemyMonsterOptions();
     }
     battleCombatantSide.addEventListener('change',toggleBattleEnemyPicker);
+    battleCombatantSide.addEventListener('change',toggleBattlePlayerPicker);
+    toggleBattlePlayerPicker();
     battleEnemySearch.addEventListener('input',renderBattleEnemyMonsterOptions);
     battleEnemyEdition.addEventListener('change',renderBattleEnemyMonsterOptions);
     battleEnemyResults.addEventListener('click',async event => {
@@ -1384,12 +1447,20 @@
         document.getElementById('battle-combatant-initiative').value = Math.max(-20,Math.min(50,Math.floor(Math.random()*20)+1+monsterAbilityMod(monster.dex||10)));
         battleEnemySelected.textContent = 'Выбран: '+monster.name+' · HP '+maxHp+' · КД '+(monster.ac||'—')+'. Можно добавить на поле.';
         battleEnemySelected.classList.remove('hidden');
+        const bestiary = document.getElementById('battle-bestiary');
+        if (bestiary) bestiary.open = false;
       } catch(error) {
         battleEnemySelected.textContent = error.message || 'Не удалось загрузить характеристики монстра.';
         battleEnemySelected.classList.remove('hidden');
       }
     });
     document.getElementById('battle-combatant-name').addEventListener('input',() => {
+      if (selectedBattleFormPlayer && document.getElementById('battle-combatant-name').value.trim() !== selectedBattleFormPlayer.name) {
+        selectedBattleFormPlayer = null;
+        battlePlayerSelect.value = '';
+        battlePlayerSelected.textContent = 'Имя изменено вручную; связь с карточкой персонажа снята.';
+        battlePlayerSelected.classList.remove('hidden');
+      }
       if (selectedBattleFormMonster && document.getElementById('battle-combatant-name').value.trim() !== selectedBattleFormMonster.name) {
         selectedBattleFormMonster = null;
         battleEnemySelected.textContent = 'Имя изменено. Выбери монстра из бестиария заново.';
@@ -1398,8 +1469,12 @@
     });
     document.getElementById('battle-combatant-form').addEventListener('reset',() => {
       selectedBattleFormMonster = null;
+      selectedBattleFormPlayer = null;
+      if (battlePlayerSelect) battlePlayerSelect.value = '';
+      if (battlePlayerSelected) { battlePlayerSelected.classList.add('hidden'); battlePlayerSelected.textContent = ''; }
       if (battleEnemySelected) { battleEnemySelected.classList.add('hidden'); battleEnemySelected.textContent = ''; }
       if (battleEnemyPicker && battleCombatantSide.value === 'enemy') setTimeout(renderBattleEnemyMonsterOptions,0);
+      if (battlePlayerPicker && battleCombatantSide.value !== 'enemy') setTimeout(renderBattlePlayerOptions,0);
     });
     monsterResults.addEventListener('click', async event => {
       const back = event.target.closest('[data-monster-back]');
