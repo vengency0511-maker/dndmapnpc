@@ -193,8 +193,8 @@
             </div>
             <label class="block text-sm text-zinc-300">Роль / краткая характеристика<input id="world-entry-role" maxlength="180" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например, облачный великан-учёный"></label>
             <div id="world-entry-photo-wrap" class="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
-              <label class="block text-sm text-zinc-300">Портрет NPC <span class="text-zinc-500">(необязательно)</span><input id="world-entry-photo" type="file" accept="image/*" class="mt-2 block w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-3 text-sm text-zinc-300 file:mr-3 file:rounded-lg file:border-0 file:bg-amber-400 file:px-3 file:py-2 file:font-semibold file:text-zinc-950"></label>
-              <div id="world-entry-photo-preview" class="mt-3 hidden items-start gap-3"><img id="world-entry-photo-image" alt="Предпросмотр портрета NPC" class="h-28 w-24 rounded-xl border border-zinc-700 object-cover"><div class="min-w-0"><p id="world-entry-photo-name" class="break-words text-sm text-zinc-400"></p><button id="world-entry-photo-remove" type="button" class="mt-2 rounded-lg border border-zinc-700 px-3 py-2 text-xs text-red-300 hover:border-red-400">Убрать фото</button></div></div>
+              <label class="block text-sm text-zinc-300">Изображение NPC или фракции <span class="text-zinc-500">(необязательно)</span><input id="world-entry-photo" type="file" accept="image/*" class="mt-2 block w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-3 text-sm text-zinc-300 file:mr-3 file:rounded-lg file:border-0 file:bg-amber-400 file:px-3 file:py-2 file:font-semibold file:text-zinc-950"></label>
+              <div id="world-entry-photo-preview" class="mt-3 hidden items-start gap-3"><img id="world-entry-photo-image" alt="Предпросмотр изображения NPC или фракции" class="h-28 w-24 rounded-xl border border-zinc-700 object-cover"><div class="min-w-0"><p id="world-entry-photo-name" class="break-words text-sm text-zinc-400"></p><button id="world-entry-photo-remove" type="button" class="mt-2 rounded-lg border border-zinc-700 px-3 py-2 text-xs text-red-300 hover:border-red-400">Убрать фото</button></div></div>
               <p class="mt-2 text-xs text-zinc-500">Изображение сохраняется в этом браузере на устройстве. Поддерживаются изображения до 12 МБ.</p>
             </div>
             <label class="block text-sm text-zinc-300">Отношение к группе<select id="world-entry-stance" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white"><option value="unknown">Пока неизвестно</option><option value="ally">Союзник</option><option value="neutral">Нейтрален</option><option value="enemy">Противник</option></select></label>
@@ -461,7 +461,8 @@
       document.getElementById('world-entry-cancel').classList.add('hidden');
     }
     function updateWorldPhotoVisibility() {
-      document.getElementById('world-entry-photo-wrap').classList.toggle('hidden', document.getElementById('world-entry-type').value !== 'npc');
+      const type = document.getElementById('world-entry-type').value;
+      document.getElementById('world-entry-photo-wrap').classList.toggle('hidden', type !== 'npc' && type !== 'faction');
     }
     document.getElementById('world-entry-type').addEventListener('change', updateWorldPhotoVisibility);
     worldPhotoInput.addEventListener('change', () => {
@@ -495,7 +496,7 @@
           '<div class="flex flex-wrap items-start justify-between gap-3"><div class="min-w-0"><p class="text-xs uppercase tracking-wide text-amber-400">' + safeText(worldTypeLabels[item.type] || 'Запись') + '</p><h4 class="mt-1 break-words text-lg font-bold text-amber-200">' + safeText(item.name) + '</h4>' +
           (item.role ? '<p class="mt-1 break-words text-sm text-zinc-400">' + safeText(item.role) + '</p>' : '') +
           '</div><span class="rounded-full border px-3 py-1 text-xs ' + stanceClass + '">' + safeText(worldStanceLabels[item.stance] || worldStanceLabels.unknown) + '</span></div>' +
-          (item.type === 'npc' && item.photoImageId ? '<div class="mt-4"><img data-world-photo="' + safeText(item.photoImageId) + '" alt="Портрет: ' + safeText(item.name) + '" loading="lazy" class="max-h-72 w-auto max-w-full rounded-xl border border-zinc-800 object-cover"></div>' : '') +
+          ((item.type === 'npc' || item.type === 'faction') && item.photoImageId ? '<div class="mt-4"><img data-world-photo="' + safeText(item.photoImageId) + '" alt="Изображение: ' + safeText(item.name) + '" loading="lazy" class="max-h-72 w-auto max-w-full rounded-xl border border-zinc-800 object-cover"></div>' : '') +
           (item.description ? '<p class="mt-4 whitespace-pre-wrap break-words text-sm leading-relaxed text-zinc-300">' + safeText(item.description) + '</p>' : '') +
           (item.notes ? '<div class="mt-4 rounded-xl border border-amber-500/10 bg-amber-500/5 p-3"><p class="mb-1 text-xs font-semibold uppercase tracking-wide text-amber-300">Заметки ведущего</p><p class="whitespace-pre-wrap break-words text-sm leading-relaxed text-zinc-300">' + safeText(item.notes) + '</p></div>' : '') +
           '<div class="mt-4 flex gap-2 border-t border-zinc-800 pt-3"><button type="button" data-world-edit="' + safeText(item.id) + '" class="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300 hover:border-amber-400">Редактировать</button><button type="button" data-world-delete="' + safeText(item.id) + '" class="rounded-lg border border-zinc-800 px-3 py-2 text-sm text-red-300 hover:border-red-400">Удалить</button></div></article>';
@@ -510,7 +511,7 @@
       const existing = editingWorldEntryId ? campaignData.worldEntries.find(entry => entry.id === editingWorldEntryId) : null;
       const item = {id:editingWorldEntryId || 'world-' + Date.now(),type:document.getElementById('world-entry-type').value,name:document.getElementById('world-entry-name').value.trim(),role:document.getElementById('world-entry-role').value.trim(),stance:document.getElementById('world-entry-stance').value,description:document.getElementById('world-entry-description').value.trim(),notes:document.getElementById('world-entry-notes').value.trim(),updatedAt:new Date().toISOString()};
       if (!item.name) return;
-      if (item.type === 'npc') {
+      if (item.type === 'npc' || item.type === 'faction') {
         item.photoImageId = existing ? existing.photoImageId || '' : '';
         if (pendingWorldPhotoRemove) item.photoImageId = '';
         if (pendingWorldPhotoFile) {
