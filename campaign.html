@@ -1354,7 +1354,17 @@
     battleInitiativeList.addEventListener('click', event => {
       const conditionButton = event.target.closest('[data-condition-toggle]');
       const defeatButton = event.target.closest('[data-defeat-toggle]');
+      const hpAdjustButton = event.target.closest('[data-hp-adjust]');
       if (conditionButton) { addConditionToCombatant(conditionButton.dataset.conditionToggle, conditionButton.dataset.condition); return; }
+      if (hpAdjustButton) {
+        const c = battleScene.combatants.find(item=>item.id===hpAdjustButton.dataset.hpAdjust);
+        if (!c) return;
+        const change = Number(prompt('Изменение HP для '+c.name+' (например, -8 для урона или 5 для лечения):','-1'));
+        if (!Number.isFinite(change) || change===0) return;
+        c.hp = Math.max(0,Math.min(Number(c.maxHp)||1,Number(c.hp||0)+change));
+        if(c.hp>0)c.defeated=false;
+        saveBattleScene();renderBattleScene();return;
+      }
       if (defeatButton) {
         const c=battleScene.combatants.find(item=>item.id===defeatButton.dataset.defeatToggle);
         if (!c) return;
@@ -1386,6 +1396,9 @@
         add.type='button';add.className='rounded-lg border border-zinc-700 px-2 py-1 text-xs text-zinc-300';add.textContent='± Состояние';
         add.addEventListener('click',()=>{if(select.value)addConditionToCombatant(c.id,select.value);});
         controls.append(select,add);
+        const hpAdjust=document.createElement('button');
+        hpAdjust.type='button';hpAdjust.className='rounded-lg border border-zinc-700 px-2 py-1 text-xs text-zinc-300';hpAdjust.textContent='Урон / лечение';hpAdjust.dataset.hpAdjust=c.id;
+        controls.appendChild(hpAdjust);
         const defeat=document.createElement('button');
         defeat.type='button';defeat.className='rounded-lg border border-red-500/30 px-2 py-1 text-xs text-red-200';defeat.textContent=c.defeated?'↺ Вернуть':'☠ Побеждён';defeat.dataset.defeatToggle=c.id;
         controls.appendChild(defeat);
@@ -1398,6 +1411,7 @@
     // Рендер боевой сцены должен учитывать расширенную инициативу и состояния.
     const initialRenderMonsterScene = renderBattleScene;
     function refreshMonsterUI() { renderMonsterResults(); renderMonsterCombatSummary(); }
+    renderBattleScene();
     renderMonsterResults();
     (async function initMonsterCatalog() {
       monsterStatus.textContent='Загружаем SRD 5.1 и SRD 5.2…';
