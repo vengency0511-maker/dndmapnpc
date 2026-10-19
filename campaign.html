@@ -350,6 +350,14 @@
                 <label class="text-sm text-zinc-300">Текущие HP<input id="battle-combatant-hp" type="number" min="0" max="9999" value="10" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"></label>
                 <label class="text-sm text-zinc-300">Макс. HP<input id="battle-combatant-maxhp" type="number" min="1" max="9999" value="10" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"></label>
               </div>
+              <section id="battle-enemy-monster-picker" class="mt-4 hidden rounded-xl border border-red-500/30 bg-zinc-900 p-3">
+                <h5 class="font-semibold text-red-200">Выбрать врага из бестиария</h5>
+                <p class="mt-1 text-xs text-zinc-400">Найди монстра — его HP, КД и модификатор Ловкости подставятся автоматически.</p>
+                <input id="battle-enemy-monster-search" type="search" class="mt-3 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white" placeholder="Поиск монстра…">
+                <select id="battle-enemy-monster-edition" class="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white"><option value="both">Все монстры (2014 + 2024)</option><option value="2014">D&D 5e · 2014</option><option value="2024">D&D 5e · 2024</option><option value="custom">Мои монстры</option></select>
+                <div id="battle-enemy-monster-results" class="mt-3 grid gap-2" aria-live="polite"><p class="text-xs text-zinc-500">Загружаем каталог монстров…</p></div>
+                <p id="battle-enemy-monster-selected" class="mt-2 hidden text-xs text-emerald-300" role="status"></p>
+              </section>
               <button type="submit" class="mt-4 w-full rounded-xl bg-amber-400 px-4 py-3 font-bold text-zinc-950">＋ Добавить на поле</button>
             </form>
             <div class="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
@@ -924,11 +932,18 @@
       const name = document.getElementById('battle-combatant-name').value.trim();
       if (!name) return;
       const side = document.getElementById('battle-combatant-side').value;
+      if (side === 'enemy' && !selectedBattleFormMonster) {
+        document.getElementById('battle-enemy-monster-selected').textContent = 'Сначала выбери монстра из списка ниже.';
+        document.getElementById('battle-enemy-monster-selected').classList.remove('hidden');
+        document.getElementById('battle-enemy-monster-search').focus();
+        return;
+      }
+      const monster = side === 'enemy' ? selectedBattleFormMonster : null;
       const maxHp = Math.max(1, Math.min(9999, Number(document.getElementById('battle-combatant-maxhp').value) || 1));
       const hp = Math.max(0, Math.min(maxHp, Number(document.getElementById('battle-combatant-hp').value) || 0));
       const id = 'combatant-' + Date.now() + '-' + Math.random().toString(36).slice(2,7);
       const count = battleScene.combatants.length;
-      battleScene.combatants.push({id,name,side,initiative:Math.max(-20,Math.min(50,Number(document.getElementById('battle-combatant-initiative').value)||0)),hp,maxHp,x:8+(count%6)*16,y:12+(Math.floor(count/6)%6)*15});
+      battleScene.combatants.push({id,name,side,initiative:Math.max(-20,Math.min(50,Number(document.getElementById('battle-combatant-initiative').value)||0)),hp,maxHp,x:8+(count%6)*16,y:12+(Math.floor(count/6)%6)*15,...(monster ? {monsterId:monster.id,monsterEdition:monster.edition,armorClass:monster.ac,conditions:[],defeated:false} : {})});
       if (!battleScene.activeId) battleScene.activeId = id;
       if (saveBattleScene()) { event.target.reset(); document.getElementById('battle-combatant-initiative').value = 10; document.getElementById('battle-combatant-hp').value = 10; document.getElementById('battle-combatant-maxhp').value = 10; renderBattleScene(); }
     });
@@ -1320,6 +1335,72 @@
       if (!battleScene.activeId) battleScene.activeId = id;
       if (saveBattleScene()) { renderBattleScene(); monsterStatus.textContent = m.name+' добавлен в бой. Инициатива: '+initiative+'.'; }
     }
+    // Тот же бестиарий доступен прямо из формы «Добавить участника».
+    let selectedBattleFormMonster = null;
+    const battleEnemyPicker = document.getElementById('battle-enemy-monster-picker');
+    const battleEnemySearch = document.getElementById('battle-enemy-monster-search');
+    const battleEnemyEdition = document.getElementById('battle-enemy-monster-edition');
+    const battleEnemyResults = document.getElementById('battle-enemy-monster-results');
+    const battleEnemySelected = document.getElementById('battle-enemy-monster-selected');
+    const battleCombatantSide = document.getElementById('battle-combatant-side');
+    function renderBattleEnemyMonsterOptions() {
+      if (!battleEnemyResults) return;
+      const edition = battleEnemyEdition.value;
+      const query = battleEnemySearch.value.trim();
+      const custom = customMonsters.map(m => ({...m,userCreated:true}));
+      let list = edition === 'custom' ? custom : [...(edition === '2014' || edition === 'both' ? monsterCatalog['2014'] : []), ...(edition === '2024' || edition === 'both' ? monsterCatalog['2024'] : [])];
+      if (edition !== 'custom') list = list.concat(custom.filter(m => edition === 'both' || m.edition === edition));
+      list = list.filter(m => monsterMatches(m,query)).slice(0,20);
+      battleEnemyResults.innerHTML = list.length ? list.map(m => '<article class="flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950 p-2"><div class="min-w-0 flex-1"><p class="text-sm font-semibold text-zinc-100">'+monsterText(m.name)+'</p><p class="text-xs text-zinc-500">'+monsterText(m.edition === 'custom' || m.edition === 'homebrew' ? 'Авторский' : monsterEditionLabel(m.edition))+(m.type?' · '+monsterText(m.type):'')+(m.cr?' · ПО '+monsterText(m.cr):'')+'</p></div><button type="button" data-battle-enemy-pick="'+monsterText(m.id)+'" data-battle-enemy-edition="'+monsterText(m.edition)+'" class="shrink-0 rounded-lg border border-red-500/40 px-3 py-2 text-xs font-semibold text-red-200">Выбрать</button></article>').join('') : '<p class="rounded-lg border border-dashed border-zinc-700 p-3 text-xs text-zinc-500">Монстры не найдены. Попробуй другой запрос или редакцию.</p>';
+    }
+    function toggleBattleEnemyPicker() {
+      const isEnemy = battleCombatantSide.value === 'enemy';
+      battleEnemyPicker.classList.toggle('hidden',!isEnemy);
+      if (!isEnemy) {
+        selectedBattleFormMonster = null;
+        battleEnemySelected.classList.add('hidden');
+        battleEnemySelected.textContent = '';
+      } else renderBattleEnemyMonsterOptions();
+    }
+    battleCombatantSide.addEventListener('change',toggleBattleEnemyPicker);
+    battleEnemySearch.addEventListener('input',renderBattleEnemyMonsterOptions);
+    battleEnemyEdition.addEventListener('change',renderBattleEnemyMonsterOptions);
+    battleEnemyResults.addEventListener('click',async event => {
+      const button = event.target.closest('[data-battle-enemy-pick]');
+      if (!button) return;
+      const id = button.dataset.battleEnemyPick;
+      const edition = button.dataset.battleEnemyEdition;
+      let monster = getAllMonsterSummaries().find(m => String(m.id) === String(id) && String(m.edition) === String(edition));
+      if (!monster) return;
+      try {
+        button.disabled = true;
+        button.textContent = '…';
+        if (!(monster.raw || monster.userCreated || monster.edition === 'custom' || monster.edition === 'homebrew')) monster = await fetchMonsterDetails(monster);
+        selectedBattleFormMonster = monster;
+        document.getElementById('battle-combatant-name').value = monster.name;
+        const maxHp = Math.max(1,Math.min(9999,Number(monster.hp)||1));
+        document.getElementById('battle-combatant-maxhp').value = maxHp;
+        document.getElementById('battle-combatant-hp').value = maxHp;
+        document.getElementById('battle-combatant-initiative').value = Math.max(-20,Math.min(50,Math.floor(Math.random()*20)+1+monsterAbilityMod(monster.dex||10)));
+        battleEnemySelected.textContent = 'Выбран: '+monster.name+' · HP '+maxHp+' · КД '+(monster.ac||'—')+'. Можно добавить на поле.';
+        battleEnemySelected.classList.remove('hidden');
+      } catch(error) {
+        battleEnemySelected.textContent = error.message || 'Не удалось загрузить характеристики монстра.';
+        battleEnemySelected.classList.remove('hidden');
+      }
+    });
+    document.getElementById('battle-combatant-name').addEventListener('input',() => {
+      if (selectedBattleFormMonster && document.getElementById('battle-combatant-name').value.trim() !== selectedBattleFormMonster.name) {
+        selectedBattleFormMonster = null;
+        battleEnemySelected.textContent = 'Имя изменено. Выбери монстра из бестиария заново.';
+        battleEnemySelected.classList.remove('hidden');
+      }
+    });
+    document.getElementById('battle-combatant-form').addEventListener('reset',() => {
+      selectedBattleFormMonster = null;
+      if (battleEnemySelected) { battleEnemySelected.classList.add('hidden'); battleEnemySelected.textContent = ''; }
+      if (battleEnemyPicker && battleCombatantSide.value === 'enemy') setTimeout(renderBattleEnemyMonsterOptions,0);
+    });
     monsterResults.addEventListener('click', async event => {
       const back = event.target.closest('[data-monster-back]');
       const open = event.target.closest('[data-monster-open]');
