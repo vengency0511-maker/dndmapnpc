@@ -14,6 +14,31 @@
     button { min-height: 42px; touch-action: manipulation; }
     .campaign-card { transition: border-color .18s ease, transform .18s ease; }
     .campaign-card:hover { transform: translateY(-2px); border-color: #d97706; }
+    .campaign-card--storm-king {
+      background-color: #111827;
+      background-image:
+        linear-gradient(90deg, rgba(9,9,11,.94) 0%, rgba(9,9,11,.76) 54%, rgba(9,9,11,.34) 100%),
+        linear-gradient(0deg, rgba(9,9,11,.7), rgba(9,9,11,.08)),
+        url("https://images.unsplash.com/photo-1790254128674-74eac7e39300?auto=format&fit=crop&w=1400&q=80");
+      background-position: center, center, center 48%;
+      background-size: cover;
+      border-color: rgba(96, 165, 250, .28);
+    }
+    .campaign-card--storm-king:hover { border-color: #60a5fa; }
+    .campaign-card--storm-king .campaign-storm-label {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      margin-bottom: .65rem;
+      padding: .25rem .55rem;
+      border: 1px solid rgba(147, 197, 253, .35);
+      border-radius: 999px;
+      background: rgba(15, 23, 42, .55);
+      color: #bfdbfe;
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+    }
     #mapViewport { position: relative; height: min(68vh, 680px); min-height: 360px; overflow: hidden; background: #18181b; cursor: grab; touch-action: none; user-select: none; }
     #mapViewport.dragging { cursor: grabbing; }
     #mapStage { position: absolute; left: 0; top: 0; width: 1280px; height: 960px; transform-origin: 0 0; will-change: transform; }
@@ -218,7 +243,14 @@
       emptyCampaigns.classList.toggle('hidden', campaigns.length > 0);
       campaigns.forEach(function(campaign) {
         const card = document.createElement('article');
-        card.className = 'campaign-card bg-zinc-900 border border-zinc-800 rounded-2xl p-5 sm:p-6';
+        const isStormKingsThunder = (campaign.title || '').trim().toLocaleLowerCase('ru') === 'гром штурмового короля';
+        card.className = 'campaign-card bg-zinc-900 border border-zinc-800 rounded-2xl p-5 sm:p-6' + (isStormKingsThunder ? ' campaign-card--storm-king' : '');
+        if (isStormKingsThunder) {
+          const stormLabel = document.createElement('span');
+          stormLabel.className = 'campaign-storm-label';
+          stormLabel.textContent = '⚡ ДИКИЙ СЕВЕР';
+          card.appendChild(stormLabel);
+        }
         const title = document.createElement('h4');
         title.className = 'text-xl font-bold text-amber-300';
         title.textContent = campaign.title;
