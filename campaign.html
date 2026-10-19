@@ -1373,7 +1373,8 @@
         const nameNode = li.querySelector('p.break-words');
         if (!nameNode) return;
         const text = nameNode.textContent.replace(/^▶ /,'');
-        const c = battleScene.combatants.find(item=>item.name===text);
+        const idButton = li.querySelector('[data-battle-active]');
+        const c = battleScene.combatants.find(item=>item.id === (idButton && idButton.dataset.battleActive));
         if (!c) return;
         const controls = document.createElement('div');
         controls.className='mt-2 flex flex-wrap gap-1.5';
