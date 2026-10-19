@@ -26,7 +26,6 @@
     { id: 'phandelver-below', title: 'Фандельвер и дальше: Обелиск', english: 'Phandelver and Below: The Shattered Obelisk', description: 'История Фандельвера продолжается тайной древнего обелиска и угрозой за пределами привычного мира.', levels: '1–12 уровень', setting: 'Forgotten Realms' },
     { id: 'vecna', title: 'Векна: Канун Руины', english: 'Vecna: Eve of Ruin', description: 'Приключение высокого уровня: героям предстоит остановить планы легендарного лича.', levels: '10–20 уровень', setting: 'Мультивселенная D&D' },
     { id: 'spelljammer', title: 'Свет Ксариxis', english: 'Spelljammer: Light of Xaryxis', description: 'Космическое приключение с путешествиями между мирами и опасностями за пределами планет.', levels: '5–8 уровень', setting: 'Spelljammer' },
-    { id: 'witchlight-alt', title: 'План побега из Страны Фей', english: 'The Wild Beyond the Witchlight', description: 'Приключение в волшебной Стране Фей с необычными персонажами и сказочными испытаниями.', levels: '1–8 уровень', setting: 'Страна Фей' },
     { id: 'strixhaven', title: 'Стриксхейвен: Учебная программа хаоса', english: 'Strixhaven: A Curriculum of Chaos', description: 'Магический университет, дружба, соперничество и загадки студенческой жизни.', levels: '1–10 уровень', setting: 'Стриксхейвен' }
   ];
 
