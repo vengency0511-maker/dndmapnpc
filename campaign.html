@@ -192,6 +192,7 @@
               <label class="block text-sm text-zinc-300">Класс<input id="player-class" name="class" maxlength="80" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-base text-white outline-none focus:border-amber-400" placeholder="Например, паладин"></label>
               <label class="block text-sm text-zinc-300">Подкласс<input id="player-subclass" name="subclass" maxlength="100" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-base text-white outline-none focus:border-amber-400" placeholder="Например, Клятва древних"></label>
               <label class="block text-sm text-zinc-300">Класс доспеха (КД)<input id="player-armor-class" name="armorClass" type="number" min="0" max="40" step="1" inputmode="numeric" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-base text-white outline-none focus:border-amber-400" placeholder="Например, 18"><span class="mt-1 block text-xs text-zinc-500">Необязательно. Укажи итоговый КД персонажа.</span></label>
+              <label class="block text-sm text-zinc-300">Максимум хитов (HP)<input id="player-max-hp" name="maxHp" type="number" min="1" max="9999" step="1" inputmode="numeric" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-base text-white outline-none focus:border-amber-400" placeholder="Например, 42"><span class="mt-1 block text-xs text-zinc-500">Необязательно. При добавлении в бой текущие и максимальные HP установятся на это значение.</span></label>
               <label class="block text-sm text-zinc-300 sm:col-span-2">Фото персонажа
                 <input id="player-photo" name="photo" type="file" accept="image/*" class="mt-2 block w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-3 text-sm text-zinc-300 file:mr-3 file:rounded-lg file:border-0 file:bg-amber-400 file:px-3 file:py-2 file:font-semibold file:text-zinc-950">
                 <span class="mt-2 block text-xs text-zinc-500">Изображение будет уменьшено для хранения. Можно оставить без фото.</span>
@@ -357,7 +358,7 @@
                 <label for="battle-player-character" class="block text-sm font-semibold text-blue-200">Взять героя из «Персонажи игроков»</label>
                 <select id="battle-player-character" class="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white"><option value="">— Заполнить вручную —</option></select>
                 <p id="battle-player-selected" class="mt-2 hidden text-xs text-emerald-300" role="status"></p>
-                <p class="mt-2 text-xs text-zinc-500">Имя, портрет и КД подставятся автоматически (если КД заполнен в карточке). HP и инициатива остаются редактируемыми.</p>
+                <p class="mt-2 text-xs text-zinc-500">Имя, портрет, КД и максимальные HP подставятся из карточки. Текущие HP можно скорректировать перед добавлением в бой; инициатива остаётся редактируемой.</p>
               </section>
               <section id="battle-enemy-monster-picker" class="mt-4 hidden rounded-xl border border-red-500/30 bg-zinc-900 p-3">
                 <h5 class="font-semibold text-red-200">Выбрать врага из бестиария</h5>
@@ -1075,7 +1076,7 @@
       playerEmpty.classList.toggle('hidden', players.length > 0);
       playerList.innerHTML = players.map(player => {
         const photo = player.photo ? '<img src="' + player.photo + '" alt="Портрет ' + escapePlayerText(player.name) + '" class="h-full w-full object-cover">' : '<div class="flex h-full min-h-48 items-center justify-center bg-zinc-950 text-5xl">🧙</div>';
-        const details = [['Раса', player.race], ['Класс', player.class], ['Подкласс', player.subclass], ['КД', player.armorClass !== undefined && player.armorClass !== null && player.armorClass !== '' ? player.armorClass : '']].filter(item => item[1] !== undefined && item[1] !== null && item[1] !== '');
+        const details = [['Раса', player.race], ['Класс', player.class], ['Подкласс', player.subclass], ['КД', player.armorClass !== undefined && player.armorClass !== null && player.armorClass !== '' ? player.armorClass : ''], ['Макс. HP', player.maxHp !== undefined && player.maxHp !== null && player.maxHp !== '' ? player.maxHp : '']].filter(item => item[1] !== undefined && item[1] !== null && item[1] !== '');
         return '<article class="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950">' +
           '<div class="grid grid-cols-[112px_minmax(0,1fr)] gap-4 p-4">' +
           '<div class="aspect-[3/4] overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">' + photo + '</div>' +
@@ -1126,6 +1127,7 @@
         document.getElementById('player-class').value = player.class || '';
         document.getElementById('player-subclass').value = player.subclass || '';
         document.getElementById('player-armor-class').value = player.armorClass !== undefined && player.armorClass !== null ? player.armorClass : '';
+        document.getElementById('player-max-hp').value = player.maxHp !== undefined && player.maxHp !== null ? player.maxHp : '';
         pendingPhoto = player.photo || '';
         showPhotoPreview(pendingPhoto);
       }
@@ -1176,6 +1178,7 @@
         class: document.getElementById('player-class').value.trim(),
         subclass: document.getElementById('player-subclass').value.trim(),
         armorClass: document.getElementById('player-armor-class').value.trim(),
+        maxHp: document.getElementById('player-max-hp').value.trim() === '' ? '' : Math.max(1, Math.min(9999, Math.floor(Number(document.getElementById('player-max-hp').value)))),
         photo: pendingPhoto || '',
         updatedAt: new Date().toISOString()
       };
@@ -1416,7 +1419,13 @@
         document.getElementById('battle-combatant-name').value = player.name;
         const playerArmorClass = getArmorClass(player);
         document.getElementById('battle-combatant-ac').value = playerArmorClass !== null ? playerArmorClass : '';
-        battlePlayerSelected.textContent = 'Выбран: ' + player.name + (player.photo ? ' · портрет будет на фишке' : ' · портрет не добавлен в карточку');
+        const playerMaxHp = Number(player.maxHp);
+        if (Number.isFinite(playerMaxHp) && playerMaxHp >= 1) {
+          const safeMaxHp = Math.max(1, Math.min(9999, Math.floor(playerMaxHp)));
+          document.getElementById('battle-combatant-maxhp').value = safeMaxHp;
+          document.getElementById('battle-combatant-hp').value = safeMaxHp;
+        }
+        battlePlayerSelected.textContent = 'Выбран: ' + player.name + (Number.isFinite(playerMaxHp) && playerMaxHp >= 1 ? ' · HP ' + Math.floor(playerMaxHp) : '') + (player.photo ? ' · портрет будет на фишке' : ' · портрет не добавлен в карточку');
       } else {
         battlePlayerSelected.textContent = '';
       }
