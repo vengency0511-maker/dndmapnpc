@@ -1392,6 +1392,7 @@
         battlePlayerSelected.textContent = '';
       }
     }
+    battlePlayerSelect.addEventListener('focus', renderBattlePlayerOptions);
     battlePlayerSelect.addEventListener('change', () => {
       const player = getSavedBattlePlayers().find(item => item.id === battlePlayerSelect.value);
       selectedBattleFormPlayer = player || null;
