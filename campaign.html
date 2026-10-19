@@ -921,7 +921,7 @@
       document.getElementById('battle-initiative-list').innerHTML = sorted.map((c, index) => {
         const active = c.id === battleScene.activeId;
         return '<li class="rounded-xl border ' + (active ? 'border-amber-400 bg-amber-400/10' : 'border-zinc-800 bg-zinc-900') + ' p-3">' +
-          '<div class="flex items-start gap-2"><span class="flex h-8 min-w-8 items-center justify-center rounded-lg bg-zinc-800 px-2 text-sm font-black text-amber-200">' + safeText(c.initiative) + '</span><div class="min-w-0 flex-1"><p class="break-words text-sm font-semibold ' + (active ? 'text-amber-200' : 'text-zinc-100') + '">' + (active ? '▶ ' : '') + safeText(c.name) + '</p><p class="mt-1 text-xs text-zinc-500">' + safeText(sideLabels[c.side] || 'Участник') + ' · HP ' + safeText(c.hp) + '/' + safeText(c.maxHp) + '</p></div></div>' +
+          '<div class="flex items-start gap-2"><span class="flex h-8 min-w-8 items-center justify-center rounded-lg bg-zinc-800 px-2 text-sm font-black text-amber-200">' + safeText(c.initiative) + '</span><div class="min-w-0 flex-1"><p class="break-words text-sm font-semibold ' + (active ? 'text-amber-200' : 'text-zinc-100') + '">' + (active ? '▶ ' : '') + safeText(c.name) + '</p><p class="mt-1 text-xs text-zinc-500">' + safeText(sideLabels[c.side] || 'Участник') + ' · HP ' + safeText(c.hp) + '/' + safeText(c.maxHp) + (getArmorClass(c) !== null ? ' · КД ' + safeText(getArmorClass(c)) : '') + '</p></div></div>' +
           '<div class="mt-2 flex flex-wrap gap-2"><button type="button" data-battle-active="' + safeText(c.id) + '" class="rounded-lg border border-zinc-700 px-2 py-1 text-xs text-zinc-300">Ход</button><button type="button" data-battle-hp="' + safeText(c.id) + '" data-hp-delta="-1" class="rounded-lg border border-zinc-700 px-2 py-1 text-xs text-zinc-300">− HP</button><button type="button" data-battle-hp="' + safeText(c.id) + '" data-hp-delta="1" class="rounded-lg border border-zinc-700 px-2 py-1 text-xs text-zinc-300">+ HP</button><button type="button" data-battle-remove="' + safeText(c.id) + '" class="ml-auto rounded-lg border border-zinc-800 px-2 py-1 text-xs text-red-300">Убрать</button></div></li>';
       }).join('');
     }
@@ -960,7 +960,7 @@
       const maxHp = Math.max(1, Math.min(9999, Number(document.getElementById('battle-combatant-maxhp').value) || 1));
       const hp = Math.max(0, Math.min(maxHp, Number(document.getElementById('battle-combatant-hp').value) || 0));
       const acInput = document.getElementById('battle-combatant-ac').value;
-      const armorClass = side === 'enemy' && monster ? Number(monster.ac) : (acInput === '' ? null : Math.max(0, Math.min(40, Math.floor(Number(acInput)))));
+      const armorClass = side === 'enemy' && monster ? getArmorClass(monster) : (acInput === '' ? (selectedBattleFormPlayer ? getArmorClass(selectedBattleFormPlayer) : null) : Math.max(0, Math.min(40, Math.floor(Number(acInput)))));
       const id = 'combatant-' + Date.now() + '-' + Math.random().toString(36).slice(2,7);
       const count = battleScene.combatants.length;
       const playerId = side !== 'enemy' && selectedBattleFormPlayer ? selectedBattleFormPlayer.id : null;
@@ -1238,6 +1238,15 @@
     };
     function monsterEditionLabel(edition) { return edition === '2024' ? 'SRD 5.2 · 2024' : edition === '2014' ? 'SRD 5.1 · 2014' : 'Авторский'; }
     function monsterAbilityMod(score) { return Math.floor((Number(score || 10) - 10) / 2); }
+    function getArmorClass(source) {
+      if (source == null) return null;
+      let value = source;
+      if (typeof source === 'object' && !Array.isArray(source)) value = source.armorClass ?? source.armor_class ?? source.ac;
+      if (Array.isArray(value)) value = value.map(item => typeof item === 'number' ? item : item && Number(item.value)).find(Number.isFinite);
+      if (value == null || value === '') return null;
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? Math.max(0, Math.min(40, Math.floor(parsed))) : null;
+    }
     function monsterSigned(value) { return (Number(value) >= 0 ? '+' : '') + Number(value); }
     function normaliseMonster(raw, edition) {
       const stats = raw.stats || {};
@@ -1405,7 +1414,8 @@
       battlePlayerSelected.classList.toggle('hidden', !player);
       if (player) {
         document.getElementById('battle-combatant-name').value = player.name;
-        document.getElementById('battle-combatant-ac').value = player.armorClass != null && player.armorClass !== '' ? player.armorClass : '';
+        const playerArmorClass = getArmorClass(player);
+        document.getElementById('battle-combatant-ac').value = playerArmorClass !== null ? playerArmorClass : '';
         battlePlayerSelected.textContent = 'Выбран: ' + player.name + (player.photo ? ' · портрет будет на фишке' : ' · портрет не добавлен в карточку');
       } else {
         battlePlayerSelected.textContent = '';
@@ -1452,8 +1462,9 @@
         document.getElementById('battle-combatant-maxhp').value = maxHp;
         document.getElementById('battle-combatant-hp').value = maxHp;
         document.getElementById('battle-combatant-initiative').value = Math.max(-20,Math.min(50,Math.floor(Math.random()*20)+1+monsterAbilityMod(monster.dex||10)));
-        document.getElementById('battle-combatant-ac').value = monster.ac != null && monster.ac !== '' ? monster.ac : '';
-        battleEnemySelected.textContent = 'Выбран: '+monster.name+' · HP '+maxHp+' · КД '+(monster.ac||'—')+'. Можно добавить на поле.';
+        const monsterArmorClass = getArmorClass(monster);
+        document.getElementById('battle-combatant-ac').value = monsterArmorClass !== null ? monsterArmorClass : '';
+        battleEnemySelected.textContent = 'Выбран: '+monster.name+' · HP '+maxHp+' · КД '+(monsterArmorClass !== null ? monsterArmorClass : '—')+'. Можно добавить на поле.';
         battleEnemySelected.classList.remove('hidden');
         const bestiary = document.getElementById('battle-bestiary');
         if (bestiary) bestiary.open = false;
