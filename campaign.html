@@ -690,6 +690,8 @@
     const battleMarkers = document.getElementById('battle-scene-markers');
     let battleZoom = 1, battlePanX = 0, battlePanY = 0;
     let panningBattleMap = false, battlePanPointerId = null, battlePanStart = null;
+    const battlePointers = new Map();
+    let battlePinchStart = null;
     function updateBattleViewport() {
       battleWorld.style.transform = 'translate(' + battlePanX + 'px,' + battlePanY + 'px) scale(' + battleZoom + ')';
       document.getElementById('battle-scene-zoom-label').textContent = Math.round(battleZoom * 100) + '%';
@@ -714,25 +716,76 @@
       event.preventDefault();
       zoomBattleMap(battleZoom + (event.deltaY < 0 ? 0.12 : -0.12), event.clientX, event.clientY);
     }, {passive:false});
+    function battlePointerDistance(a, b) {
+      return Math.hypot(a.x - b.x, a.y - b.y);
+    }
+    function battlePointerMidpoint(a, b) {
+      return {x:(a.x+b.x)/2, y:(a.y+b.y)/2};
+    }
     battleBoard.addEventListener('pointerdown', event => {
       if (event.target.closest('[data-battle-marker]') || event.button === 2) return;
       event.preventDefault();
-      panningBattleMap = true;
-      battlePanPointerId = event.pointerId;
-      battlePanStart = {x:event.clientX,y:event.clientY,panX:battlePanX,panY:battlePanY};
+      battlePointers.set(event.pointerId, {x:event.clientX,y:event.clientY});
       battleBoard.setPointerCapture(event.pointerId);
-      battleBoard.style.cursor = 'grabbing';
+      if (battlePointers.size >= 2) {
+        const points = Array.from(battlePointers.values()).slice(0, 2);
+        panningBattleMap = false;
+        battlePanPointerId = null;
+        battlePanStart = null;
+        battlePinchStart = {
+          distance: Math.max(1, battlePointerDistance(points[0], points[1])),
+          midpoint: battlePointerMidpoint(points[0], points[1])
+        };
+        battleBoard.style.cursor = 'grabbing';
+      } else {
+        panningBattleMap = true;
+        battlePanPointerId = event.pointerId;
+        battlePanStart = {x:event.clientX,y:event.clientY,panX:battlePanX,panY:battlePanY};
+        battleBoard.style.cursor = 'grabbing';
+      }
     });
     battleBoard.addEventListener('pointermove', event => {
+      if (!battlePointers.has(event.pointerId)) return;
+      battlePointers.set(event.pointerId, {x:event.clientX,y:event.clientY});
+      if (battlePointers.size >= 2) {
+        const points = Array.from(battlePointers.values()).slice(0, 2);
+        const distance = Math.max(1, battlePointerDistance(points[0], points[1]));
+        const midpoint = battlePointerMidpoint(points[0], points[1]);
+        if (battlePinchStart) {
+          zoomBattleMap(battleZoom * distance / battlePinchStart.distance, midpoint.x, midpoint.y);
+        }
+        battlePinchStart = {distance, midpoint};
+        return;
+      }
       if (!panningBattleMap || event.pointerId !== battlePanPointerId || !battlePanStart) return;
       battlePanX = battlePanStart.panX + event.clientX - battlePanStart.x;
       battlePanY = battlePanStart.panY + event.clientY - battlePanStart.y;
       updateBattleViewport();
     });
     function endBattlePan(event) {
-      if (event && battlePanPointerId !== event.pointerId) return;
-      panningBattleMap = false; battlePanPointerId = null; battlePanStart = null;
-      battleBoard.style.cursor = 'grab';
+      if (event) battlePointers.delete(event.pointerId);
+      if (battlePointers.size >= 2) {
+        const points = Array.from(battlePointers.entries()).slice(0, 2);
+        battlePinchStart = {
+          distance: Math.max(1, battlePointerDistance(points[0][1], points[1][1])),
+          midpoint: battlePointerMidpoint(points[0][1], points[1][1])
+        };
+        panningBattleMap = false;
+        battlePanPointerId = null;
+        battlePanStart = null;
+      } else if (battlePointers.size === 1) {
+        const remaining = Array.from(battlePointers.entries())[0];
+        battlePinchStart = null;
+        panningBattleMap = true;
+        battlePanPointerId = remaining[0];
+        battlePanStart = {x:remaining[1].x,y:remaining[1].y,panX:battlePanX,panY:battlePanY};
+      } else {
+        battlePinchStart = null;
+        panningBattleMap = false;
+        battlePanPointerId = null;
+        battlePanStart = null;
+        battleBoard.style.cursor = 'grab';
+      }
     }
     battleBoard.addEventListener('pointerup', endBattlePan);
     battleBoard.addEventListener('pointercancel', endBattlePan);
