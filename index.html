@@ -53,7 +53,8 @@
         <h2 class="text-3xl sm:text-4xl font-black leading-tight">Всё приключение — в одном месте</h2>
         <p class="text-zinc-400 mt-3">Создавай кампании, возвращайся к своим историям и отмечай на карте, где сейчас находятся герои.</p>
         <div class="flex flex-wrap gap-3 mt-6">
-          <button id="createCampaignBtn" class="bg-amber-500 hover:bg-amber-400 text-black px-5 py-3 rounded-xl font-bold">＋ Создать кампанию</button>
+          <button id="createCampaignBtn" class="bg-amber-500 hover:bg-amber-400 text-black px-5 py-3 rounded-xl font-bold">＋ Выбрать готовую кампанию</button>
+          <button id="createCustomCampaignBtn" class="border border-zinc-700 hover:border-amber-400 px-5 py-3 rounded-xl font-semibold">＋ Создать свою</button>
           <button id="exportBtn" class="border border-zinc-700 hover:border-amber-400 px-5 py-3 rounded-xl font-semibold">↓ Экспорт данных</button>
         </div>
       </div>
@@ -119,6 +120,27 @@
       <span>Кампании и карта Фаэруна</span>
     </div>
   </footer>
+
+
+  <div id="officialCampaignModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/80 p-4 backdrop-blur-sm" hidden>
+    <section class="mx-auto my-[3vh] w-full max-w-5xl rounded-3xl border border-zinc-700 bg-zinc-900 p-5 shadow-2xl sm:p-7" role="dialog" aria-modal="true" aria-labelledby="officialModalTitle">
+      <div class="flex items-start justify-between gap-4"><div><p class="text-xs uppercase tracking-[.2em] text-amber-400">Каталог приключений</p><h2 id="officialModalTitle" class="mt-2 text-2xl font-black sm:text-3xl">Выбери официальную кампанию</h2><p class="mt-2 text-sm text-zinc-400">Добавь приключение в общий список «Мои кампании».</p></div><button type="button" data-close-modal="officialCampaignModal" class="control-btn shrink-0" aria-label="Закрыть">✕</button></div>
+      <label class="mt-5 block"><span class="text-sm text-zinc-300">Поиск по названию</span><input id="campaignCatalogSearch" type="search" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например, Страд или Авернус"></label>
+      <div id="campaignCatalogList" class="mt-5 grid gap-3 sm:grid-cols-2"></div><p id="campaignCatalogEmpty" class="mt-4 hidden text-center text-sm text-zinc-500">Ничего не найдено. Попробуй другое название.</p>
+      <div class="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-zinc-800 pt-4"><p class="max-w-xl text-xs text-zinc-500">Подборка официальных приключений D&D 5e. В неё не входят все приключения из всех изданий.</p><button type="button" data-open-custom class="text-sm text-amber-300 hover:text-amber-200">Нет нужного? Создать свою →</button></div>
+    </section>
+  </div>
+  <div id="customCampaignModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/80 p-4 backdrop-blur-sm" hidden>
+    <section class="mx-auto my-[5vh] w-full max-w-2xl rounded-3xl border border-zinc-700 bg-zinc-900 p-5 shadow-2xl sm:p-7" role="dialog" aria-modal="true" aria-labelledby="customModalTitle">
+      <div class="flex items-start justify-between gap-4"><div><p class="text-xs uppercase tracking-[.2em] text-amber-400">Новая история</p><h2 id="customModalTitle" class="mt-2 text-2xl font-black sm:text-3xl">Создать свою кампанию</h2><p class="mt-2 text-sm text-zinc-400">Новая кампания появится в том же списке.</p></div><button type="button" data-close-modal="customCampaignModal" class="control-btn shrink-0" aria-label="Закрыть">✕</button></div>
+      <form id="customCampaignForm" class="mt-5 space-y-4">
+        <label class="block text-sm text-zinc-300">Название кампании <span class="text-amber-300">*</span><input id="customCampaignTitle" required maxlength="100" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например, Тайны Невервинтера"></label>
+        <label class="block text-sm text-zinc-300">Краткое описание<textarea id="customCampaignDescription" maxlength="600" rows="3" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="О чём будет приключение?"></textarea></label>
+        <div class="grid gap-4 sm:grid-cols-2"><label class="block text-sm text-zinc-300">Уровни<input id="customCampaignLevels" maxlength="40" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например, 1–10"></label><label class="block text-sm text-zinc-300">Мир / регион<input id="customCampaignSetting" maxlength="80" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например, Фаэрун"></label></div>
+        <div class="flex flex-wrap justify-end gap-3 pt-2"><button type="button" data-close-modal="customCampaignModal" class="control-btn">Отмена</button><button type="submit" class="rounded-xl bg-amber-400 px-5 py-3 font-bold text-zinc-950 hover:bg-amber-300">Создать кампанию</button></div>
+      </form>
+    </section>
+  </div>
 
   <script>
     const STORAGE_KEYS = {
@@ -199,11 +221,7 @@
     }
 
     function createCampaign() {
-      const title = prompt('Как называется новая кампания?');
-      if (title === null || !title.trim()) return;
-      const description = prompt('Краткое описание кампании (можно оставить пустым):') || '';
-      campaigns.push({ title: title.trim(), description: description.trim(), href: null, createdAt: new Date().toISOString() });
-      if (saveStorage(STORAGE_KEYS.campaigns, campaigns)) renderCampaigns();
+      // Campaign selection and creation are handled by campaign-catalog.js.
     }
 
     document.getElementById('createCampaignBtn').addEventListener('click', createCampaign);
@@ -436,5 +454,6 @@
     resetMap();
     window.addEventListener('resize', resetMap);
   </script>
+  <script src="campaign-catalog.js"></script>
 </body>
 </html>
