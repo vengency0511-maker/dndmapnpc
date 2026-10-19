@@ -24,6 +24,34 @@
     .map-marker span { position: absolute; left: 50%; top: 31px; transform: translateX(-50%); padding: 3px 7px; white-space: nowrap; max-width: 180px; overflow: hidden; text-overflow: ellipsis; background: #09090bdf; border: 1px solid #52525b; border-radius: 6px; font-size: 11px; font-weight: 500; pointer-events: none; }
     .control-btn { border: 1px solid #3f3f46; background: #27272a; border-radius: 10px; padding: 8px 12px; }
     .control-btn:hover { border-color: #d97706; }
+    .adventure-hero {
+      background-color: #09090b;
+      background-image:
+        linear-gradient(90deg, rgba(9,9,11,.94) 0%, rgba(9,9,11,.78) 34%, rgba(9,9,11,.3) 68%, rgba(9,9,11,.14) 100%),
+        linear-gradient(0deg, rgba(9,9,11,.68) 0%, transparent 42%, rgba(9,9,11,.12) 100%),
+        url("https://images.stockcake.com/public/e/4/4/e444d08a-2cee-464b-a126-0b83e075f052_small/golden-valley-explorers-stockcake.jpg");
+      background-position: center, center, center 54%;
+      background-size: cover;
+    }
+    .adventure-hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      border-radius: inherit;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), inset 0 -80px 120px rgba(9,9,11,.18);
+      pointer-events: none;
+    }
+    @media (max-width: 640px) {
+      .adventure-hero {
+        min-height: 520px;
+        background-image:
+          linear-gradient(90deg, rgba(9,9,11,.82), rgba(9,9,11,.46)),
+          linear-gradient(0deg, rgba(9,9,11,.8) 0%, transparent 65%),
+          url("https://images.stockcake.com/public/e/4/4/e444d08a-2cee-464b-a126-0b83e075f052_small/golden-valley-explorers-stockcake.jpg");
+        background-position: center, center, 58% center;
+      }
+    }
     @media (max-width: 640px) {
       #mapViewport { height: 58vh; min-height: 340px; }
       #campaignList { grid-template-columns: minmax(0, 1fr); }
@@ -47,17 +75,22 @@
   </header>
 
   <main class="max-w-6xl mx-auto px-5 py-8 sm:py-10 space-y-12">
-    <section class="rounded-3xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 sm:p-8">
-      <div class="max-w-2xl">
-        <div class="text-amber-300 text-sm font-semibold tracking-wide mb-3">⚔️ DUNGEONS & DRAGONS</div>
-        <h2 class="text-3xl sm:text-4xl font-black leading-tight">Всё приключение — в одном месте</h2>
-        <p class="text-zinc-400 mt-3">Создавай кампании, возвращайся к своим историям и отмечай на карте, где сейчас находятся герои.</p>
-        <div class="flex flex-wrap gap-3 mt-6">
-          <button id="createCampaignBtn" class="bg-amber-500 hover:bg-amber-400 text-black px-5 py-3 rounded-xl font-bold">＋ Выбрать готовую кампанию</button>
-          <button id="createCustomCampaignBtn" class="border border-zinc-700 hover:border-amber-400 px-5 py-3 rounded-xl font-semibold">＋ Создать свою</button>
-          <button id="exportBtn" class="border border-zinc-700 hover:border-amber-400 px-5 py-3 rounded-xl font-semibold">↓ Экспорт данных</button>
+    <section class="adventure-hero relative isolate flex min-h-[470px] items-center overflow-hidden rounded-3xl border border-zinc-700 px-6 py-10 shadow-2xl sm:min-h-[520px] sm:px-10 lg:px-14">
+      <div class="relative z-10 max-w-2xl">
+        <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-300/30 bg-black/35 px-3 py-1.5 text-xs font-bold tracking-[.18em] text-amber-200 backdrop-blur-sm">
+          <span aria-hidden="true">✦</span> DUNGEONS &amp; DRAGONS
         </div>
+        <h2 class="max-w-xl text-4xl font-black leading-[1.05] tracking-tight text-white drop-shadow-lg sm:text-5xl lg:text-6xl">Мир ждёт своих <span class="text-amber-300">героев</span></h2>
+        <p class="mt-5 max-w-lg text-base leading-relaxed text-zinc-100 drop-shadow sm:text-lg">Собери отряд, открой карту и впиши новую главу в легенду. Все твои кампании, персонажи и заметки — в одном месте.</p>
+        <div class="mt-7 flex flex-wrap gap-3">
+          <button id="createCampaignBtn" class="rounded-xl bg-amber-400 px-5 py-3 font-bold text-zinc-950 shadow-lg shadow-amber-950/30 transition hover:bg-amber-300">⚔ Выбрать кампанию</button>
+          <button id="createCustomCampaignBtn" class="rounded-xl border border-white/35 bg-black/25 px-5 py-3 font-semibold text-white backdrop-blur-sm transition hover:border-amber-300 hover:bg-black/45">＋ Создать свою</button>
+          <a href="#campaigns" class="rounded-xl border border-white/20 bg-black/20 px-5 py-3 font-semibold text-white/90 backdrop-blur-sm transition hover:border-amber-300">Мои кампании ↓</a>
+        </div>
+        <button id="exportBtn" class="mt-4 rounded-lg px-1 py-2 text-sm text-white/65 transition hover:text-amber-200">↓ Экспорт данных</button>
       </div>
+      <div class="pointer-events-none absolute inset-0 -z-10 bg-zinc-950"></div>
+      <div class="absolute bottom-3 right-4 z-10 text-[10px] text-white/65 sm:bottom-4 sm:right-5">Иллюстрация: <a class="pointer-events-auto underline decoration-white/40 underline-offset-2 hover:text-amber-200" href="https://stockcake.com/i/warrior-overlooking-valley_1227441_795632" target="_blank" rel="noopener noreferrer">StockCake</a></div>
     </section>
 
     <section id="campaigns">
