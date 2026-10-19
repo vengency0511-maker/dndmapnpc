@@ -15,14 +15,35 @@
     .campaign-card { transition: border-color .18s ease, transform .18s ease; }
     .campaign-card:hover { transform: translateY(-2px); border-color: #d97706; }
     .campaign-card--storm-king {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
       background-color: #111827;
       background-image:
-        linear-gradient(90deg, rgba(9,9,11,.94) 0%, rgba(9,9,11,.76) 54%, rgba(9,9,11,.34) 100%),
-        linear-gradient(0deg, rgba(9,9,11,.7), rgba(9,9,11,.08)),
-        url("https://images.unsplash.com/photo-1790254128674-74eac7e39300?auto=format&fit=crop&w=1400&q=80");
+        linear-gradient(90deg, rgba(9,9,11,.91) 0%, rgba(9,9,11,.72) 48%, rgba(9,9,11,.36) 100%),
+        linear-gradient(0deg, rgba(9,9,11,.62), rgba(9,9,11,.10)),
+        url("https://images.stockcake.com/public/8/f/4/8f4de03f-b3c6-4562-a90a-cd3d9e62c9ba_large/stormy-mountain-landscape-stockcake.jpg");
       background-position: center, center, center 48%;
       background-size: cover;
       border-color: rgba(96, 165, 250, .28);
+    }
+    .campaign-card--storm-king::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image: url("https://images.stockcake.com/public/7/4/0/7407e507-ec07-4489-ace2-66eadd14c859_large/snowy-mountain-fortress-stockcake.jpg");
+      background-size: cover;
+      background-position: center right;
+      opacity: .72;
+      mix-blend-mode: screen;
+      -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,.12) 26%, #000 65%);
+      mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,.12) 26%, #000 65%);
+    }
+    .campaign-card--storm-king > * {
+      position: relative;
+      z-index: 1;
     }
     .campaign-card--storm-king:hover { border-color: #60a5fa; }
     .campaign-card--storm-king .campaign-storm-label {
