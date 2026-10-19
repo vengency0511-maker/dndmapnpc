@@ -1284,8 +1284,7 @@
       if (!m) return;
       try {
         monsterStatus.textContent = 'Загружаем характеристики: ' + m.name + '…';
-        selectedMonster = m.raw ? m : await fetchMonsterDetails(m);
-        if (m.userCreated || m.edition === 'custom' || m.edition === 'homebrew') selectedMonster = m;
+        selectedMonster = (m.raw || m.userCreated || m.edition === 'custom' || m.edition === 'homebrew') ? m : await fetchMonsterDetails(m);
         monsterResults.innerHTML = renderMonsterCard(selectedMonster);
         monsterEmpty.classList.add('hidden');
         monsterStatus.textContent = 'Открыта карточка: ' + selectedMonster.name + '.';
@@ -1321,7 +1320,7 @@
       const refresh = event.target.closest('[data-monster-details]');
       const remove = event.target.closest('[data-monster-delete]');
       if (open) { await openMonsterDetails(open.dataset.monsterOpen, open.dataset.monsterEdition); return; }
-      if (refresh && selectedMonster) { try { selectedMonster = await fetchMonsterDetails(selectedMonster); monsterResults.innerHTML = renderMonsterCard(selectedMonster); } catch(e) { monsterStatus.textContent='Не удалось обновить характеристики.'; } return; }
+      if (refresh && selectedMonster) { try { if (!selectedMonster.userCreated && selectedMonster.edition !== 'custom' && selectedMonster.edition !== 'homebrew') selectedMonster = await fetchMonsterDetails(selectedMonster); monsterResults.innerHTML = renderMonsterCard(selectedMonster); } catch(e) { monsterStatus.textContent='Не удалось обновить характеристики.'; } return; }
       if (add && selectedMonster) { addMonsterToBattle(selectedMonster); return; }
       if (remove) { if (confirm('Удалить собственного монстра из библиотеки?')) { customMonsters=customMonsters.filter(m=>String(m.id)!==remove.dataset.monsterDelete); persistCustomMonsters(); renderMonsterResults(); } }
     });
