@@ -14,6 +14,32 @@
     button { touch-action: manipulation; }
     .tab-button[aria-selected="true"] { color: #fcd34d; background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.45); }
     .tab-panel[hidden] { display: none; }
+    .campaign-hero {
+      position: relative;
+      isolation: isolate;
+      background-color: #111827;
+      background-image:
+        linear-gradient(90deg, rgba(9,9,11,.91) 0%, rgba(9,9,11,.78) 40%, rgba(9,9,11,.48) 100%),
+        linear-gradient(0deg, rgba(9,9,11,.66), rgba(9,9,11,.08)),
+        url("https://images.stockcake.com/public/8/f/4/8f4de03f-b3c6-4562-a90a-cd3d9e62c9ba_large/stormy-mountain-landscape-stockcake.jpg");
+      background-position: center, center, center 48%;
+      background-size: cover;
+    }
+    .campaign-hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image: url("https://images.stockcake.com/public/7/4/0/7407e507-ec07-4489-ace2-66eadd14c859_large/snowy-mountain-fortress-stockcake.jpg");
+      background-size: cover;
+      background-position: center right;
+      opacity: .7;
+      mix-blend-mode: screen;
+      -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,.12) 24%, #000 64%);
+      mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,.12) 24%, #000 64%);
+    }
+    .campaign-hero > div { position: relative; z-index: 1; }
     @media (max-width: 640px) {
       .page-wrap { padding-left: 1rem; padding-right: 1rem; }
       .tab-strip { display: flex; overflow-x: auto; padding-bottom: .5rem; }
@@ -32,7 +58,7 @@
 
   <main class="page-wrap max-w-7xl mx-auto px-6 py-8 md:py-12">
     <a href="index.html#campaigns" class="text-sm text-zinc-400 hover:text-amber-300">Кампании /</a>
-    <section class="mt-5 overflow-hidden rounded-3xl border border-amber-500/20 bg-gradient-to-br from-zinc-900 via-zinc-900 to-amber-950/30">
+    <section class="campaign-hero mt-5 overflow-hidden rounded-3xl border border-amber-500/20">
       <div class="p-6 md:p-10">
         <div class="flex flex-wrap gap-2 mb-5">
           <span class="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-sm text-amber-200">Dungeons & Dragons 5e</span>
