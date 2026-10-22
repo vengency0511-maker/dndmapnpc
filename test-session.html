@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>D&D Map NPC — онлайн-тестовая сессия</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{color-scheme:dark}body{background:#090d16;color:#e5e7eb}input,textarea,button{font:inherit}input,textarea{color:#f9fafb;background:#111827;border:1px solid #374151;border-radius:.65rem;padding:.7rem;width:100%}button{touch-action:manipulation;min-height:42px}.panel{background:rgba(17,24,39,.92);border:1px solid #293548;border-radius:1rem;padding:1rem}.primary{background:#b45309;color:#fff7ed;border-radius:.65rem;padding:.7rem 1rem;font-weight:700}.secondary{background:#263449;color:#f3f4f6;border-radius:.65rem;padding:.65rem 1rem}.muted{color:#9ca3af}.field{display:grid;gap:.35rem}.field label{font-size:.85rem;color:#cbd5e1}.status{font-size:.85rem;border-radius:999px;padding:.3rem .7rem;background:#1f2937}.token{border:1px solid #475569;background:#172033;border-radius:.8rem;padding:.75rem}.token button{min-height:34px}.map-grid{background-image:linear-gradient(#33415555 1px,transparent 1px),linear-gradient(90deg,#33415555 1px,transparent 1px);background-size:32px 32px;min-height:260px;position:relative;overflow:hidden;border:1px solid #334155;border-radius:.8rem}.map-token{position:absolute;transform:translate(-50%,-50%);min-width:86px;max-width:130px;padding:.45rem;border-radius:.65rem;background:#7c2d12;border:1px solid #fdba74;text-align:center;font-size:.75rem;box-shadow:0 6px 18px #0008}.map-token.player{background:#1e3a8a;border-color:#93c5fd}.hidden{display:none!important}
+</style>
+</head>
+<body>
+<header class="border-b border-slate-800 bg-slate-950/90">
+  <div class="max-w-6xl mx-auto px-4 py-5 flex flex-wrap items-center justify-between gap-3">
+    <div><p class="text-amber-400 text-xs tracking-[.25em] uppercase">D&D Map NPC · тестовая среда</p><h1 class="text-2xl md:text-3xl font-black mt-1">Онлайн-сессия</h1><p class="muted text-sm mt-1">Мастер и игроки · разные устройства · синхронизация в реальном времени</p></div>
+    <span id="connection-badge" class="status">Не подключено</span>
+  </div>
+</header>
+<main class="max-w-6xl mx-auto p-4 md:p-6 space-y-5">
+  <section class="panel">
+    <div class="flex items-start justify-between gap-3 flex-wrap"><div><h2 class="text-lg font-bold">1. Подключение тестового сервера</h2><p class="muted text-sm mt-1">Использует отдельный проект Supabase. Эти параметры сохраняются только в этом браузере.</p></div><button id="connect-btn" class="primary">Подключиться</button></div>
+    <div class="grid md:grid-cols-2 gap-3 mt-4">
+      <div class="field"><label for="supabase-url">Supabase Project URL</label><input id="supabase-url" placeholder="https://xxxxxxxx.supabase.co" autocomplete="url"></div>
+      <div class="field"><label for="supabase-key">Publishable / anon key</label><input id="supabase-key" placeholder="sb_publishable_… или legacy anon key" autocomplete="off"></div>
+    </div>
+    <p class="muted text-xs mt-3">Не вставляйте сюда service_role/secret key. Сначала выполните SQL из <code>supabase/test-session.sql</code> в SQL Editor проекта и включите Anonymous Sign-Ins в Authentication.</p>
+    <p id="connection-message" class="text-sm mt-3" role="status"></p>
+  </section>
+
+  <section id="entry-panel" class="grid md:grid-cols-2 gap-4">
+    <div class="panel space-y-3"><h2 class="text-lg font-bold">2А. Создать комнату мастера</h2><p class="muted text-sm">Создаёт комнату и выдаёт код, которым можно поделиться с игроками.</p><div class="field"><label for="master-name">Имя мастера</label><input id="master-name" maxlength="40" value="Мастер"></div><button id="create-room-btn" class="primary w-full">Создать тестовую сессию</button></div>
+    <div class="panel space-y-3"><h2 class="text-lg font-bold">2Б. Присоединиться игроком</h2><p class="muted text-sm">Введите код комнаты мастера и имя персонажа.</p><div class="field"><label for="room-code">Код комнаты</label><input id="room-code" maxlength="6" placeholder="Например, A4F92C" autocapitalize="characters"></div><div class="grid grid-cols-3 gap-2"><div class="field col-span-1"><label for="player-hp">Макс. HP</label><input id="player-hp" type="number" min="1" max="999" value="20"></div><div class="field col-span-1"><label for="player-ac">КД</label><input id="player-ac" type="number" min="0" max="40" value="15"></div><div class="field col-span-1"><label for="player-name">Персонаж</label><input id="player-name" maxlength="40" value="Игрок"></div></div><button id="join-room-btn" class="secondary w-full">Войти в комнату</button></div>
+  </section>
+
+  <section id="session-panel" class="hidden space-y-4">
+    <div class="panel flex flex-wrap items-center justify-between gap-3"><div><p class="muted text-xs uppercase tracking-wider">Текущая сессия</p><div class="flex items-center gap-3 flex-wrap mt-1"><h2 id="session-title" class="text-xl font-black">Комната</h2><span id="role-badge" class="status"></span></div><p class="muted text-sm mt-1">Код для приглашения: <strong id="session-code" class="text-amber-300 tracking-widest"></strong></p></div><div class="flex gap-2 flex-wrap"><button id="copy-code-btn" class="secondary">Копировать код</button><button id="leave-btn" class="secondary">Выйти</button></div></div>
+    <div id="master-controls" class="panel space-y-3 hidden">
+      <h3 class="font-bold text-lg">Панель мастера</h3><div class="grid md:grid-cols-3 gap-3"><div class="field"><label for="encounter-name">Сцена / столкновение</label><input id="encounter-name" maxlength="100" value="Тестовое столкновение"></div><div class="field"><label for="round-number">Раунд</label><input id="round-number" type="number" min="1" max="999" value="1"></div><div class="field"><label for="session-notes">Заметка для группы</label><input id="session-notes" maxlength="500" placeholder="Что сейчас происходит…"></div></div><button id="save-state-btn" class="primary">Обновить состояние сессии</button><p class="muted text-xs">Только мастер может менять сцену, раунд и общие заметки, а также HP/КД участников.</p>
+    </div>
+    <div class="grid lg:grid-cols-[1.25fr_.75fr] gap-4">
+      <div class="panel space-y-3"><div class="flex items-center justify-between gap-2"><h3 class="font-bold text-lg">Общая карта</h3><span id="map-status" class="muted text-xs">Ожидание данных</span></div><div id="map" class="map-grid"><div class="absolute inset-0 grid place-items-center muted text-sm">Подключите комнату, чтобы увидеть фишки</div></div><p class="muted text-xs">Игрок может перемещать свою фишку кнопками ниже; мастер видит изменения сразу.</p><div id="scene-summary" class="rounded-lg bg-slate-900 p-3 text-sm"></div></div>
+      <div class="panel space-y-3"><div class="flex items-center justify-between gap-2"><h3 class="font-bold text-lg">Участники</h3><span id="member-count" class="status">0</span></div><div id="token-list" class="space-y-2"><p class="muted text-sm">Пока нет участников.</p></div></div>
+    </div>
+    <div class="panel"><h3 class="font-bold">Журнал синхронизации</h3><ul id="event-log" class="muted text-sm mt-2 space-y-1"><li>Комната ещё не подключена.</li></ul></div>
+  </section>
+  <section class="panel"><h2 class="font-bold">Что проверяем в этой версии</h2><ul class="list-disc pl-5 mt-2 space-y-1 text-sm muted"><li>Мастер создаёт комнату, игрок входит с другого устройства по коду.</li><li>Общие изменения сцены и раунда появляются у всех подключённых участников.</li><li>Игрок перемещает только свою фишку; мастер может корректировать HP и КД.</li><li>Права проверяются политиками базы данных и RPC, а не только скрытием кнопок.</li></ul></section>
+</main>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const config = { url: localStorage.getItem('dndnpc-test-supabase-url') || '', key: localStorage.getItem('dndnpc-test-supabase-key') || '' };
+  $('supabase-url').value = config.url; $('supabase-key').value = config.key;
+  let client = null, user = null, roomId = null, roomCode = '', role = '', ownTokenId = null, roomState = {}, channel = null, tokens = [], members = [], refreshTimer = null;
+  const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  function log(message) { const ul=$('event-log'), li=document.createElement('li'); li.textContent='• '+new Date().toLocaleTimeString()+' — '+message; ul.prepend(li); while(ul.children.length>7) ul.lastElementChild.remove(); }
+  function setStatus(text, ok=false) { $('connection-badge').textContent=text; $('connection-badge').style.color=ok?'#86efac':'#fbbf24'; }
+  function say(text, error=false) { $('connection-message').textContent=text; $('connection-message').style.color=error?'#fca5a5':'#86efac'; }
+  function requireClient(){if(!client) throw new Error('Сначала подключите Supabase.');}
+  async function connect() {
+    const url=$('supabase-url').value.trim().replace(/\/$/, ''), key=$('supabase-key').value.trim();
+    if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url) || !key) throw new Error('Проверьте Project URL и publishable/anon key.');
+    localStorage.setItem('dndnpc-test-supabase-url',url); localStorage.setItem('dndnpc-test-supabase-key',key);
+    client = window.supabase.createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true}});
+    const {data:sessionData,error:sessionError}=await client.auth.getSession();
+    if(sessionError) throw sessionError;
+    if(!sessionData.session){const {data,error}=await client.auth.signInAnonymously();if(error) throw error;user=data.user;} else user=sessionData.session.user;
+    setStatus('Сервер подключён',true); say('Подключение успешно. Можно создать комнату или войти по коду.'); log('Подключено к тестовому серверу.'); return true;
+  }
+  async function ensureConnected(){ if(!client) await connect(); if(!user){const {data,error}=await client.auth.getUser();if(error)throw error;user=data.user;} }
+  async function createRoom(){
+    await ensureConnected();
+    const {data,error}=await client.rpc('dnd_test_create_room',{p_master_name:$('master-name').value.trim()||'Мастер'});
+    if(error)throw error; roomId=data.room_id;roomCode=data.room_code;role='master';ownTokenId=null;
+    await openSession();
+  }
+  async function joinRoom(){
+    await ensureConnected();
+    const code=$('room-code').value.trim().toUpperCase();
+    const hp=Math.max(1,Math.min(999,Number($('player-hp').value)||20)),ac=Math.max(0,Math.min(40,Number($('player-ac').value)||0));
+    const {data,error}=await client.rpc('dnd_test_join_room',{p_room_code:code,p_character_name:$('player-name').value.trim()||'Игрок',p_max_hp:hp,p_armor_class:ac});
+    if(error)throw error;roomId=data.room_id;roomCode=code;role='player';ownTokenId=data.token_id;
+    await openSession();
+  }
+  async function openSession(){
+    $('entry-panel').classList.add('hidden');$('session-panel').classList.remove('hidden');
+    $('role-badge').textContent=role==='master'?'Мастер':'Игрок';$('master-controls').classList.toggle('hidden',role!=='master');
+    $('session-code').textContent=roomCode;$('session-title').textContent='Сессия '+roomCode;
+    await refreshAll();
+    if(channel) await client.removeChannel(channel);
+    channel=client.channel('dnd-test-room-'+roomId)
+      .on('postgres_changes',{event:'*',schema:'public',table:'dnd_test_rooms',filter:'id=eq.'+roomId},async payload=>{if(payload.new?.state){roomState=payload.new.state;renderState();log('Общее состояние обновлено.');}})
+      .on('postgres_changes',{event:'*',schema:'public',table:'dnd_test_tokens',filter:'room_id=eq.'+roomId},async()=>{await refreshTokens();log('Список фишек синхронизирован.');})
+      .on('postgres_changes',{event:'*',schema:'public',table:'dnd_test_members',filter:'room_id=eq.'+roomId},async()=>{await refreshMembers();})
+      .subscribe(status=>{if(status==='SUBSCRIBED'){$('map-status').textContent='Онлайн · синхронизация активна';log('Realtime подключён.');}});
+    setStatus('В комнате · '+(role==='master'?'мастер':'игрок'),true);log('Вы вошли в комнату.');
+  }
+  async function refreshAll(){await Promise.all([refreshRoom(),refreshTokens(),refreshMembers()]);}
+  async function refreshRoom(){
+    const {data,error}=await client.from('dnd_test_rooms').select('state,room_code').eq('id',roomId).single();
+    if(error)throw error;roomState=data.state||{};roomCode=data.room_code||roomCode;$('session-code').textContent=roomCode;renderState();
+  }
+  async function refreshTokens(){const {data,error}=await client.from('dnd_test_tokens').select('*').eq('room_id',roomId).order('created_at');if(error)throw error;tokens=data||[];renderTokens();}
+  async function refreshMembers(){const {data,error}=await client.from('dnd_test_members').select('user_id,display_name,role').eq('room_id',roomId).order('created_at');if(error)throw error;members=data||[];$('member-count').textContent=String(members.length);}
+  function renderState(){
+    if(role==='master'){$('encounter-name').value=roomState.encounter_name||'Тестовое столкновение';$('round-number').value=roomState.round_number||1;$('session-notes').value=roomState.notes||'';}
+    $('scene-summary').innerHTML='<strong>'+escapeHtml(roomState.encounter_name||'Тестовое столкновение')+'</strong><div class="muted mt-1">Раунд '+escapeHtml(roomState.round_number||1)+'</div><p class="mt-2">'+escapeHtml(roomState.notes||'Мастер пока не добавил заметку.')+'</p>';
+  }
+  function renderTokens(){
+    const map=$('map');map.innerHTML='';
+    if(!tokens.length){map.innerHTML='<div class="absolute inset-0 grid place-items-center muted text-sm">Ожидание игроков…</div>';$('token-list').innerHTML='<p class="muted text-sm">Пока нет участников.</p>';return;}
+    for(const token of tokens){
+      const marker=document.createElement('div');marker.className='map-token '+(token.user_id===user?.id?'player':'');marker.style.left=Math.max(8,Math.min(92,Number(token.x)||50))+'%';marker.style.top=Math.max(12,Math.min(88,Number(token.y)||50))+'%';marker.innerHTML='<div class="font-bold break-words">'+escapeHtml(token.character_name)+'</div><div>HP '+escapeHtml(token.current_hp)+'/'+escapeHtml(token.max_hp)+'</div><div>КД '+escapeHtml(token.armor_class)+'</div>';map.appendChild(marker);
+    }
+    $('token-list').innerHTML=tokens.map(t=>{
+      const isOwn=t.user_id===user?.id, canMove=role==='master'||isOwn, canEdit=role==='master';
+      return '<div class="token space-y-2"><div class="flex justify-between gap-2"><strong>'+escapeHtml(t.character_name)+'</strong><span class="muted text-xs">'+(isOwn?'Ваша фишка':(t.user_id?'Игрок':'Участник'))+'</span></div><div class="text-sm">HP <strong>'+escapeHtml(t.current_hp)+'/'+escapeHtml(t.max_hp)+'</strong> · КД <strong>'+escapeHtml(t.armor_class)+'</strong></div>'+(canEdit?'<div class="grid grid-cols-2 gap-2"><div class="field"><label>Текущие HP</label><input data-hp="'+t.id+'" type="number" min="0" max="'+t.max_hp+'" value="'+t.current_hp+'"></div><div class="field"><label>КД</label><input data-ac="'+t.id+'" type="number" min="0" max="40" value="'+t.armor_class+'"></div></div><button class="secondary w-full" data-save-token="'+t.id+'">Сохранить HP / КД</button>':'')+(canMove?'<div class="grid grid-cols-4 gap-1"><button class="secondary" data-move="'+t.id+'" data-dx="0" data-dy="-8">↑</button><button class="secondary" data-move="'+t.id+'" data-dx="-8" data-dy="0">←</button><button class="secondary" data-move="'+t.id+'" data-dx="8" data-dy="0">→</button><button class="secondary" data-move="'+t.id+'" data-dx="0" data-dy="8">↓</button></div>':'')+'</div>';
+    }).join('');
+  }
+  async function saveState(){
+    if(role!=='master')throw new Error('Только мастер может менять состояние сессии.');
+    const state={encounter_name:$('encounter-name').value.trim()||'Тестовое столкновение',round_number:Math.max(1,Number($('round-number').value)||1),notes:$('session-notes').value.trim()};
+    const {error}=await client.from('dnd_test_rooms').update({state}).eq('id',roomId);if(error)throw error;roomState=state;renderState();log('Мастер обновил сцену/раунд/заметку.');
+  }
+  async function saveToken(id){
+    if(role!=='master')throw new Error('Изменять HP и КД может только мастер.');
+    const hpEl=document.querySelector('[data-hp="'+id+'"]'),acEl=document.querySelector('[data-ac="'+id+'"]');
+    const {error}=await client.rpc('dnd_test_master_update_token',{p_token_id:id,p_current_hp:Math.max(0,Number(hpEl.value)||0),p_armor_class:Math.max(0,Math.min(40,Number(acEl.value)||0))});
+    if(error)throw error;await refreshTokens();log('Мастер обновил HP/КД.');
+  }
+  async function moveToken(id,dx,dy){
+    const token=tokens.find(t=>t.id===id);if(!token)return;
+    if(role!=='master'&&token.user_id!==user?.id)throw new Error('Игрок может двигать только свою фишку.');
+    const {error}=await client.rpc('dnd_test_move_token',{p_token_id:id,p_x:Math.max(4,Math.min(96,(Number(token.x)||50)+dx)),p_y:Math.max(8,Math.min(92,(Number(token.y)||50)+dy))});
+    if(error)throw error;await refreshTokens();
+  }
+  async function leaveRoom(){if(channel){await client.removeChannel(channel);channel=null;}roomId=null;roomCode='';role='';ownTokenId=null;tokens=[];members=[];$('session-panel').classList.add('hidden');$('entry-panel').classList.remove('hidden');setStatus('Сервер подключён',!!client);log('Вы вышли из комнаты.');}
+  async function run(action){try{say('');await action();}catch(e){say(e.message||String(e),true);log('Ошибка: '+(e.message||String(e)));}}
+  $('connect-btn').addEventListener('click',()=>run(connect));
+  $('create-room-btn').addEventListener('click',()=>run(createRoom));
+  $('join-room-btn').addEventListener('click',()=>run(joinRoom));
+  $('save-state-btn').addEventListener('click',()=>run(saveState));
+  $('leave-btn').addEventListener('click',()=>run(leaveRoom));
+  $('copy-code-btn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(roomCode);say('Код комнаты скопирован.');}catch{say('Код комнаты: '+roomCode);}});
+  $('room-code').addEventListener('input',e=>e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,''));
+  $('token-list').addEventListener('click',e=>{const save=e.target.closest('[data-save-token]'),move=e.target.closest('[data-move]');if(save)run(()=>saveToken(save.dataset.saveToken));if(move)run(()=>moveToken(move.dataset.move,Number(move.dataset.dx),Number(move.dataset.dy)));});
+  if(config.url&&config.key) setStatus('Параметры сохранены · нажмите «Подключиться»');
+})();
+</script>
+</body>
+</html>
