@@ -37,19 +37,27 @@ alter table public.dnd_test_rooms enable row level security;
 alter table public.dnd_test_members enable row level security;
 alter table public.dnd_test_tokens enable row level security;
 
+-- SECURITY DEFINER helper avoids recursive RLS when membership policies query the roster.
+create or replace function public.dnd_test_is_member(p_room_id uuid)
+returns boolean language sql stable security definer set search_path=public,auth as $
+  select exists(select 1 from public.dnd_test_members m where m.room_id=p_room_id and m.user_id=auth.uid());
+$;
+revoke all on function public.dnd_test_is_member(uuid) from public;
+grant execute on function public.dnd_test_is_member(uuid) to authenticated;
+
 drop policy if exists "room members can read room" on public.dnd_test_rooms;
 create policy "room members can read room" on public.dnd_test_rooms for select to authenticated
-using (exists(select 1 from public.dnd_test_members m where m.room_id=id and m.user_id=auth.uid()));
+using (public.dnd_test_is_member(id));
 drop policy if exists "only room master updates room" on public.dnd_test_rooms;
 create policy "only room master updates room" on public.dnd_test_rooms for update to authenticated
 using (master_user_id=auth.uid()) with check (master_user_id=auth.uid());
 
 drop policy if exists "members can see their room roster" on public.dnd_test_members;
 create policy "members can see their room roster" on public.dnd_test_members for select to authenticated
-using (exists(select 1 from public.dnd_test_members mine where mine.room_id=dnd_test_members.room_id and mine.user_id=auth.uid()));
+using (public.dnd_test_is_member(room_id));
 drop policy if exists "members can see tokens" on public.dnd_test_tokens;
 create policy "members can see tokens" on public.dnd_test_tokens for select to authenticated
-using (exists(select 1 from public.dnd_test_members m where m.room_id=dnd_test_tokens.room_id and m.user_id=auth.uid()));
+using (public.dnd_test_is_member(room_id));
 
 grant select on public.dnd_test_rooms, public.dnd_test_members, public.dnd_test_tokens to authenticated;
 grant update(state) on public.dnd_test_rooms to authenticated;
