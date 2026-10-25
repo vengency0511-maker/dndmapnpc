@@ -255,7 +255,7 @@
         </div>
         <div class="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_190px]">
           <label class="block text-sm text-zinc-300">Поиск по библиотеке<input id="polyhaven-search" type="search" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="лес, камни, руины, дом…"></label>
-          <label class="block text-sm text-zinc-300">Категория<select id="polyhaven-category" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white"><option value="all">Все окружение</option><option value="nature">Природа и камни</option><option value="architecture">Здания и руины</option><option value="props">Предметы и декор</option></select></label>
+          <label class="block text-sm text-zinc-300">Категория<select id="polyhaven-category" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white"><option value="all">Все ресурсы</option><option value="locations">Локации — природа, здания и руины</option><option value="decorations">Декорации — предметы и детали</option></select></label>
         </div>
         <p id="polyhaven-status" class="mt-4 text-xs text-zinc-500" role="status">Загружаем каталог Poly Haven…</p>
         <div id="polyhaven-results" class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-live="polite"></div>
@@ -680,9 +680,8 @@
     const polyHavenStatus = document.getElementById('polyhaven-status');
     function polyHavenAssetType(asset) {
       const text = ((asset.name || '') + ' ' + (asset.category || '') + ' ' + (Array.isArray(asset.tags) ? asset.tags.join(' ') : '')).toLowerCase();
-      if (/building|architecture|house|castle|ruin|temple|church|wall|medieval|door|window|tower/.test(text)) return 'architecture';
-      if (/prop|furniture|weapon|barrel|crate|chair|table|lamp|torch|statue|cart|chest/.test(text)) return 'props';
-      return 'nature';
+      if (/prop|furniture|weapon|barrel|crate|chair|table|lamp|torch|statue|cart|chest|vase|bottle|book|candle|banner|shelf|pot|basket|tool/.test(text)) return 'decorations';
+      return 'locations';
     }
     function renderPolyHavenAssets() {
       if (!polyHavenResults) return;
@@ -735,7 +734,7 @@
         title: asset.name,
         url: asset.thumbnail_url,
         imageId: null,
-        type: polyHavenAssetType(asset) === 'nature' ? 'forest' : polyHavenAssetType(asset) === 'architecture' ? 'settlement' : 'other',
+        type: polyHavenAssetType(asset) === 'decorations' ? 'other' : /building|architecture|house|castle|ruin|temple|church|wall|medieval|door|window|tower/i.test((asset.name || '') + ' ' + (asset.category || '')) ? 'settlement' : 'forest',
         source: 'Poly Haven',
         notes: 'Превью окружения Poly Haven. Это рендер объекта, а не готовая тактическая карта сверху.',
         polyHavenId: asset.id,
