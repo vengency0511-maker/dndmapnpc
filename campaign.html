@@ -1226,6 +1226,14 @@
       const ac = Array.isArray(raw.armor_class) ? raw.armor_class.map(x => typeof x === 'number' ? x : x.value).filter(Number.isFinite)[0] : Number(raw.armor_class || raw.armorClass || raw.ac || 10);
       const actions = raw.actions || raw.action || [];
       const traits = raw.special_abilities || raw.specialAbilities || raw.traits || [];
+      const proficiencies = Array.isArray(raw.proficiencies) ? raw.proficiencies : [];
+      const proficiencyName = item => String(item && (item.proficiency && item.proficiency.name || item.name) || '').replace(/^(Saving Throw|Skill):\\s*/i, '');
+      const savingProficiencies = proficiencies.filter(item => /^Saving Throw:/i.test(String(item && item.proficiency && item.proficiency.name || item && item.name || '')));
+      const skillProficiencies = proficiencies.filter(item => /^Skill:/i.test(String(item && item.proficiency && item.proficiency.name || item && item.name || '')));
+      const rawSaves = raw.saving_throws || raw.savingThrows || [];
+      const savingThrowsText = Array.isArray(rawSaves) ? rawSaves.map(x => typeof x === 'string' ? x : (x.name || x.proficiency && x.proficiency.name || '') + (x.value != null ? ' +' + x.value : '')).filter(Boolean).join(', ') : '';
+      const proficienciesText = (skillProficiencies.length ? skillProficiencies : proficiencies.filter(item => !savingProficiencies.includes(item))).map(x => proficiencyName(x) + (x && x.value != null ? ' +' + x.value : '')).filter(Boolean).join(', ');
+      const savingThrowsFinal = savingThrowsText || savingProficiencies.map(x => proficiencyName(x) + (x && x.value != null ? ' +' + x.value : '')).filter(Boolean).join(', ');
       return {
         id: raw.id || raw.index || raw.key || (edition + '-' + String(raw.name || '').toLowerCase().replace(/[^a-z0-9]+/g,'-')),
         name: raw.name || 'Без названия', edition, source: raw.source || 'SRD',
@@ -1238,8 +1246,8 @@
         languages: raw.languages || '—', xp: raw.xp || raw.experience_points || 0,
         resistances: raw.damage_resistances || raw.damageResistances || [], immunities: raw.damage_immunities || raw.damageImmunities || [], vulnerabilities: raw.damage_vulnerabilities || raw.damageVulnerabilities || [],
         conditionImmunities: raw.condition_immunities || raw.conditionImmunities || [],
-        savingThrows: (raw.saving_throws || raw.savingThrows || []).map ? (raw.saving_throws || raw.savingThrows || []).map(x => typeof x === 'string' ? x : (x.name || x.proficiency && x.proficiency.name || '') + (x.value != null ? ' +' + x.value : '')).filter(Boolean).join(', ') : '',
-        proficiencies: Array.isArray(raw.proficiencies) ? raw.proficiencies.map(x => (x.proficiency && x.proficiency.name || x.name || '') + (x.value != null ? ' +' + x.value : '')).filter(Boolean).join(', ') : '',
+        savingThrows: savingThrowsFinal,
+        proficiencies: proficienciesText,
         traits: Array.isArray(traits) ? traits : [], actions: Array.isArray(actions) ? actions : [],
         legendary: Array.isArray(raw.legendary_actions) ? raw.legendary_actions : Array.isArray(raw.legendaryActions) ? raw.legendaryActions : [],
         raw
