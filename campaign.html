@@ -933,7 +933,7 @@
       const id = 'combatant-' + Date.now() + '-' + Math.random().toString(36).slice(2,7);
       const count = battleScene.combatants.length;
       const playerId = side !== 'enemy' && selectedBattleFormPlayer ? selectedBattleFormPlayer.id : null;
-      battleScene.combatants.push({id,name,side,initiative:Math.max(-20,Math.min(50,Number(document.getElementById('battle-combatant-initiative').value)||0)),hp,maxHp,x:8+(count%6)*16,y:12+(Math.floor(count/6)%6)*15,...(playerId ? {playerId} : {}),...(armorClass !== null && Number.isFinite(armorClass) ? {armorClass} : {}),...(monster ? {monsterId:monster.id,monsterEdition:monster.edition,conditions:[],defeated:false} : {})});
+      battleScene.combatants.push({id,name,side,initiative:Math.max(-20,Math.min(50,Number(document.getElementById('battle-combatant-initiative').value)||0)),hp,maxHp,x:8+(count%6)*16,y:12+(Math.floor(count/6)%6)*15,...(playerId ? {playerId} : {}),...(armorClass !== null && Number.isFinite(armorClass) ? {armorClass} : {}),...(monster ? {monsterId:monster.id,monsterEdition:monster.edition,monsterData:monster,conditions:[],defeated:false} : {})});
       if (!battleScene.activeId) battleScene.activeId = id;
       if (saveBattleScene()) { event.target.reset(); document.getElementById('battle-combatant-initiative').value = 10; document.getElementById('battle-combatant-hp').value = 10; document.getElementById('battle-combatant-maxhp').value = 10; document.getElementById('battle-combatant-ac').value = ''; renderBattleScene(); }
     });
@@ -1278,19 +1278,30 @@
       if (monsterLoadState[edition] && !force) return;
       monsterLoadState[edition] = true;
       try {
-        const response = await fetch('https://www.dnd5eapi.co/api/' + edition + '/monsters', { headers: { 'Accept':'application/json' } });
+        if (edition === '2024') {
+          const response = await fetch('./data/srd-2024-monsters.json', { headers: { 'Accept':'application/json' }, cache: force ? 'reload' : 'default' });
+          if (!response.ok) throw new Error('Не удалось прочитать встроенный бестиарий SRD 5.2.1');
+          const data = await response.json();
+          const list = Array.isArray(data.monsters) ? data.monsters : [];
+          if (!list.length) throw new Error('Встроенный бестиарий пуст');
+          monsterCatalog['2024'] = list.map(raw => ({...normaliseMonster(raw, '2024'), index:raw.index, summary:'bundled-srd-5.2.1'}));
+          return;
+        }
+        const response = await fetch('https://www.dnd5eapi.co/api/2014/monsters', { headers: { 'Accept':'application/json' } });
         if (!response.ok) throw new Error('HTTP ' + response.status);
         const data = await response.json();
         const list = Array.isArray(data.results) ? data.results : Array.isArray(data.data) ? data.data : [];
         if (!list.length) throw new Error('API вернул пустой список');
-        monsterCatalog[edition] = list.map(item => ({id:item.index || item.key || item.slug, name:item.name, edition, index:item.index || item.key || item.slug, summary:item.url || ''})).filter(item => item.name);
+        monsterCatalog['2014'] = list.map(item => ({id:item.index || item.key || item.slug, name:item.name, edition:'2014', index:item.index || item.key || item.slug, summary:item.url || ''})).filter(item => item.name);
         monsterLoadError = false;
       } catch (error) {
         monsterLoadError = true;
         if (edition === '2014' && !monsterCatalog[edition].length) {
           monsterCatalog[edition] = offlineMonsterSeed.map(raw => ({...normaliseMonster(raw, '2014'), index:raw.index, summary:'offline-srd-sample'}));
         }
-        monsterStatus.textContent = 'Не удалось подключиться к каталогу ' + edition + '. Показан встроенный запасной список, если он доступен.';
+        monsterStatus.textContent = edition === '2024'
+          ? 'Не удалось прочитать встроенный каталог SRD 5.2.1. Проверь, что файл data/srd-2024-monsters.json опубликован вместе с сайтом.'
+          : 'Каталог 2014 временно недоступен; показан встроенный запасной список. Бестиарий 2024 загружается с сайта.';
       }
     }
     async function fetchMonsterDetails(monster) {
@@ -1354,7 +1365,7 @@
       const initiative = Math.floor(Math.random()*20)+1+dexMod;
       const id = 'combatant-' + Date.now() + '-' + Math.random().toString(36).slice(2,7);
       const count = battleScene.combatants.length;
-      battleScene.combatants.push({id,name:m.name,side:'enemy',initiative,hp:maxHp,maxHp,x:8+(count%6)*16,y:12+(Math.floor(count/6)%6)*15,monsterId:m.id,monsterEdition:m.edition,armorClass:m.ac,conditions:[], defeated:false});
+      battleScene.combatants.push({id,name:m.name,side:'enemy',initiative,hp:maxHp,maxHp,x:8+(count%6)*16,y:12+(Math.floor(count/6)%6)*15,monsterId:m.id,monsterEdition:m.edition,monsterData:m,armorClass:m.ac,conditions:[], defeated:false});
       if (!battleScene.activeId) battleScene.activeId = id;
       if (saveBattleScene()) { renderBattleScene(); monsterStatus.textContent = m.name+' добавлен в бой. Инициатива: '+initiative+'.'; }
     }
@@ -1447,6 +1458,42 @@
       battleEnemyDetails.innerHTML = '<div class="flex flex-wrap items-start justify-between gap-2"><div class="min-w-0"><h6 class="text-lg font-bold text-amber-200">'+monsterText(m.name)+'</h6><p class="mt-1 text-xs text-zinc-500">'+monsterText(monsterEditionLabel(m.edition))+' · '+monsterText(m.size)+' '+monsterText(m.type)+' · '+monsterText(m.alignment)+' · ПО '+monsterText(m.cr)+'</p></div><div class="flex gap-2"><span class="rounded-lg border border-zinc-700 px-3 py-2 text-sm">КД <b>'+monsterText(m.ac)+'</b></span><span class="rounded-lg border border-zinc-700 px-3 py-2 text-sm">HP <b>'+monsterText(m.hp)+'</b></span></div></div><div class="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-6">'+monsterStatLine(m)+'</div><div class="mt-3 grid gap-2 text-sm sm:grid-cols-2"><p><span class="text-zinc-500">Скорость:</span> '+monsterText(m.speed)+'</p><p><span class="text-zinc-500">Чувства:</span> '+monsterText(m.senses)+'</p><p><span class="text-zinc-500">Языки:</span> '+monsterText(m.languages)+'</p><p><span class="text-zinc-500">Опыт:</span> '+monsterText(m.xp || '—')+'</p><p><span class="text-zinc-500">Спасброски:</span> '+monsterText(m.savingThrows || '—')+'</p><p><span class="text-zinc-500">Навыки:</span> '+monsterText(m.proficiencies || '—')+'</p>'+defenses('Сопротивления',m.resistances)+defenses('Иммунитеты',m.immunities)+defenses('Уязвимости',m.vulnerabilities)+defenses('Иммунитет к состояниям',m.conditionImmunities)+'</div><details open class="mt-3 rounded-lg border border-zinc-800 p-3"><summary class="cursor-pointer text-sm font-semibold text-zinc-200">Особенности и действия</summary><div class="mt-3"><h6 class="font-semibold text-amber-200">Особенности</h6><div class="mt-1 text-sm leading-relaxed text-zinc-300">'+traits+'</div><h6 class="mt-3 font-semibold text-amber-200">Действия</h6><div class="mt-1 text-sm leading-relaxed text-zinc-300">'+actions+'</div>'+(m.legendary && m.legendary.length ? '<h6 class="mt-3 font-semibold text-amber-200">Легендарные действия</h6><div class="mt-1 text-sm leading-relaxed text-zinc-300">'+monsterTextEntries(m.legendary)+'</div>' : '')+'</div></details><div class="mt-3 flex flex-wrap gap-2"><button type="button" data-battle-details-pick="'+monsterText(m.id)+'" data-battle-enemy-edition="'+monsterText(m.edition)+'" class="rounded-lg bg-amber-400 px-3 py-2 text-sm font-bold text-zinc-950">Выбрать этого монстра</button><button type="button" data-battle-details-close class="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300">Скрыть информацию</button></div>';
       battleEnemyDetails.classList.remove('hidden');
     }
+    // Карточка монстра открывается нажатием на токен и работает по сохранённым характеристикам.
+    const battleTokenMonsterModal = document.createElement('div');
+    battleTokenMonsterModal.id = 'battle-token-monster-modal';
+    battleTokenMonsterModal.className = 'hidden fixed inset-0 z-[100] items-center justify-center bg-black/80 p-3 sm:p-6';
+    battleTokenMonsterModal.innerHTML = '<section class="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-amber-500/30 bg-zinc-950 p-4 shadow-2xl sm:p-6"><div class="mb-3 flex items-start justify-between gap-3"><div><h5 id="battle-token-monster-title" class="text-lg font-bold text-amber-200">Информация о монстре</h5><p id="battle-token-monster-current" class="mt-1 text-xs text-zinc-400"></p></div><button type="button" data-token-monster-close class="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-200">Закрыть ✕</button></div><div id="battle-token-monster-content"></div></section>';
+    document.body.appendChild(battleTokenMonsterModal);
+    const battleTokenMonsterContent = document.getElementById('battle-token-monster-content');
+    function openBattleTokenMonsterInfo(combatant) {
+      if (!combatant || combatant.side !== 'enemy') return;
+      let monster = combatant.monsterData || getAllMonsterSummaries().find(item => String(item.id) === String(combatant.monsterId) && String(item.edition) === String(combatant.monsterEdition));
+      if (!monster) {
+        document.getElementById('battle-token-monster-title').textContent = combatant.name;
+        document.getElementById('battle-token-monster-current').textContent = 'HP ' + combatant.hp + '/' + combatant.maxHp + (getArmorClass(combatant) !== null ? ' · КД ' + getArmorClass(combatant) : '');
+        battleTokenMonsterContent.innerHTML = '<p class="rounded-xl border border-zinc-800 p-4 text-sm text-zinc-300">Для этого старого токена подробные характеристики не сохранены. Добавь монстра из бестиария ещё раз, чтобы его карточка была доступна без сети.</p>';
+      } else {
+        document.getElementById('battle-token-monster-title').textContent = monster.name;
+        document.getElementById('battle-token-monster-current').textContent = 'В бою: HP ' + combatant.hp + '/' + combatant.maxHp + (getArmorClass(combatant) !== null ? ' · КД ' + getArmorClass(combatant) : '') + ' · базовые характеристики указаны в карточке ниже';
+        renderBattleMonsterDetails(monster);
+        battleTokenMonsterContent.innerHTML = battleEnemyDetails.innerHTML;
+        battleTokenMonsterContent.querySelectorAll('[data-battle-details-pick],[data-battle-details-close]').forEach(button => button.remove());
+      }
+      battleTokenMonsterModal.classList.remove('hidden');
+      battleTokenMonsterModal.classList.add('flex');
+    }
+    battleTokenMonsterModal.addEventListener('click', event => {
+      if (event.target === battleTokenMonsterModal || event.target.closest('[data-token-monster-close]')) {
+        battleTokenMonsterModal.classList.add('hidden');
+        battleTokenMonsterModal.classList.remove('flex');
+      }
+    });
+    battleMarkers.addEventListener('click', event => {
+      const token = event.target.closest('[data-battle-marker]');
+      if (!token) return;
+      const combatant = battleScene.combatants.find(item => String(item.id) === String(token.dataset.battleMarker));
+      if (combatant && combatant.side === 'enemy') openBattleTokenMonsterInfo(combatant);
+    });
     async function selectBattleFormMonster(monster, button) {
       if (!(monster.raw || monster.userCreated || monster.edition === 'custom' || monster.edition === 'homebrew')) monster = await fetchMonsterDetails(monster);
       selectedBattleFormMonster = monster;
