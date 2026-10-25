@@ -1263,8 +1263,10 @@
       const q = query.toLocaleLowerCase('ru').trim();
       const name = String(m.name || '').toLocaleLowerCase('ru');
       const type = String(m.type || '').toLocaleLowerCase('ru');
-      const alias = Object.entries(monsterAliases).filter(([en,ru]) => name.includes(en)).map(([en,ru]) => ru).join(' ');
-      return (name + ' ' + type + ' ' + alias + ' ' + String(m.cr)).includes(q);
+      const index = String(m.index || m.id || '').toLocaleLowerCase('ru');
+      const alias = Object.entries(monsterAliases).filter(([en,ru]) => name.includes(en) || index.includes(en)).map(([en,ru]) => ru).join(' ');
+      const haystack = (name + ' ' + type + ' ' + index + ' ' + alias + ' ' + String(m.cr)).normalize('NFKC');
+      return haystack.includes(q.normalize('NFKC'));
     }
     const offlineMonsterSeed = [
       {index:'goblin',name:'Goblin',size:'Small',type:'humanoid',alignment:'neutral evil',challenge_rating:0.25,armor_class:[{value:15}],hit_points:7,speed:{walk:'30 ft.'},strength:8,dexterity:14,constitution:10,intelligence:10,wisdom:8,charisma:8,actions:[{name:'Scimitar',desc:'Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) slashing damage.'}]},
@@ -1282,6 +1284,9 @@
       {index:'mage',name:'Mage',size:'Medium',type:'humanoid',alignment:'any alignment',challenge_rating:6,armor_class:[{value:12}],hit_points:40,speed:{walk:'30 ft.'},strength:9,dexterity:14,constitution:11,intelligence:17,wisdom:12,charisma:11},
       {index:'adult-red-dragon',name:'Adult Red Dragon',size:'Huge',type:'dragon',alignment:'chaotic evil',challenge_rating:17,armor_class:[{value:19}],hit_points:256,speed:{walk:'40 ft.',climb:'40 ft.',fly:'80 ft.'},strength:27,dexterity:10,constitution:25,intelligence:16,wisdom:13,charisma:21}
     ];
+    // Сразу показываем небольшой локальный каталог, пока читаются полные JSON-файлы.
+    // Это гарантирует, что окно добавления врага не останется пустым даже при сбое Pages/CDN.
+    monsterCatalog['2014'] = offlineMonsterSeed.map(raw => ({...normaliseMonster(raw, '2014'), index:raw.index, summary:'offline-srd-sample'}));
     async function loadMonsterEdition(edition, force) {
       if (monsterLoadState[edition] && !force) return;
       monsterLoadState[edition] = true;
@@ -1299,7 +1304,7 @@
         if (edition === '2014' && !monsterCatalog[edition].length) {
           monsterCatalog[edition] = offlineMonsterSeed.map(raw => ({...normaliseMonster(raw, '2014'), index:raw.index, summary:'offline-srd-sample'}));
         }
-        monsterStatus.textContent = 'Не удалось прочитать встроенный бестиарий ' + edition + '. Проверь, что файл data/srd-' + edition + '-monsters.json опубликован вместе с сайтом.';
+        monsterStatus.textContent = 'Не удалось загрузить полный каталог ' + edition + '. Сейчас показан встроенный запасной список. Ошибка: ' + String(error && error.message || error);
       }
     }
     async function fetchMonsterDetails(monster) {
