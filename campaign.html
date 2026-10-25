@@ -878,7 +878,7 @@
         const y = Math.max(5, Math.min(95, Number(c.y) || 14 + (Math.floor(i / 5) % 5) * 16));
         const color = sideColors[c.side] || sideColors.enemy;
         const portrait = getBattlePlayerPhoto(c.playerId);
-        return '<button type="button" draggable="false" data-battle-marker="' + safeText(c.id) + '" title="' + safeText(c.name) + ' — перетащи фишку" class="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 focus:outline-none focus:ring-2 focus:ring-amber-300" style="left:' + x + '%;top:' + y + '%;touch-action:none;max-width:92px">' +
+        return '<button type="button" draggable="false" data-battle-marker="' + safeText(c.id) + '" title="' + safeText(c.name) + ' — нажми для информации, перетащи для перемещения" class="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 focus:outline-none focus:ring-2 focus:ring-amber-300" style="left:' + x + '%;top:' + y + '%;touch-action:none;max-width:92px">' +
           '<span class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-white text-lg font-black text-white shadow-lg" style="background:' + color + '">' + (portrait ? '<img src="' + safeText(portrait) + '" alt="" class="h-full w-full object-cover">' : (c.side === 'enemy' ? '☠' : c.side === 'ally' ? '✦' : '♟')) + '</span>' +
           '<span class="max-w-[92px] rounded-md bg-zinc-950/90 px-1.5 py-0.5 text-center text-[11px] font-semibold leading-tight text-white">' + safeText(c.name) + '</span>' +
           '<span class="max-w-[110px] rounded-md bg-zinc-950/90 px-1.5 py-0.5 text-center text-[9px] font-medium leading-tight text-emerald-200">HP ' + safeText(c.hp) + '/' + safeText(c.maxHp) + (getArmorClass(c) !== null ? ' · КД ' + safeText(getArmorClass(c)) : '') + '</span></button>';
@@ -1474,6 +1474,7 @@
         document.getElementById('battle-token-monster-current').textContent = 'В бою: HP ' + combatant.hp + '/' + combatant.maxHp + (getArmorClass(combatant) !== null ? ' · КД ' + getArmorClass(combatant) : '') + ' · базовые характеристики указаны в карточке ниже';
         renderBattleMonsterDetails(monster);
         battleTokenMonsterContent.innerHTML = battleEnemyDetails.innerHTML;
+        battleEnemyDetails.classList.add('hidden');
         battleTokenMonsterContent.querySelectorAll('[data-battle-details-pick],[data-battle-details-close]').forEach(button => button.remove());
       }
       battleTokenMonsterModal.classList.remove('hidden');
