@@ -1227,7 +1227,7 @@
       const actions = raw.actions || raw.action || [];
       const traits = raw.special_abilities || raw.specialAbilities || raw.traits || [];
       const proficiencies = Array.isArray(raw.proficiencies) ? raw.proficiencies : [];
-      const proficiencyName = item => String(item && (item.proficiency && item.proficiency.name || item.name) || '').replace(/^(Saving Throw|Skill):\\s*/i, '');
+      const proficiencyName = item => String(item && (item.proficiency && item.proficiency.name || item.name) || '').replace(/^(Saving Throw|Skill):\s*/i, '');
       const savingProficiencies = proficiencies.filter(item => /^Saving Throw:/i.test(String(item && item.proficiency && item.proficiency.name || item && item.name || '')));
       const skillProficiencies = proficiencies.filter(item => /^Skill:/i.test(String(item && item.proficiency && item.proficiency.name || item && item.name || '')));
       const rawSaves = raw.saving_throws || raw.savingThrows || [];
