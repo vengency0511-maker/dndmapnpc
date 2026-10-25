@@ -1258,6 +1258,22 @@
       const alias = Object.entries(monsterAliases).filter(([en,ru]) => name.includes(en)).map(([en,ru]) => ru).join(' ');
       return (name + ' ' + type + ' ' + alias + ' ' + String(m.cr)).includes(q);
     }
+    const offlineMonsterSeed = [
+      {index:'goblin',name:'Goblin',size:'Small',type:'humanoid',alignment:'neutral evil',challenge_rating:0.25,armor_class:[{value:15}],hit_points:7,speed:{walk:'30 ft.'},strength:8,dexterity:14,constitution:10,intelligence:10,wisdom:8,charisma:8,actions:[{name:'Scimitar',desc:'Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) slashing damage.'}]},
+      {index:'orc',name:'Orc',size:'Medium',type:'humanoid',alignment:'chaotic evil',challenge_rating:0.5,armor_class:[{value:13}],hit_points:15,speed:{walk:'30 ft.'},strength:16,dexterity:12,constitution:16,intelligence:7,wisdom:11,charisma:10,actions:[{name:'Greataxe',desc:'Melee Weapon Attack: +5 to hit. Hit: 9 (1d12 + 3) slashing damage.'}]},
+      {index:'skeleton',name:'Skeleton',size:'Medium',type:'undead',alignment:'lawful evil',challenge_rating:0.25,armor_class:[{value:13}],hit_points:13,speed:{walk:'30 ft.'},strength:10,dexterity:14,constitution:15,intelligence:6,wisdom:8,charisma:5},
+      {index:'zombie',name:'Zombie',size:'Medium',type:'undead',alignment:'neutral evil',challenge_rating:0.25,armor_class:[{value:8}],hit_points:22,speed:{walk:'20 ft.'},strength:13,dexterity:6,constitution:16,intelligence:3,wisdom:6,charisma:5},
+      {index:'wolf',name:'Wolf',size:'Medium',type:'beast',alignment:'unaligned',challenge_rating:0.25,armor_class:[{value:13}],hit_points:11,speed:{walk:'40 ft.'},strength:12,dexterity:15,constitution:12,intelligence:3,wisdom:12,charisma:6},
+      {index:'bandit',name:'Bandit',size:'Medium',type:'humanoid',alignment:'any non-lawful alignment',challenge_rating:0.125,armor_class:[{value:12}],hit_points:11,speed:{walk:'30 ft.'},strength:11,dexterity:12,constitution:12,intelligence:10,wisdom:10,charisma:10},
+      {index:'guard',name:'Guard',size:'Medium',type:'humanoid',alignment:'any alignment',challenge_rating:0.125,armor_class:[{value:16}],hit_points:11,speed:{walk:'30 ft.'},strength:13,dexterity:12,constitution:12,intelligence:10,wisdom:11,charisma:10},
+      {index:'cultist',name:'Cultist',size:'Medium',type:'humanoid',alignment:'any non-good alignment',challenge_rating:0.125,armor_class:[{value:12}],hit_points:9,speed:{walk:'30 ft.'},strength:11,dexterity:12,constitution:10,intelligence:10,wisdom:11,charisma:10},
+      {index:'giant-spider',name:'Giant Spider',size:'Large',type:'beast',alignment:'unaligned',challenge_rating:1,armor_class:[{value:14}],hit_points:26,speed:{walk:'30 ft.',climb:'30 ft.'},strength:14,dexterity:16,constitution:12,intelligence:2,wisdom:11,charisma:4},
+      {index:'owlbear',name:'Owlbear',size:'Large',type:'monstrosity',alignment:'unaligned',challenge_rating:3,armor_class:[{value:13}],hit_points:59,speed:{walk:'40 ft.'},strength:20,dexterity:12,constitution:17,intelligence:3,wisdom:12,charisma:7},
+      {index:'ogre',name:'Ogre',size:'Large',type:'giant',alignment:'chaotic evil',challenge_rating:2,armor_class:[{value:11}],hit_points:59,speed:{walk:'40 ft.'},strength:19,dexterity:8,constitution:16,intelligence:5,wisdom:7,charisma:7},
+      {index:'troll',name:'Troll',size:'Large',type:'giant',alignment:'chaotic evil',challenge_rating:5,armor_class:[{value:15}],hit_points:84,speed:{walk:'30 ft.'},strength:18,dexterity:13,constitution:20,intelligence:7,wisdom:9,charisma:7},
+      {index:'mage',name:'Mage',size:'Medium',type:'humanoid',alignment:'any alignment',challenge_rating:6,armor_class:[{value:12}],hit_points:40,speed:{walk:'30 ft.'},strength:9,dexterity:14,constitution:11,intelligence:17,wisdom:12,charisma:11},
+      {index:'adult-red-dragon',name:'Adult Red Dragon',size:'Huge',type:'dragon',alignment:'chaotic evil',challenge_rating:17,armor_class:[{value:19}],hit_points:256,speed:{walk:'40 ft.',climb:'40 ft.',fly:'80 ft.'},strength:27,dexterity:10,constitution:25,intelligence:16,wisdom:13,charisma:21}
+    ];
     async function loadMonsterEdition(edition, force) {
       if (monsterLoadState[edition] && !force) return;
       monsterLoadState[edition] = true;
@@ -1266,11 +1282,15 @@
         if (!response.ok) throw new Error('HTTP ' + response.status);
         const data = await response.json();
         const list = Array.isArray(data.results) ? data.results : Array.isArray(data.data) ? data.data : [];
-        monsterCatalog[edition] = list.map(item => ({id:item.index || item.key, name:item.name, edition, index:item.index || item.key, summary:item.url || ''})).filter(item => item.name);
+        if (!list.length) throw new Error('API вернул пустой список');
+        monsterCatalog[edition] = list.map(item => ({id:item.index || item.key || item.slug, name:item.name, edition, index:item.index || item.key || item.slug, summary:item.url || ''})).filter(item => item.name);
         monsterLoadError = false;
       } catch (error) {
         monsterLoadError = true;
-        monsterStatus.textContent = 'Не удалось загрузить каталог ' + edition + '. Проверь подключение и нажми «Обновить каталог».';
+        if (edition === '2014' && !monsterCatalog[edition].length) {
+          monsterCatalog[edition] = offlineMonsterSeed.map(raw => ({...normaliseMonster(raw, '2014'), index:raw.index, summary:'offline-srd-sample'}));
+        }
+        monsterStatus.textContent = 'Не удалось подключиться к каталогу ' + edition + '. Показан встроенный запасной список, если он доступен.';
       }
     }
     async function fetchMonsterDetails(monster) {
@@ -1402,7 +1422,8 @@
       let list = edition === 'custom' ? custom : [...(edition === '2014' || edition === 'both' ? monsterCatalog['2014'] : []), ...(edition === '2024' || edition === 'both' ? monsterCatalog['2024'] : [])];
       if (edition !== 'custom') list = list.concat(custom.filter(m => edition === 'both' || m.edition === edition));
       list = list.filter(m => monsterMatches(m,query)).slice(0,20);
-      battleEnemyResults.innerHTML = list.length ? list.map(m => '<article class="flex flex-wrap items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950 p-2"><div class="min-w-0 flex-1"><p class="text-sm font-semibold text-zinc-100">'+monsterText(m.name)+'</p><p class="text-xs text-zinc-500">'+monsterText(m.edition === 'custom' || m.edition === 'homebrew' ? 'Авторский' : monsterEditionLabel(m.edition))+(m.type?' · '+monsterText(m.type):'')+(m.cr?' · ПО '+monsterText(m.cr):'')+'</p></div><button type="button" data-battle-enemy-details="'+monsterText(m.id)+'" data-battle-enemy-edition="'+monsterText(m.edition)+'" class="rounded-lg border border-amber-500/40 px-3 py-2 text-xs font-semibold text-amber-200">Информация</button><button type="button" data-battle-enemy-pick="'+monsterText(m.id)+'" data-battle-enemy-edition="'+monsterText(m.edition)+'" class="rounded-lg border border-red-500/40 px-3 py-2 text-xs font-semibold text-red-200">Выбрать</button></article>').join('') : '<p class="rounded-lg border border-dashed border-zinc-700 p-3 text-xs text-zinc-500">Монстры не найдены. Попробуй другой запрос или редакцию.</p>';
+      const offlineNote = monsterLoadError && list.some(m => m.summary === 'offline-srd-sample') ? '<p class="rounded-lg border border-amber-500/30 p-2 text-xs text-amber-200">Внешний каталог недоступен. Ниже показан встроенный запасной список монстров; можно добавить их в бой.</p>' : '';
+      battleEnemyResults.innerHTML = offlineNote + (list.length ? list.map(m => '<article class="flex flex-wrap items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950 p-2"><div class="min-w-0 flex-1"><p class="text-sm font-semibold text-zinc-100">'+monsterText(m.name)+'</p><p class="text-xs text-zinc-500">'+monsterText(m.edition === 'custom' || m.edition === 'homebrew' ? 'Авторский' : monsterEditionLabel(m.edition))+(m.type?' · '+monsterText(m.type):'')+(m.cr?' · ПО '+monsterText(m.cr):'')+'</p></div><button type="button" data-battle-enemy-details="'+monsterText(m.id)+'" data-battle-enemy-edition="'+monsterText(m.edition)+'" class="rounded-lg border border-amber-500/40 px-3 py-2 text-xs font-semibold text-amber-200">Информация</button><button type="button" data-battle-enemy-pick="'+monsterText(m.id)+'" data-battle-enemy-edition="'+monsterText(m.edition)+'" class="rounded-lg border border-red-500/40 px-3 py-2 text-xs font-semibold text-red-200">Выбрать</button></article>').join('') : '<p class="rounded-lg border border-dashed border-zinc-700 p-3 text-xs text-zinc-500">Монстры не найдены. Попробуй другой запрос или редакцию.</p>');
     }
     function toggleBattleEnemyPicker() {
       const isEnemy = battleCombatantSide.value === 'enemy';
