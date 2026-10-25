@@ -9,7 +9,7 @@
   <style>
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
-    body { min-width: 320px; }
+    body { min-width: 320px; background-color: #09090b; background-attachment: fixed; }
     button, a { -webkit-tap-highlight-color: transparent; }
     button { touch-action: manipulation; }
     .tab-button[aria-selected="true"] { color: #fcd34d; background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.45); }
@@ -76,13 +76,13 @@
     </section>
 
     <nav class="tab-strip mt-8 flex flex-wrap gap-2 border-b border-zinc-800 pb-4" role="tablist" aria-label="Разделы кампании">
-      <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-dashboard" role="tab" aria-controls="panel-dashboard" aria-selected="false" data-tab="dashboard">Панель мастера</button>
       <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-overview" role="tab" aria-controls="panel-overview" aria-selected="true" data-tab="overview">Обзор</button>
+      <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-npcs" role="tab" aria-controls="panel-npcs" aria-selected="false" data-tab="npcs">NPC и фракции</button>
+      <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-sessions" role="tab" aria-controls="panel-sessions" aria-selected="false" data-tab="sessions">Журнал сессии</button>
+      <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-dashboard" role="tab" aria-controls="panel-dashboard" aria-selected="false" data-tab="dashboard">Панель мастера</button>
+      <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-players" role="tab" aria-controls="panel-players" aria-selected="false" data-tab="players">Персонажи игроков</button>
       <button class="hidden tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-map" role="tab" aria-controls="panel-map" aria-selected="false" data-tab="map">Карта</button>
       <button class="hidden tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-battlemaps" role="tab" aria-controls="panel-battlemaps" aria-selected="false" data-tab="battlemaps">Боевые карты · мастер</button>
-      <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-players" role="tab" aria-controls="panel-players" aria-selected="false" data-tab="players">Персонажи игроков</button>
-      <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-npcs" role="tab" aria-controls="panel-npcs" aria-selected="false" data-tab="npcs">NPC и фракции</button>
-      <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300 hover:border-amber-500/40" id="tab-sessions" role="tab" aria-controls="panel-sessions" aria-selected="false" data-tab="sessions">Журнал сессий</button>
     </nav>
 
     <section id="panel-dashboard" class="tab-panel py-8" role="tabpanel" aria-labelledby="tab-dashboard" hidden>
@@ -1401,7 +1401,7 @@
       if (savedPlayers.some(player => player.id === selectedId)) battlePlayerSelect.value = selectedId;
     }
     function toggleBattlePlayerPicker() {
-      const canPickPlayer = battleCombatantSide.value !== 'enemy';
+      const canPickPlayer = battleCombatantSide.value === 'hero';
       battlePlayerPicker.classList.toggle('hidden', !canPickPlayer);
       renderBattlePlayerOptions();
       if (!canPickPlayer) {
