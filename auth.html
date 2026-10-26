@@ -37,6 +37,7 @@
 </div>
 <form id="auth-form" class="mt-5 space-y-4">
 <div id="display-name-field" class="field hidden"><label for="display-name">Как к тебе обращаться</label><input id="display-name" maxlength="60" autocomplete="nickname" placeholder="Имя в приключении"></div>
+<div id="signup-role-field" class="field hidden"><label for="signup-role">Какую роль ты выбираешь?</label><select id="signup-role" class="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-3 text-white"><option value="player">Игрок — присоединиться к приключению</option><option value="master">Мастер — создать и вести кампанию</option></select><p class="text-xs leading-relaxed text-zinc-500">Выбор Мастера — это запрос роли. Доступ к инструментам мастера включается после подтверждения владельцем проекта, чтобы любой зарегистрировавшийся не мог получить права ведущего.</p></div>
 <div class="field"><label for="email">Электронная почта</label><input id="email" type="email" required autocomplete="email" placeholder="you@example.com"></div>
 <div class="field"><label for="password">Пароль</label><input id="password" type="password" required minlength="8" autocomplete="current-password" placeholder="Не менее 8 символов"></div>
 <button id="submit-btn" class="primary w-full" type="submit">Войти</button>
@@ -98,6 +99,7 @@
     $('signin-tab').setAttribute('aria-selected', String(mode === 'signin'));
     $('signup-tab').setAttribute('aria-selected', String(mode === 'signup'));
     $('display-name-field').classList.toggle('hidden', mode !== 'signup');
+    $('signup-role-field').classList.toggle('hidden', mode !== 'signup');
     $('submit-btn').textContent = mode === 'signup' ? 'Создать аккаунт' : 'Войти';
     $('password').autocomplete = mode === 'signup' ? 'new-password' : 'current-password';
     $('forgot-btn').classList.toggle('hidden', mode !== 'signin');
@@ -134,7 +136,7 @@
     $('role-badge').className = 'rounded-full border px-3 py-1 text-sm ' + (role === 'master' ? 'border-amber-400/30 bg-amber-400/10 text-amber-200' : 'border-blue-400/30 bg-blue-400/10 text-blue-200');
     $('role-description').textContent = role === 'master'
       ? 'Роль Мастера назначена в базе данных. Сейчас подключена базовая авторизация; следующие шаги — привязать кампании и права мастера.'
-      : 'Новые аккаунты по умолчанию получают роль Игрока. Мастер может быть назначен владельцем проекта через SQL Editor; выбор роли недоступен в браузере.';
+      : 'Аккаунт зарегистрирован как Игрок. Если при регистрации выбран Мастер, это запрос роли; права Мастера нужно подтвердить в базе данных.';
     $('profile-warning').textContent = warning;
   }
   async function restoreSession() {
@@ -209,7 +211,7 @@
         const displayName = $('display-name').value.trim();
         const { data, error } = await client.auth.signUp({
           email, password,
-          options: { data: { display_name: displayName }, emailRedirectTo: location.origin + location.pathname }
+          options: { data: { display_name: displayName, requested_role: $('signup-role').value }, emailRedirectTo: location.origin + location.pathname }
         });
         if (error) throw error;
         if (data.session?.user) {
@@ -217,7 +219,7 @@
           await loadProfile(data.session.user);
           message('Аккаунт создан. Добро пожаловать!', false);
         } else {
-          message('Регистрация отправлена. Проверь почту и подтверди адрес, затем войди в аккаунт.');
+          message($('signup-role').value === 'master' ? 'Регистрация отправлена. Подтверди почту. Запрос на роль Мастера сохранится, но права Мастера должен отдельно назначить владелец проекта.' : 'Регистрация отправлена. Проверь почту и подтверди адрес, затем войди в аккаунт.');
         }
       } else {
         const { data, error } = await client.auth.signInWithPassword({ email, password });
