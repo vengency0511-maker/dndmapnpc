@@ -24,6 +24,9 @@
     body:not(.role-verified) #quest-form,
     body:not(.role-verified) #secret-note-form,
     body:not(.role-verified) #dm-quick-note-form { display: none !important; }
+    body.master-role #add-player-button,
+    body.master-role #player-form,
+    body.master-role #player-list button,
     body.player-role #tab-dashboard,
     body.player-role #panel-dashboard,
     body.player-role #overview-edit-form,
@@ -36,7 +39,26 @@
     body.player-role #world-entry-list button,
     body.player-role #session-list button,
     body.player-role #quest-list button,
-    body.player-role #secret-note-list button { display: none !important; }
+    body.player-role #secret-note-list button,
+    body.player-role #tab-battlemaps,
+    body.player-role #panel-battlemaps .master-map-tools,
+    body.player-role #panel-battlemaps > .mt-8,
+    body.player-role #panel-battlemaps > .mb-6,
+    body.player-role #panel-battlemaps > p,
+    body.player-role #panel-battlemaps #battle-scene-saved-map,
+    body.player-role #panel-battlemaps #battle-scene-use-saved-map,
+    body.player-role #panel-battlemaps #battle-scene-settings,
+    body.player-role #panel-battlemaps #battle-combatant-form,
+    body.player-role #panel-battlemaps #battle-next-turn,
+    body.player-role #panel-battlemaps #battle-reset-turn { display: none !important; }
+    body.player-role #panel-battlemaps { display:block !important; }
+    body.player-role #panel-battlemaps #battle-scene-board { pointer-events:none; }
+    body.player-role #panel-players #add-player-button,
+    body.player-role #panel-players #player-form,
+    body.player-role #panel-players #player-list button,
+    body.player-role #world-entry-list [data-world-edit],
+    body.player-role #world-entry-list [data-world-delete],
+    body.player-role #world-entry-list .gm-private-note { display:none !important; }
     .role-status { display:inline-flex; align-items:center; gap:.45rem; border:1px solid #3f3f46; border-radius:999px; padding:.4rem .75rem; font-size:.8rem; color:#d4d4d8; }
     .role-status.master { border-color:#92400e; background:#451a03aa; color:#fcd34d; }
     .role-status.player { border-color:#1d4ed8; background:#172554aa; color:#bfdbfe; }
@@ -276,7 +298,7 @@
     </section>
 
     <section id="panel-battlemaps" class="tab-panel py-8" role="tabpanel" aria-labelledby="tab-battlemaps" hidden>
-      <div class="mb-6"><p class="text-xs uppercase tracking-[.2em] text-amber-400">Инструменты ведущего</p><h2 class="mt-2 text-3xl font-black">Библиотека боевых карт</h2><p class="mt-2 max-w-3xl text-zinc-400">Личная подборка карт и тактическая сцена для подготовки столкновений.</p></div>
+      <div class="mb-6 master-map-tools"><p class="text-xs uppercase tracking-[.2em] text-amber-400">Инструменты ведущего</p><h2 class="mt-2 text-3xl font-black">Библиотека боевых карт</h2><p class="mt-2 max-w-3xl text-zinc-400">Личная подборка карт и тактическая сцена для подготовки столкновений.</p></div><div id="player-readonly-map" class="mb-6 hidden rounded-2xl border border-blue-500/30 bg-blue-950/20 p-4"><h2 class="text-xl font-bold text-blue-200">Карта от Мастера</h2><p class="mt-1 text-sm text-zinc-400">Игрок видит поле, выбранное Мастером, без возможности менять карту.</p></div>
       <div class="mb-6 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm leading-relaxed text-amber-100"><strong>На будущее:</strong> вкладка пока не защищена авторизацией и видна всем, кто откроет страницу. Не добавляй сюда секретные сюжетные детали. Записи хранятся локально в этом браузере.</div>
       <p class="mb-6 text-sm text-zinc-400">Внешних каталогов карт здесь больше нет. Позже добавим собственную базу карт; пока используй свою подборку ниже.</p>
       <div class="mt-8 grid gap-6 xl:grid-cols-[minmax(0,.85fr)_minmax(0,1.15fr)]">
@@ -435,6 +457,11 @@
       status.classList.add(role === 'master' ? 'master' : 'player');
       if (role !== 'master') {
         document.getElementById('tab-dashboard').classList.add('hidden');
+        document.getElementById('tab-battlemaps').classList.remove('hidden');
+        document.getElementById('player-readonly-map')?.classList.remove('hidden');
+        document.querySelectorAll('#panel-battlemaps input, #panel-battlemaps select, #panel-battlemaps textarea, #panel-battlemaps form button').forEach(function(control) { control.disabled = true; });
+        document.getElementById('battle-scene-board')?.setAttribute('aria-label', 'Карта, выбранная Мастером; режим просмотра');
+        document.querySelectorAll('#panel-sessions #session-form, #panel-sessions #quest-form, #panel-sessions #secret-note-form').forEach(function(form) { form.classList.add('hidden'); });
         document.querySelectorAll('#panel-npcs form, #panel-map form, #session-form, #quest-form, #secret-note-form, #dm-quick-note-form').forEach(function(el) {
           el.setAttribute('aria-hidden', 'true');
           el.querySelectorAll('input,textarea,select,button').forEach(function(control) { control.disabled = true; });
@@ -442,6 +469,10 @@
         document.querySelectorAll('#world-entry-list button, #session-list button, #quest-list button, #secret-note-list button').forEach(function(button) { button.disabled = true; });
         const secretForm = document.getElementById('secret-note-form');
         if (secretForm && secretForm.closest('section')) secretForm.closest('section').classList.add('hidden');
+      }
+      if (role === 'master') {
+        document.getElementById('add-player-button')?.classList.add('hidden');
+        document.getElementById('player-form')?.classList.add('hidden');
       }
       window.dndLoreCurrentRole = role;
       window.dndLoreIsMaster = role === 'master';
@@ -639,7 +670,7 @@
           '</div><span class="rounded-full border px-3 py-1 text-xs ' + stanceClass + '">' + safeText(worldStanceLabels[item.stance] || worldStanceLabels.unknown) + '</span></div>' +
           ((item.type === 'npc' || item.type === 'faction') && item.photoImageId ? '<div class="mt-4"><img data-world-photo="' + safeText(item.photoImageId) + '" alt="Изображение: ' + safeText(item.name) + '" loading="lazy" class="max-h-72 w-auto max-w-full rounded-xl border border-zinc-800 object-cover"></div>' : '') +
           (item.description ? '<p class="mt-4 whitespace-pre-wrap break-words text-sm leading-relaxed text-zinc-300">' + safeText(item.description) + '</p>' : '') +
-          (item.notes ? '<div class="mt-4 rounded-xl border border-amber-500/10 bg-amber-500/5 p-3"><p class="mb-1 text-xs font-semibold uppercase tracking-wide text-amber-300">Заметки ведущего</p><p class="whitespace-pre-wrap break-words text-sm leading-relaxed text-zinc-300">' + safeText(item.notes) + '</p></div>' : '') +
+          (item.notes ? '<div class="gm-private-note mt-4 rounded-xl border border-amber-500/10 bg-amber-500/5 p-3"><p class="mb-1 text-xs font-semibold uppercase tracking-wide text-amber-300">Заметки ведущего</p><p class="whitespace-pre-wrap break-words text-sm leading-relaxed text-zinc-300">' + safeText(item.notes) + '</p></div>' : '') +
           '<div class="mt-4 flex gap-2 border-t border-zinc-800 pt-3"><button type="button" data-world-edit="' + safeText(item.id) + '" class="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300 hover:border-amber-400">Редактировать</button><button type="button" data-world-delete="' + safeText(item.id) + '" class="rounded-lg border border-zinc-800 px-3 py-2 text-sm text-red-300 hover:border-red-400">Удалить</button></div></article>';
       }).join('');
       list.querySelectorAll('[data-world-photo]').forEach(async img => {
@@ -679,6 +710,7 @@
     document.getElementById('world-entry-cancel').addEventListener('click', resetWorldEntryForm);
     document.getElementById('world-entry-filter').addEventListener('change', renderWorldEntries);
     document.getElementById('world-entry-list').addEventListener('click', event => {
+      if (window.dndLoreIsMaster !== true && event.target.closest('[data-world-edit], [data-world-delete]')) return;
       const editButton = event.target.closest('[data-world-edit]');
       const deleteButton = event.target.closest('[data-world-delete]');
       if (editButton) {
