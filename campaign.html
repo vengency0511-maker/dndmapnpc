@@ -242,7 +242,7 @@
     <section id="panel-battlemaps" class="tab-panel py-8" role="tabpanel" aria-labelledby="tab-battlemaps" hidden>
       <div class="mb-6"><p class="text-xs uppercase tracking-[.2em] text-amber-400">Инструменты ведущего</p><h2 class="mt-2 text-3xl font-black">Библиотека боевых карт</h2><p class="mt-2 max-w-3xl text-zinc-400">Личная подборка карт и тактическая сцена для подготовки столкновений.</p></div>
       <div class="mb-6 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm leading-relaxed text-amber-100"><strong>На будущее:</strong> вкладка пока не защищена авторизацией и видна всем, кто откроет страницу. Не добавляй сюда секретные сюжетные детали. Записи хранятся локально в этом браузере.</div>
-      <p class="mb-6 text-sm text-zinc-400">Внешние каталоги убраны. Позже здесь появится собственная база карт; пока можно сохранять свои карты в подборке ниже.</p>
+      <p class="mb-6 text-sm text-zinc-400">Внешних каталогов карт здесь больше нет. Позже добавим собственную базу карт; пока используй свою подборку ниже.</p>
       <div class="mt-8 grid gap-6 xl:grid-cols-[minmax(0,.85fr)_minmax(0,1.15fr)]">
         <section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 md:p-7"><h3 class="text-xl font-bold text-amber-200">Добавить карту в свою подборку</h3><p class="mt-2 text-sm text-zinc-400">Сохраняй ссылку на карту, чтобы быстро открыть её перед боем. Можно добавить заметку о встрече или местности.</p>
           <form id="battlemap-form" class="mt-5 space-y-4">
@@ -628,7 +628,7 @@
       document.getElementById('battlemap-count').textContent = campaignData.battleMaps.length + (campaignData.battleMaps.length === 1 ? ' карта' : campaignData.battleMaps.length >= 2 && campaignData.battleMaps.length <= 4 ? ' карты' : ' карт');
       const list = document.getElementById('battlemap-list');
       if (!entries.length) {
-        list.innerHTML = '<p class="rounded-xl border border-dashed border-zinc-800 p-5 text-sm text-zinc-500">Пока нет сохранённых карт. Добавь ссылку на карту из одного из каталогов выше.</p>';
+        list.innerHTML = '<p class="rounded-xl border border-dashed border-zinc-800 p-5 text-sm text-zinc-500">Пока нет сохранённых карт. Добавь прямую ссылку на изображение или загрузи карту с компьютера.</p>';
         return;
       }
       list.innerHTML = entries.slice().reverse().map(item => '<article class="rounded-2xl border border-zinc-800 bg-zinc-950 p-4"><div class="flex flex-wrap items-start justify-between gap-2"><div class="min-w-0"><h4 class="break-words font-semibold text-amber-200">' + safeText(item.title) + '</h4><p class="mt-1 text-xs text-zinc-500">' + safeText(battleMapTypes[item.type] || 'Другое') + (item.source ? ' · ' + safeText(item.source) : '') + (item.imageId ? ' · Файл с компьютера' : '') + '</p></div><button type="button" data-battlemap-delete="' + safeText(item.id) + '" class="rounded-lg border border-zinc-800 px-3 py-2 text-xs text-red-300">Удалить</button></div>' + (item.notes ? '<p class="mt-3 whitespace-pre-wrap break-words text-sm text-zinc-300">' + safeText(item.notes) + '</p>' : '') + (item.imageId ? '<div class="mt-3 overflow-hidden rounded-xl border border-zinc-800"><img data-battlemap-preview="' + safeText(item.imageId) + '" alt="' + safeText(item.title) + '" class="mx-auto block max-h-[70vh] w-auto max-w-full object-contain"></div><button type="button" data-battlemap-use="' + safeText(item.id) + '" class="mt-3 rounded-xl border border-amber-500/30 px-3 py-2 text-sm text-amber-200">Наложить на тактическую сцену</button>' : '') + (item.url ? '<a href="' + safeText(item.url) + '" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex max-w-full break-all rounded-xl border border-amber-500/30 px-3 py-2 text-sm text-amber-200">Открыть карту / источник ↗</a>' : '') + '</article>').join('');
@@ -873,7 +873,7 @@
         const y = Math.max(5, Math.min(95, Number(c.y) || 14 + (Math.floor(i / 5) % 5) * 16));
         const color = sideColors[c.side] || sideColors.enemy;
         const portrait = getBattlePlayerPhoto(c.playerId);
-        return '<button type="button" draggable="false" data-battle-marker="' + safeText(c.id) + '" title="' + safeText(c.name) + ' — нажми для информации, перетащи для перемещения" class="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 focus:outline-none focus:ring-2 focus:ring-amber-300" style="left:' + x + '%;top:' + y + '%;touch-action:none;max-width:92px">' +
+        return '<button type="button" draggable="false" data-battle-marker="' + safeText(c.id) + '" aria-label="' + safeText(c.name) + ' — перетащи для перемещения" class="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 focus:outline-none focus:ring-2 focus:ring-amber-300" style="left:' + x + '%;top:' + y + '%;touch-action:none;max-width:92px">' +
           '<span class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-white text-lg font-black text-white shadow-lg" style="background:' + color + '">' + (portrait ? '<img src="' + safeText(portrait) + '" alt="" class="h-full w-full object-cover">' : (c.side === 'enemy' ? '☠' : c.side === 'ally' ? '✦' : '♟')) + '</span>' +
           '<span class="max-w-[92px] rounded-md bg-zinc-950/90 px-1.5 py-0.5 text-center text-[11px] font-semibold leading-tight text-white">' + safeText(c.name) + '</span>' +
           '<span class="max-w-[110px] rounded-md bg-zinc-950/90 px-1.5 py-0.5 text-center text-[9px] font-medium leading-tight text-emerald-200">HP ' + safeText(c.hp) + '/' + safeText(c.maxHp) + (getArmorClass(c) !== null ? ' · КД ' + safeText(getArmorClass(c)) : '') + '</span></button>';
@@ -969,6 +969,13 @@
       saveBattleScene(); renderBattleScene();
     });
     let draggedBattleMarker = null;
+    // Токены служат только для перетаскивания: клик по врагу не открывает карточку информации.
+    battleMarkers.addEventListener('click', event => {
+      const marker = event.target.closest('[data-battle-marker]');
+      if (!marker) return;
+      event.preventDefault();
+      event.stopPropagation();
+    });
     battleMarkers.addEventListener('pointerdown', event => {
       const marker = event.target.closest('[data-battle-marker]');
       if (!marker) return;
