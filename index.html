@@ -228,8 +228,6 @@
     };
 
     const defaultCampaigns = [
-      { title: 'Нисхождение в Авернус', description: 'Кампания по Forgotten Realms с путешествием в Авернус.', href: null },
-      { title: 'Проклятие Страда', description: 'Мрачное приключение в Баровии.', href: null },
       { title: 'Гром штурмового короля', description: 'Эпическое приключение по Дикому Северу Фаэруна: великаны, древние руны и тайны Севера.', href: 'campaign.html', levels: '1–11 уровень', setting: 'Forgotten Realms · Дикий Север' }
     ];
 
@@ -255,6 +253,15 @@
     }
 
     let campaigns = readStorage(STORAGE_KEYS.campaigns, defaultCampaigns);
+    // Hide the two campaigns that have not been set up yet, including stale browser-saved defaults.
+    const unavailableCampaignTitles = new Set(['нисхождение в авернус', 'проклятие страда']);
+    const visibleCampaigns = campaigns.filter(function(campaign) {
+      return !unavailableCampaignTitles.has((campaign.title || '').trim().toLocaleLowerCase('ru'));
+    });
+    if (visibleCampaigns.length !== campaigns.length) {
+      campaigns = visibleCampaigns;
+      saveStorage(STORAGE_KEYS.campaigns, campaigns);
+    }
     let markers = readStorage(STORAGE_KEYS.markers, []);
     const campaignList = document.getElementById('campaignList');
     const emptyCampaigns = document.getElementById('emptyCampaigns');
