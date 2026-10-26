@@ -103,13 +103,16 @@
           setting: item.setting,
           sourceId: item.id,
           source: 'official',
-          href: item.href || null,
+          id: item.id,
+          href: item.href || ('campaign-page.html?id=' + encodeURIComponent(item.id)),
           createdAt: new Date().toISOString()
         };
         campaigns.push(campaign);
         if (saveStorage(STORAGE_KEYS.campaigns, campaigns)) {
           renderCampaigns();
           renderCatalog();
+          closeModal(officialModal);
+          window.location.href = campaign.href;
         }
       });
       card.append(title, originalTitle, description, meta, button);
@@ -133,10 +136,12 @@
     const description = document.getElementById('customCampaignDescription').value.trim();
     const levels = document.getElementById('customCampaignLevels').value.trim();
     const setting = document.getElementById('customCampaignSetting').value.trim();
+    const campaignId = 'custom-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
     const campaign = {
+      id: campaignId,
       title: title,
       description: description,
-      href: null,
+      href: 'campaign-page.html?id=' + encodeURIComponent(campaignId),
       source: 'custom',
       createdAt: new Date().toISOString()
     };
@@ -148,7 +153,7 @@
       renderCampaigns();
       closeModal(customModal);
       customForm.reset();
-      document.getElementById('campaigns').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.location.href = campaign.href;
     }
   }
 
