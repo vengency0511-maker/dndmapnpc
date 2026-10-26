@@ -17,6 +17,7 @@
     .tab-panel[hidden] { display: none; }
     body:not(.role-verified) #tab-dashboard,
     body:not(.role-verified) #panel-dashboard,
+    body:not(.role-verified) #overview-edit-form,
     body:not(.role-verified) #panel-npcs form,
     body:not(.role-verified) #panel-map form,
     body:not(.role-verified) #session-form,
@@ -25,6 +26,7 @@
     body:not(.role-verified) #dm-quick-note-form { display: none !important; }
     body.player-role #tab-dashboard,
     body.player-role #panel-dashboard,
+    body.player-role #overview-edit-form,
     body.player-role #panel-npcs form,
     body.player-role #panel-map form,
     body.player-role #session-form,
@@ -160,6 +162,16 @@
           <div class="mt-7 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4">
             <p class="text-sm font-semibold text-amber-200">Заметка кампании</p>
             <p class="mt-2 text-sm leading-relaxed text-zinc-400">Пока здесь общая информация по приключению. Персональные записи вашей группы можно будет добавить отдельно.</p>
+          </div>
+          <div class="mt-5 rounded-2xl border border-zinc-700 bg-zinc-950/70 p-4">
+            <h3 class="font-semibold text-amber-200">Дополнение к обзору</h3>
+            <p id="overview-master-note" class="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-zinc-300">Мастер пока не добавил заметок к обзору.</p>
+            <form id="overview-edit-form" class="mt-4 space-y-3">
+              <label class="block text-sm text-zinc-300">Текст обзора для всей группы
+                <textarea id="overview-edit-text" maxlength="6000" rows="4" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-base text-white" placeholder="Краткое описание кампании, известные игрокам сведения и важные договорённости…"></textarea>
+              </label>
+              <div class="flex flex-wrap items-center gap-3"><button type="submit" class="rounded-xl bg-amber-400 px-4 py-3 font-semibold text-zinc-950">Сохранить обзор</button><span id="overview-edit-status" class="text-sm text-zinc-500" role="status"></span></div>
+            </form>
           </div>
         </aside>
       </div>
@@ -465,7 +477,7 @@
     });
     // Панель мастера, журнал, квесты и авторские заметки.
     const CAMPAIGN_DATA_KEY = 'dnd-lore-stormking-dm-tools-v1';
-    const defaultCampaignData = { sessions: [], quests: [], playerNotes: [], secretNotes: [], quickNotes: [], battleMaps: [], worldEntries: [{id:'npc-zephyros',type:'npc',name:'Зефирос',role:'Облачный великан · учёный',stance:'unknown',description:'Загадочный исследователь, способный неожиданно вмешаться в путешествие героев.',notes:''},{id:'npc-neri',type:'npc',name:'Нери',role:'Королева штормовых великанов',stance:'unknown',description:'Супруга Хекатона; её судьба связана с историей королевской семьи.',notes:''}] };
+    const defaultCampaignData = { overviewNote: '', sessions: [], quests: [], playerNotes: [], secretNotes: [], quickNotes: [], battleMaps: [], worldEntries: [{id:'npc-zephyros',type:'npc',name:'Зефирос',role:'Облачный великан · учёный',stance:'unknown',description:'Загадочный исследователь, способный неожиданно вмешаться в путешествие героев.',notes:''},{id:'npc-neri',type:'npc',name:'Нери',role:'Королева штормовых великанов',stance:'unknown',description:'Супруга Хекатона; её судьба связана с историей королевской семьи.',notes:''}] };
     let campaignData = loadCampaignData();
     function loadCampaignData() {
       try { const saved = JSON.parse(localStorage.getItem(CAMPAIGN_DATA_KEY) || '{}'); return Object.assign({}, defaultCampaignData, saved && typeof saved === 'object' ? saved : {}); }
@@ -474,6 +486,25 @@
     function saveCampaignData() {
       try { localStorage.setItem(CAMPAIGN_DATA_KEY, JSON.stringify(campaignData)); updateDashboard(); return true; }
       catch (error) { alert('Не удалось сохранить запись. Возможно, хранилище браузера заполнено.'); return false; }
+    }
+    const overviewNote = document.getElementById('overview-master-note');
+    const overviewEditText = document.getElementById('overview-edit-text');
+    const overviewEditForm = document.getElementById('overview-edit-form');
+    if (overviewNote && overviewEditText && overviewEditForm) {
+      overviewNote.textContent = campaignData.overviewNote || 'Мастер пока не добавил заметок к обзору.';
+      overviewEditText.value = campaignData.overviewNote || '';
+      overviewEditForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        if (window.dndLoreIsMaster !== true) {
+          document.getElementById('overview-edit-status').textContent = 'Редактировать обзор может только Мастер.';
+          return;
+        }
+        campaignData.overviewNote = overviewEditText.value.trim();
+        if (saveCampaignData()) {
+          overviewNote.textContent = campaignData.overviewNote || 'Мастер пока не добавил заметок к обзору.';
+          document.getElementById('overview-edit-status').textContent = 'Обзор сохранён в этом браузере.';
+        }
+      });
     }
     function safeText(value) { return String(value || '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char])); }
     function displayDate(value) {
