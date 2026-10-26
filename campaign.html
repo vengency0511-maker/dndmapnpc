@@ -436,6 +436,7 @@
       const status = document.getElementById('role-status');
       const authLink = document.getElementById('auth-link');
       let role = 'player';
+      let authenticated = false;
       try {
         const projectUrl = (localStorage.getItem('dnd-lore-supabase-url') || 'https://qfddxghiwzmtdoxcxrhy.supabase.co').trim().replace(/\/$/, '');
         const publicKey = (localStorage.getItem('dnd-lore-supabase-publishable-key') || '').trim();
@@ -444,6 +445,7 @@
           const sessionResult = await client.auth.getSession();
           const user = sessionResult.data && sessionResult.data.session && sessionResult.data.session.user;
           if (user) {
+            authenticated = true;
             const profileResult = await client.from('profiles').select('role').eq('id', user.id).maybeSingle();
             if (!profileResult.error && profileResult.data && profileResult.data.role === 'master') role = 'master';
             authLink.textContent = 'Аккаунт';
@@ -455,6 +457,10 @@
         }
       } catch (error) {
         console.warn('Не удалось проверить роль Supabase:', error);
+      }
+      if (!authenticated) {
+        location.replace('auth.html?return=campaign.html');
+        return;
       }
       document.body.classList.add('role-verified');
       document.body.classList.toggle('master-role', role === 'master');
