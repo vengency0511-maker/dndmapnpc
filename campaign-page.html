@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#09090b">
+  <title>Кампания — DnD Lore Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { min-width: 320px; background: #09090b; }
+    .campaign-hero { background: linear-gradient(110deg, rgba(9,9,11,.96), rgba(24,24,27,.78)), radial-gradient(ellipse at 85% 15%, rgba(217,119,6,.28), transparent 48%); }
+    .tab-button[aria-selected="true"] { color: #fcd34d; background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.45); }
+    .tab-panel[hidden] { display: none; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100">
+  <header class="border-b border-zinc-800 bg-zinc-900/95">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5">
+      <a href="index.html" class="text-lg font-bold text-amber-300">⚔ DnD Lore Portal</a>
+      <a href="index.html#campaigns" class="text-sm text-zinc-300 hover:text-amber-300">← Все кампании</a>
+    </div>
+  </header>
+  <main class="mx-auto max-w-6xl space-y-7 px-5 py-8 sm:py-12">
+    <p class="text-sm text-zinc-500"><a href="index.html#campaigns" class="hover:text-amber-300">Кампании</a> / <span id="breadcrumbTitle">Новая кампания</span></p>
+    <section class="campaign-hero overflow-hidden rounded-3xl border border-amber-500/20 p-6 shadow-2xl sm:p-10">
+      <div class="inline-flex rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-sm text-amber-200">Dungeons &amp; Dragons · Рабочее пространство</div>
+      <p class="mt-6 text-xs font-bold uppercase tracking-[.24em] text-amber-400">Твоя кампания</p>
+      <h1 id="campaignTitle" class="mt-3 max-w-4xl text-4xl font-black leading-tight sm:text-6xl">Новая кампания</h1>
+      <p id="campaignDescription" class="mt-5 max-w-3xl text-lg leading-relaxed text-zinc-300">Добавь описание приключения, чтобы оно было под рукой во время игры.</p>
+      <div class="mt-7 flex flex-wrap gap-3">
+        <div class="rounded-xl bg-black/30 px-4 py-3"><span class="text-sm text-zinc-500">Уровни</span><p id="campaignLevels" class="mt-1 font-semibold text-amber-200">Не указаны</p></div>
+        <div class="rounded-xl bg-black/30 px-4 py-3"><span class="text-sm text-zinc-500">Мир / регион</span><p id="campaignSetting" class="mt-1 font-semibold">Не указан</p></div>
+        <div class="rounded-xl bg-black/30 px-4 py-3"><span class="text-sm text-zinc-500">Статус</span><p class="mt-1 font-semibold text-emerald-300">Можно готовить</p></div>
+      </div>
+    </section>
+    <nav class="flex gap-2 overflow-x-auto border-b border-zinc-800 pb-3" role="tablist" aria-label="Разделы кампании">
+      <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm" role="tab" aria-selected="true" data-tab="overview">Обзор</button>
+      <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300" role="tab" aria-selected="false" data-tab="npcs">NPC и фракции</button>
+      <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300" role="tab" aria-selected="false" data-tab="sessions">Журнал сессии</button>
+      <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300" role="tab" aria-selected="false" data-tab="players">Персонажи игроков</button>
+      <button class="tab-button rounded-xl border border-zinc-800 px-4 py-3 text-sm text-zinc-300" role="tab" aria-selected="false" data-tab="maps">Карты</button>
+    </nav>
+    <section id="panel-overview" class="tab-panel grid gap-5 py-2 lg:grid-cols-[1.4fr_1fr]">
+      <article class="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 sm:p-8">
+        <p class="text-sm font-semibold uppercase tracking-wider text-amber-300">Об этой истории</p>
+        <h2 class="mt-2 text-2xl font-bold">Подготовка приключения</h2>
+        <p id="overviewDescription" class="mt-4 leading-relaxed text-zinc-300">Здесь собрана основная информация о кампании. Постепенно добавляй сюжетные зацепки, места и открытия отряда.</p>
+        <div class="mt-6 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4"><p class="font-semibold text-amber-200">Заметки мастера</p><p class="mt-2 text-sm leading-relaxed text-zinc-400">Это пространство для подготовки. Разделы кампании помогут постепенно собрать материалы в одном месте.</p></div>
+      </article>
+      <aside class="rounded-3xl border border-zinc-800 bg-zinc-900 p-6 sm:p-8"><h2 class="text-xl font-bold text-amber-300">Быстрый старт</h2><ul class="mt-4 space-y-3 text-sm leading-relaxed text-zinc-300"><li>✦ Добавь описание и ключевые сюжетные зацепки.</li><li>✦ Запиши важных NPC и фракции.</li><li>✦ Веди журнал встреч и заметок.</li><li>✦ Добавь персонажей партии и игровые карты.</li></ul></aside>
+    </section>
+    <section id="panel-npcs" class="tab-panel hidden rounded-3xl border border-zinc-800 bg-zinc-900 p-6 sm:p-8"><h2 class="text-2xl font-bold text-amber-300">NPC и фракции</h2><p class="mt-3 leading-relaxed text-zinc-400">Здесь можно будет собирать важных персонажей, организации, их изображения и заметки. Раздел пока готовится к наполнению.</p></section>
+    <section id="panel-sessions" class="tab-panel hidden rounded-3xl border border-zinc-800 bg-zinc-900 p-6 sm:p-8"><h2 class="text-2xl font-bold text-amber-300">Журнал сессии</h2><p class="mt-3 leading-relaxed text-zinc-400">Место для итогов встреч, текущих квестов и открытий группы. Инструменты журнала будут добавлены отдельно.</p></section>
+    <section id="panel-players" class="tab-panel hidden rounded-3xl border border-zinc-800 bg-zinc-900 p-6 sm:p-8"><h2 class="text-2xl font-bold text-amber-300">Персонажи игроков</h2><p class="mt-3 leading-relaxed text-zinc-400">Здесь будут карточки героев вашей партии. Данные этой кампании пока не добавлены.</p></section>
+    <section id="panel-maps" class="tab-panel hidden rounded-3xl border border-zinc-800 bg-zinc-900 p-6 sm:p-8"><h2 class="text-2xl font-bold text-amber-300">Карты кампании</h2><p class="mt-3 leading-relaxed text-zinc-400">Здесь будут храниться карты мира и боевые карты этой кампании.</p></section>
+    <p id="campaignMissing" class="hidden rounded-2xl border border-amber-500/20 bg-amber-500/5 p-5 text-sm text-amber-200">Не удалось найти кампанию в локальном хранилище. Вернись на главную страницу и создай её заново.</p>
+    <footer class="border-t border-zinc-800 pt-5 text-xs text-zinc-600">Данные списка кампаний хранятся в браузере на этом устройстве.</footer>
+  </main>
+  <script>
+    (function () {
+      const STORAGE_KEY = 'dndLorePortal.campaigns.v1';
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      let campaigns = [];
+      try { campaigns = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch (error) { campaigns = []; }
+      const campaign = campaigns.find(function (item) { return id && item.id === id; });
+      if (campaign) {
+        document.title = campaign.title + ' — DnD Lore Portal';
+        document.getElementById('campaignTitle').textContent = campaign.title;
+        document.getElementById('breadcrumbTitle').textContent = campaign.title;
+        document.getElementById('campaignDescription').textContent = campaign.description || 'Описание пока не добавлено. Его можно дополнить по мере подготовки приключения.';
+        document.getElementById('overviewDescription').textContent = campaign.description || 'Здесь собрана основная информация о кампании. Постепенно добавляй сюжетные зацепки, места и открытия отряда.';
+        document.getElementById('campaignLevels').textContent = campaign.levels || 'Не указаны';
+        document.getElementById('campaignSetting').textContent = campaign.setting || 'Не указан';
+      } else {
+        document.getElementById('campaignMissing').classList.remove('hidden');
+      }
+      document.querySelectorAll('[data-tab]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          const target = button.dataset.tab;
+          document.querySelectorAll('[data-tab]').forEach(function (item) {
+            item.setAttribute('aria-selected', String(item === button));
+            item.classList.toggle('text-zinc-300', item !== button);
+          });
+          document.querySelectorAll('.tab-panel').forEach(function (panel) {
+            panel.hidden = panel.id !== 'panel-' + target;
+          });
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
