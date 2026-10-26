@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#09090b">
   <title>Гром штурмового короля — DnD Lore Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
@@ -14,6 +15,29 @@
     button { touch-action: manipulation; }
     .tab-button[aria-selected="true"] { color: #fcd34d; background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.45); }
     .tab-panel[hidden] { display: none; }
+    body:not(.role-verified) #tab-dashboard,
+    body:not(.role-verified) #panel-dashboard,
+    body:not(.role-verified) #panel-npcs form,
+    body:not(.role-verified) #panel-map form,
+    body:not(.role-verified) #session-form,
+    body:not(.role-verified) #quest-form,
+    body:not(.role-verified) #secret-note-form,
+    body:not(.role-verified) #dm-quick-note-form { display: none !important; }
+    body.player-role #tab-dashboard,
+    body.player-role #panel-dashboard,
+    body.player-role #panel-npcs form,
+    body.player-role #panel-map form,
+    body.player-role #session-form,
+    body.player-role #quest-form,
+    body.player-role #secret-note-form,
+    body.player-role #dm-quick-note-form,
+    body.player-role #world-entry-list button,
+    body.player-role #session-list button,
+    body.player-role #quest-list button,
+    body.player-role #secret-note-list button { display: none !important; }
+    .role-status { display:inline-flex; align-items:center; gap:.45rem; border:1px solid #3f3f46; border-radius:999px; padding:.4rem .75rem; font-size:.8rem; color:#d4d4d8; }
+    .role-status.master { border-color:#92400e; background:#451a03aa; color:#fcd34d; }
+    .role-status.player { border-color:#1d4ed8; background:#172554aa; color:#bfdbfe; }
     .campaign-hero {
       position: relative;
       isolation: isolate;
@@ -52,7 +76,7 @@
   <header class="border-b border-zinc-800 bg-zinc-900/95">
     <div class="page-wrap max-w-7xl mx-auto px-6 py-5 flex items-center justify-between gap-4">
       <a href="index.html" class="text-amber-300 font-bold text-lg">⚔ DnD Lore Portal</a>
-      <div class="flex items-center gap-3"><a href="auth.html" class="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-500/20">Войти</a><a href="index.html#campaigns" class="text-sm text-zinc-300 hover:text-amber-300">← Все кампании</a></div>
+      <div class="flex flex-wrap items-center gap-3"><span id="role-status" class="role-status">Проверяем роль…</span><a href="auth.html" id="auth-link" class="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-500/20">Войти</a><a href="index.html#campaigns" class="text-sm text-zinc-300 hover:text-amber-300">← Все кампании</a></div>
     </div>
   </header>
 
@@ -366,6 +390,51 @@
     <footer class="mt-8 border-t border-zinc-800 py-6 text-sm text-zinc-500 flex flex-wrap justify-between gap-3"><span>DnD Lore Portal · Гром штурмового короля</span><a href="index.html#campaigns" class="hover:text-amber-300">Вернуться к кампаниям ↑</a></footer>
   </main>
   <script>
+    // Роль читается из профиля Supabase. Выбор роли при регистрации не выдаёт права Мастера.
+    // Это клиентское ограничение интерфейса; защиту данных на сервере подключим отдельным этапом.
+    (async function dndLoreRoleGate() {
+      const status = document.getElementById('role-status');
+      const authLink = document.getElementById('auth-link');
+      let role = 'player';
+      try {
+        const projectUrl = (localStorage.getItem('dnd-lore-supabase-url') || 'https://qfddxghiwzmtdoxcxrhy.supabase.co').trim().replace(/\/$/, '');
+        const publicKey = (localStorage.getItem('dnd-lore-supabase-publishable-key') || '').trim();
+        if (publicKey && window.supabase && window.supabase.createClient) {
+          const client = window.supabase.createClient(projectUrl, publicKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+          const sessionResult = await client.auth.getSession();
+          const user = sessionResult.data && sessionResult.data.session && sessionResult.data.session.user;
+          if (user) {
+            const profileResult = await client.from('profiles').select('role').eq('id', user.id).maybeSingle();
+            if (!profileResult.error && profileResult.data && profileResult.data.role === 'master') role = 'master';
+            authLink.textContent = 'Аккаунт';
+          } else {
+            authLink.textContent = 'Войти';
+          }
+        } else {
+          authLink.textContent = 'Настроить вход';
+        }
+      } catch (error) {
+        console.warn('Не удалось проверить роль Supabase:', error);
+      }
+      document.body.classList.add('role-verified');
+      document.body.classList.toggle('master-role', role === 'master');
+      document.body.classList.toggle('player-role', role !== 'master');
+      status.textContent = role === 'master' ? '✦ Мастер' : '⚔ Игрок · просмотр';
+      status.classList.add(role === 'master' ? 'master' : 'player');
+      if (role !== 'master') {
+        document.getElementById('tab-dashboard').classList.add('hidden');
+        document.querySelectorAll('#panel-npcs form, #panel-map form, #session-form, #quest-form, #secret-note-form, #dm-quick-note-form').forEach(function(el) {
+          el.setAttribute('aria-hidden', 'true');
+          el.querySelectorAll('input,textarea,select,button').forEach(function(control) { control.disabled = true; });
+        });
+        document.querySelectorAll('#world-entry-list button, #session-list button, #quest-list button, #secret-note-list button').forEach(function(button) { button.disabled = true; });
+        const secretForm = document.getElementById('secret-note-form');
+        if (secretForm && secretForm.closest('section')) secretForm.closest('section').classList.add('hidden');
+      }
+      window.dndLoreCurrentRole = role;
+      window.dndLoreIsMaster = role === 'master';
+    })();
+
     const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
     const panels = Array.from(document.querySelectorAll('[role="tabpanel"]'));
     function activateTab(tab, focus = false) {
@@ -1648,7 +1717,7 @@
 
     const initial = tabs.find(tab => tab.dataset.tab === location.hash.slice(1));
     if (initial) activateTab(initial);
-    else activateTab(tabs.find(tab => tab.dataset.tab === 'dashboard') || tabs[0]);
+    else activateTab(tabs.find(tab => tab.dataset.tab === 'overview') || tabs[0]);
   </script>
 </body>
 </html>
