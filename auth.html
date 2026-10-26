@@ -75,6 +75,7 @@
   const DEFAULT_URL = 'https://qfddxghiwzmtdoxcxrhy.supabase.co';
   let supabase = null;
   let mode = 'signin';
+  let recoveryMode = false;
   let currentSession = null;
 
   const config = () => ({
@@ -89,7 +90,11 @@
     el.className = 'message mt-4 ' + (error ? 'text-red-300' : 'text-emerald-300');
   }
   function setMode(next) {
+    recoveryMode = false;
     mode = next;
+    $('signin-tab').classList.remove('hidden');
+    $('signup-tab').classList.remove('hidden');
+    $('password').previousElementSibling.textContent = 'Пароль';
     $('signin-tab').setAttribute('aria-selected', String(mode === 'signin'));
     $('signup-tab').setAttribute('aria-selected', String(mode === 'signup'));
     $('display-name-field').classList.toggle('hidden', mode !== 'signup');
@@ -142,12 +147,29 @@
         currentSession = data.session;
         await loadProfile(data.session.user);
       }
+      if (location.hash.includes('type=recovery')) enterRecoveryMode();
       client.auth.onAuthStateChange((event, session) => {
         currentSession = session;
-        if (session?.user) setTimeout(() => loadProfile(session.user), 0);
+        if (event === 'PASSWORD_RECOVERY') enterRecoveryMode();
+        else if (session?.user && !recoveryMode) setTimeout(() => loadProfile(session.user), 0);
         else { $('account-panel').classList.add('hidden'); $('auth-form-panel').classList.remove('hidden'); }
       });
     } catch (e) { message(e.message || 'Не удалось восстановить сессию.', true); }
+  }
+
+  function enterRecoveryMode() {
+    recoveryMode = true;
+    $('account-panel').classList.add('hidden');
+    $('auth-form-panel').classList.remove('hidden');
+    $('signin-tab').classList.add('hidden');
+    $('signup-tab').classList.add('hidden');
+    $('display-name-field').classList.add('hidden');
+    $('forgot-btn').classList.add('hidden');
+    $('password').previousElementSibling.textContent = 'Новый пароль';
+    $('password').autocomplete = 'new-password';
+    $('password').value = '';
+    $('submit-btn').textContent = 'Сохранить новый пароль';
+    message('Придумай новый пароль не короче 8 символов.');
   }
 
   $('signin-tab').addEventListener('click', () => setMode('signin'));
@@ -174,7 +196,15 @@
       const client = makeClient();
       const email = $('email').value.trim();
       const password = $('password').value;
-      if (mode === 'signup') {
+      if (recoveryMode) {
+        if (password.length < 8) throw new Error('Пароль должен содержать не менее 8 символов.');
+        const { data, error } = await client.auth.updateUser({ password });
+        if (error) throw error;
+        recoveryMode = false;
+        $('signin-tab').classList.remove('hidden'); $('signup-tab').classList.remove('hidden');
+        await loadProfile(data.user);
+        message('Пароль успешно изменён.');
+      } else if (mode === 'signup') {
         if (password.length < 8) throw new Error('Пароль должен содержать не менее 8 символов.');
         const displayName = $('display-name').value.trim();
         const { data, error } = await client.auth.signUp({
