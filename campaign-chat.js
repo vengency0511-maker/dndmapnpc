@@ -254,9 +254,11 @@
     input.disabled = true;
     const send = document.querySelector('.campaign-chat-send');
     if(send) send.disabled = true;
-    const result = await client.from('campaign_messages').insert({
-      campaign_slug:CAMPAIGN,sender_id:user.id,recipient_id:activeContact,body
-    }).select('id,campaign_slug,sender_id,recipient_id,body,created_at,read_at').single();
+    const result = await client.rpc('send_campaign_message', {
+      p_campaign_slug: CAMPAIGN,
+      p_recipient_id: activeContact,
+      p_body: body
+    });
     input.disabled = false;
     if(send) send.disabled = false;
     if (result.error) {
@@ -265,8 +267,9 @@
       return;
     }
     input.value = '';
-    messages.push(result.data);
-    renderThread(); renderContacts(); renderNotices(); updateUnreadCount();
+    const row = result.data;
+    if (row && row.id && !messages.some(message => message.id === row.id)) messages.push(row);
+    await refreshAll();
     input.focus();
   }
   async function init() {
