@@ -402,6 +402,28 @@
               <ol id="battle-initiative-list" class="mt-4 space-y-2" aria-live="polite"></ol>
               <p id="battle-initiative-empty" class="mt-3 text-sm text-zinc-500">Участников пока нет. Добавь первого героя или врага.</p>
             </div>
+            <section id="battle-dice-panel" class="rounded-2xl border border-amber-500/30 bg-zinc-950 p-4">
+              <div class="flex items-start justify-between gap-3">
+                <div><h4 class="font-bold text-amber-200">🎲 Броски кубов</h4><p class="mt-1 text-xs text-zinc-400">Собери комбинацию для атаки, урона или проверки.</p></div>
+                <span class="rounded-full border border-zinc-700 px-2 py-1 text-[11px] text-zinc-400">D&D</span>
+              </div>
+              <div class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                <label class="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 p-2"><input type="checkbox" class="battle-die-check accent-amber-400" data-die="20"><span class="font-bold text-amber-200">D20</span><span class="ml-auto text-xs text-zinc-500">×</span><input type="number" min="1" max="20" value="1" data-die-count="20" class="w-14 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-center text-sm text-white" aria-label="Количество D20"></label>
+                <label class="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 p-2"><input type="checkbox" class="battle-die-check accent-amber-400" data-die="12"><span class="font-bold text-amber-200">D12</span><span class="ml-auto text-xs text-zinc-500">×</span><input type="number" min="1" max="20" value="1" data-die-count="12" class="w-14 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-center text-sm text-white" aria-label="Количество D12"></label>
+                <label class="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 p-2"><input type="checkbox" class="battle-die-check accent-amber-400" data-die="10"><span class="font-bold text-amber-200">D10</span><span class="ml-auto text-xs text-zinc-500">×</span><input type="number" min="1" max="20" value="1" data-die-count="10" class="w-14 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-center text-sm text-white" aria-label="Количество D10"></label>
+                <label class="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 p-2"><input type="checkbox" class="battle-die-check accent-amber-400" data-die="8"><span class="font-bold text-amber-200">D8</span><span class="ml-auto text-xs text-zinc-500">×</span><input type="number" min="1" max="20" value="1" data-die-count="8" class="w-14 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-center text-sm text-white" aria-label="Количество D8"></label>
+                <label class="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 p-2"><input type="checkbox" class="battle-die-check accent-amber-400" data-die="6"><span class="font-bold text-amber-200">D6</span><span class="ml-auto text-xs text-zinc-500">×</span><input type="number" min="1" max="20" value="1" data-die-count="6" class="w-14 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-center text-sm text-white" aria-label="Количество D6"></label>
+                <label class="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 p-2"><input type="checkbox" class="battle-die-check accent-amber-400" data-die="4"><span class="font-bold text-amber-200">D4</span><span class="ml-auto text-xs text-zinc-500">×</span><input type="number" min="1" max="20" value="1" data-die-count="4" class="w-14 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-center text-sm text-white" aria-label="Количество D4"></label>
+              </div>
+              <div class="mt-3 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+                <label class="block text-sm text-zinc-300">Модификатор<input id="battle-dice-modifier" type="number" min="-100" max="100" value="0" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"></label>
+                <button id="battle-dice-roll" type="button" class="rounded-xl bg-amber-400 px-5 py-3 font-bold text-zinc-950 hover:bg-amber-300">🎲 Бросить</button>
+              </div>
+              <p id="battle-dice-error" class="mt-2 hidden text-sm text-red-300" role="alert"></p>
+              <div id="battle-dice-result" class="mt-4 rounded-xl border border-zinc-800 bg-zinc-900 p-3" aria-live="polite"><p class="text-sm text-zinc-500">Выбери один или несколько типов кубов и нажми «Бросить».</p></div>
+              <div class="mt-4"><div class="flex items-center justify-between gap-2"><h5 class="text-sm font-semibold text-zinc-200">История бросков</h5><button id="battle-dice-clear" type="button" class="text-xs text-zinc-500 hover:text-amber-200">Очистить</button></div><ol id="battle-dice-history" class="mt-2 space-y-2"></ol></div>
+              <p class="mt-3 text-[11px] leading-relaxed text-zinc-500">Результаты этой версии сохраняются в текущей вкладке браузера. Общая история бросков для всех игроков потребует синхронизации через Supabase.</p>
+            </section>
           </div>
         </div>
       </section>
@@ -1952,5 +1974,61 @@
     if (initial) activateTab(initial);
     else activateTab(tabs.find(tab => tab.dataset.tab === 'overview') || tabs[0]);
   </script>
+
+  <script>
+    (() => {
+      const panel = document.getElementById('battle-dice-panel');
+      if (!panel) return;
+      const resultBox = document.getElementById('battle-dice-result');
+      const historyBox = document.getElementById('battle-dice-history');
+      const errorBox = document.getElementById('battle-dice-error');
+      const rollButton = document.getElementById('battle-dice-roll');
+      const rollHistory = [];
+      const escapeHtml = value => String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+      function renderHistory() {
+        historyBox.innerHTML = rollHistory.length ? rollHistory.map(item =>
+          '<li class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2"><div class="flex items-center justify-between gap-3"><span class="text-xs text-zinc-400">' + escapeHtml(item.time) + ' · ' + escapeHtml(item.formula) + '</span><strong class="text-amber-200">' + item.total + '</strong></div><p class="mt-1 text-xs text-zinc-300">' + escapeHtml(item.detail) + '</p></li>'
+        ).join('') : '<li class="text-xs text-zinc-500">Здесь появятся последние броски.</li>';
+      }
+      rollButton.addEventListener('click', () => {
+        errorBox.classList.add('hidden');
+        const selected = [...panel.querySelectorAll('.battle-die-check:checked')];
+        if (!selected.length) {
+          errorBox.textContent = 'Сначала выбери хотя бы один тип куба.';
+          errorBox.classList.remove('hidden');
+          return;
+        }
+        let totalDice = 0;
+        const groups = [];
+        selected.forEach(check => {
+          const sides = Number(check.dataset.die);
+          const countInput = panel.querySelector('[data-die-count="' + sides + '"]');
+          const count = Math.max(1, Math.min(20, Number.parseInt(countInput.value, 10) || 1));
+          countInput.value = count;
+          totalDice += count;
+          const rolls = Array.from({length: count}, () => Math.floor(Math.random() * sides) + 1);
+          groups.push({sides, rolls, sum: rolls.reduce((a,b)=>a+b,0)});
+        });
+        if (totalDice > 50) {
+          errorBox.textContent = 'За один раз можно бросить не больше 50 кубов. Уменьши количество.';
+          errorBox.classList.remove('hidden');
+          return;
+        }
+        const modifier = Math.max(-100, Math.min(100, Number.parseInt(document.getElementById('battle-dice-modifier').value, 10) || 0));
+        document.getElementById('battle-dice-modifier').value = modifier;
+        const diceTotal = groups.reduce((sum, group) => sum + group.sum, 0);
+        const total = diceTotal + modifier;
+        const formula = groups.map(g => (g.rolls.length > 1 ? g.rolls.length : '') + 'D' + g.sides).join(' + ') + (modifier ? (modifier > 0 ? ' + ' : ' − ') + Math.abs(modifier) : '');
+        const detail = groups.map(g => (g.rolls.length > 1 ? g.rolls.length + 'D' : 'D') + g.sides + ': [' + g.rolls.join(', ') + '] = ' + g.sum).join(' · ') + (modifier ? ' · модификатор ' + (modifier > 0 ? '+' : '') + modifier : '');
+        resultBox.innerHTML = '<p class="text-xs uppercase tracking-wider text-zinc-400">Результат броска</p><div class="mt-1 flex items-end justify-between gap-3"><strong class="text-4xl font-black text-amber-200">' + total + '</strong><span class="text-sm text-zinc-300">' + escapeHtml(formula) + '</span></div><p class="mt-2 text-sm leading-relaxed text-zinc-300">' + escapeHtml(detail) + '</p>';
+        rollHistory.unshift({time:new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),formula,detail,total});
+        if (rollHistory.length > 10) rollHistory.length = 10;
+        renderHistory();
+      });
+      document.getElementById('battle-dice-clear').addEventListener('click', () => { rollHistory.length = 0; renderHistory(); });
+      renderHistory();
+    })();
+  </script>
+
 </body>
 </html>
