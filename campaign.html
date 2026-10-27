@@ -563,7 +563,7 @@
       document.body.classList.add('role-verified');
       document.body.classList.toggle('master-role', role === 'master');
       document.body.classList.toggle('player-role', role !== 'master');
-      status.textContent = role === 'master' ? '✦ Мастер' : '⚔ Игрок · просмотр';
+      status.textContent = role === 'master' ? '✦ Мастер' : '⚔ Игрок';
       status.classList.add(role === 'master' ? 'master' : 'player');
       if (role !== 'master') {
         document.getElementById('tab-dashboard').classList.add('hidden');
