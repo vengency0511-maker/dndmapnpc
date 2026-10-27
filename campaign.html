@@ -650,7 +650,7 @@
       const inboxList = document.getElementById('player-secret-inbox-list');
       const form = document.getElementById('secret-message-form');
       const status = document.getElementById('secret-message-status');
-      const projectUrl = (localStorage.getItem('dnd-lore-supabase-url') || 'https://qfddxghiwzmtdoxcxrhy.supabase.co').trim().replace(/\\/$/, '');
+      const projectUrl = (localStorage.getItem('dnd-lore-supabase-url') || 'https://qfddxghiwzmtdoxcxrhy.supabase.co').trim().replace(/\/$/, '');
       const publicKey = (localStorage.getItem('dnd-lore-supabase-publishable-key') || '').trim();
       if (!publicKey || !window.supabase?.createClient) {
         if (sentList) sentList.textContent = 'Подключи публичный ключ Supabase на странице входа.';
