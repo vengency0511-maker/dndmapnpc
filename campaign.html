@@ -363,13 +363,32 @@
                 <p class="mt-2 text-xs text-zinc-500">Имя, портрет, КД и максимальные HP подставятся из карточки. Текущие HP можно скорректировать перед добавлением в бой; инициатива остаётся редактируемой.</p>
               </section>
               <section id="battle-enemy-monster-picker" class="mt-4 hidden rounded-xl border border-red-500/30 bg-zinc-900 p-3">
-                <h5 class="font-semibold text-red-200">Выбрать врага из бестиария</h5>
-                <p class="mt-1 text-xs text-zinc-400">Найди монстра — его HP, КД и модификатор Ловкости подставятся автоматически.</p>
-                <input id="battle-enemy-monster-search" type="search" class="mt-3 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white" placeholder="Поиск монстра…">
-                <select id="battle-enemy-monster-edition" class="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white"><option value="both">Все монстры (2014 + 2024)</option><option value="2014">D&D 5e · 2014</option><option value="2024">D&D 5e · 2024</option><option value="custom">Мои монстры</option></select>
-                <div id="battle-enemy-monster-results" class="mt-3 grid gap-2" aria-live="polite"><p class="text-xs text-zinc-500">Загружаем каталог монстров…</p></div>
-                <div id="battle-enemy-monster-details" class="mt-3 hidden rounded-xl border border-amber-500/30 bg-zinc-950 p-3" aria-live="polite"></div>
+                <h5 class="font-semibold text-red-200">Бестиарий</h5>
+                <p class="mt-1 text-xs text-zinc-400">Подбери монстра в отдельном окне поиска. HP, КД и модификатор Ловкости подставятся автоматически.</p>
+                <button id="battle-enemy-monster-open" type="button" class="mt-3 w-full rounded-xl border border-red-400/40 bg-red-950/30 px-4 py-3 text-sm font-semibold text-red-100 hover:bg-red-900/40">🔎 Найти врага в бестиарии</button>
                 <p id="battle-enemy-monster-selected" class="mt-2 hidden text-xs text-emerald-300" role="status"></p>
+              </section>
+              <section id="battle-enemy-monster-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 p-3 sm:p-6" role="dialog" aria-modal="true" aria-labelledby="battle-enemy-monster-modal-title">
+                <div class="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-zinc-700 bg-zinc-950 shadow-2xl">
+                  <header class="flex items-start justify-between gap-3 border-b border-zinc-800 p-4 sm:p-5">
+                    <div class="min-w-0">
+                      <h5 id="battle-enemy-monster-modal-title" class="text-lg font-bold text-red-200 sm:text-xl">Выбрать врага из бестиария</h5>
+                      <p class="mt-1 text-xs text-zinc-400">Поиск по названию. Выбери монстра, чтобы заполнить параметры участника боя.</p>
+                    </div>
+                    <button id="battle-enemy-monster-close" type="button" aria-label="Закрыть бестиарий" class="shrink-0 rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800">✕</button>
+                  </header>
+                  <div class="overflow-y-auto p-4 sm:p-5">
+                    <input id="battle-enemy-monster-search" type="search" class="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-3 text-sm text-white" placeholder="Например: гоблин, дракон, вампир…" autocomplete="off">
+                    <select id="battle-enemy-monster-edition" class="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-3 text-sm text-white"><option value="both">Все монстры (2014 + 2024)</option><option value="2014">D&D 5e · 2014</option><option value="2024">D&D 5e · 2024</option><option value="custom">Мои монстры</option></select>
+                    <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                      <a href="https://dnd.su/bestiary/" target="_blank" rel="noopener noreferrer" class="rounded-lg border border-zinc-700 px-3 py-2 text-zinc-300 hover:border-amber-500/50">Полный бестиарий 2014 ↗</a>
+                      <a href="https://next.dnd.su/bestiary/" target="_blank" rel="noopener noreferrer" class="rounded-lg border border-zinc-700 px-3 py-2 text-zinc-300 hover:border-amber-500/50">Бестиарий 2024 ↗</a>
+                    </div>
+                    <p id="battle-enemy-monster-source-note" class="mt-2 text-xs text-zinc-500">Встроенный список содержит открытые SRD-материалы и ваших собственных монстров. Полные каталоги по редакциям доступны по ссылкам выше.</p>
+                    <div id="battle-enemy-monster-results" class="mt-3 grid gap-2" aria-live="polite"><p class="text-xs text-zinc-500">Загружаем каталог монстров…</p></div>
+                    <div id="battle-enemy-monster-details" class="mt-3 hidden rounded-xl border border-amber-500/30 bg-zinc-900 p-3" aria-live="polite"></div>
+                  </div>
+                </div>
               </section>
               <button type="submit" class="mt-4 w-full rounded-xl bg-amber-400 px-4 py-3 font-bold text-zinc-950">＋ Добавить на поле</button>
             </form>
@@ -1773,10 +1792,30 @@
       const offlineNote = monsterLoadError && list.some(m => m.summary === 'offline-srd-sample') ? '<p class="rounded-lg border border-amber-500/30 p-2 text-xs text-amber-200">Внешний каталог недоступен. Ниже показан встроенный запасной список монстров; можно добавить их в бой.</p>' : '';
       battleEnemyResults.innerHTML = offlineNote + (list.length ? list.map(m => '<article class="flex flex-wrap items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950 p-2"><div class="min-w-0 flex-1"><p class="text-sm font-semibold text-zinc-100">'+monsterText(m.name)+'</p><p class="text-xs text-zinc-500">'+monsterText(m.edition === 'custom' || m.edition === 'homebrew' ? 'Авторский' : monsterEditionLabel(m.edition))+(m.type?' · '+monsterText(m.type):'')+(m.cr?' · ПО '+monsterText(m.cr):'')+'</p></div><button type="button" data-battle-enemy-details="'+monsterText(m.id)+'" data-battle-enemy-edition="'+monsterText(m.edition)+'" class="rounded-lg border border-amber-500/40 px-3 py-2 text-xs font-semibold text-amber-200">Информация</button><button type="button" data-battle-enemy-pick="'+monsterText(m.id)+'" data-battle-enemy-edition="'+monsterText(m.edition)+'" class="rounded-lg border border-red-500/40 px-3 py-2 text-xs font-semibold text-red-200">Выбрать</button></article>').join('') : '<p class="rounded-lg border border-dashed border-zinc-700 p-3 text-xs text-zinc-500">Монстры не найдены. Попробуй другой запрос или редакцию.</p>');
     }
+    const battleEnemyModal = document.getElementById('battle-enemy-monster-modal');
+    const battleEnemyOpen = document.getElementById('battle-enemy-monster-open');
+    const battleEnemyClose = document.getElementById('battle-enemy-monster-close');
+    function openBattleEnemyModal() {
+      if (!battleEnemyModal) return;
+      battleEnemyModal.classList.remove('hidden');
+      battleEnemyModal.classList.add('flex');
+      renderBattleEnemyMonsterOptions();
+      window.setTimeout(() => battleEnemySearch.focus(), 0);
+    }
+    function closeBattleEnemyModal() {
+      if (!battleEnemyModal) return;
+      battleEnemyModal.classList.add('hidden');
+      battleEnemyModal.classList.remove('flex');
+    }
+    battleEnemyOpen.addEventListener('click', openBattleEnemyModal);
+    battleEnemyClose.addEventListener('click', closeBattleEnemyModal);
+    battleEnemyModal.addEventListener('click', event => { if (event.target === battleEnemyModal) closeBattleEnemyModal(); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape' && !battleEnemyModal.classList.contains('hidden')) closeBattleEnemyModal(); });
     function toggleBattleEnemyPicker() {
       const isEnemy = battleCombatantSide.value === 'enemy';
       battleEnemyPicker.classList.toggle('hidden',!isEnemy);
       if (!isEnemy) {
+        closeBattleEnemyModal();
         selectedBattleFormMonster = null;
         battleEnemySelected.classList.add('hidden');
         battleEnemySelected.textContent = '';
@@ -1832,6 +1871,7 @@
         }
         await selectBattleFormMonster(monster, button);
         battleEnemyDetails.classList.add('hidden');
+        closeBattleEnemyModal();
       } catch(error) {
         battleEnemySelected.textContent = error.message || 'Не удалось загрузить характеристики монстра.';
         battleEnemySelected.classList.remove('hidden');
