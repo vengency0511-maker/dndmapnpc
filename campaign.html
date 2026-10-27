@@ -319,10 +319,9 @@
                 </select>
                 <button id="battle-scene-use-saved-map" type="button" class="rounded-xl border border-amber-500/40 px-4 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-500/10">Наложить на поле</button>
               </div>
-              <p class="mt-2 text-xs leading-relaxed text-zinc-500">Можно выбрать загруженную карту из библиотеки или вставить прямую ссылку на изображение.</p>
+              <p class="mt-2 text-xs leading-relaxed text-zinc-500">Выбери карту из своей подборки. Новые изображения можно загрузить в библиотеку ниже.</p>
             </div>
-            <form id="battle-scene-settings" class="mb-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_100px_auto]">
-              <label class="text-sm text-zinc-300">Или вставь прямую ссылку на изображение<input id="battle-scene-map-url" type="url" maxlength="1000" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-white" placeholder="https://.../map.jpg"></label>
+            <form id="battle-scene-settings" class="mb-4 grid gap-3 sm:grid-cols-[minmax(0,180px)_auto]">
               <label class="text-sm text-zinc-300">Размер клетки<input id="battle-scene-grid-size" type="number" min="20" max="100" value="40" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-white"></label>
               <div class="flex items-end"><button type="submit" class="w-full rounded-xl border border-amber-500/40 px-4 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-500/10">Применить</button></div>
             </form>
@@ -964,7 +963,7 @@
       document.getElementById('battlemap-count').textContent = campaignData.battleMaps.length + (campaignData.battleMaps.length === 1 ? ' карта' : campaignData.battleMaps.length >= 2 && campaignData.battleMaps.length <= 4 ? ' карты' : ' карт');
       const list = document.getElementById('battlemap-list');
       if (!entries.length) {
-        list.innerHTML = '<p class="rounded-xl border border-dashed border-zinc-800 p-5 text-sm text-zinc-500">Пока нет сохранённых карт. Добавь прямую ссылку на изображение или загрузи карту с компьютера.</p>';
+        list.innerHTML = '<p class="rounded-xl border border-dashed border-zinc-800 p-5 text-sm text-zinc-500">Пока нет сохранённых карт. Загрузи изображение с компьютера в форму ниже.</p>';
         return;
       }
       list.innerHTML = entries.slice().reverse().map(item => '<article class="rounded-2xl border border-zinc-800 bg-zinc-950 p-4"><div class="flex flex-wrap items-start justify-between gap-2"><div class="min-w-0"><h4 class="break-words font-semibold text-amber-200">' + safeText(item.title) + '</h4><p class="mt-1 text-xs text-zinc-500">' + safeText(battleMapTypes[item.type] || 'Другое') + (item.source ? ' · ' + safeText(item.source) : '') + (item.imageId ? ' · Файл с компьютера' : '') + '</p></div><button type="button" data-battlemap-delete="' + safeText(item.id) + '" class="rounded-lg border border-zinc-800 px-3 py-2 text-xs text-red-300">Удалить</button></div>' + (item.notes ? '<p class="mt-3 whitespace-pre-wrap break-words text-sm text-zinc-300">' + safeText(item.notes) + '</p>' : '') + (item.imageId ? '<div class="mt-3 overflow-hidden rounded-xl border border-zinc-800"><img data-battlemap-preview="' + safeText(item.imageId) + '" alt="' + safeText(item.title) + '" class="mx-auto block max-h-[70vh] w-auto max-w-full object-contain"></div><button type="button" data-battlemap-use="' + safeText(item.id) + '" class="mt-3 rounded-xl border border-amber-500/30 px-3 py-2 text-sm text-amber-200">Наложить на тактическую сцену</button>' : '') + (item.url ? '<a href="' + safeText(item.url) + '" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex max-w-full break-all rounded-xl border border-amber-500/30 px-3 py-2 text-sm text-amber-200">Открыть карту / источник ↗</a>' : '') + '</article>').join('');
@@ -1204,8 +1203,7 @@
     function renderBattleScene() {
       renderSavedBattleMapOptions();
       document.getElementById('battle-scene-grid-size').value = battleScene.gridSize;
-      document.getElementById('battle-scene-map-url').value = battleScene.mapUrl || '';
-      battleGrid.style.backgroundImage = 'linear-gradient(to right, rgba(226,232,240,.42) 1px, transparent 1px), linear-gradient(to bottom, rgba(226,232,240,.42) 1px, transparent 1px)';
+       battleGrid.style.backgroundImage = 'linear-gradient(to right, rgba(226,232,240,.42) 1px, transparent 1px), linear-gradient(to bottom, rgba(226,232,240,.42) 1px, transparent 1px)';
       battleGrid.style.backgroundSize = battleScene.gridSize + 'px ' + battleScene.gridSize + 'px';
       battleMapLayer.style.backgroundImage = '';
       if (battleScene.mapImageObjectUrl) { URL.revokeObjectURL(battleScene.mapImageObjectUrl); battleScene.mapImageObjectUrl=null; }
@@ -1241,22 +1239,7 @@
       event.preventDefault();
       const err = document.getElementById('battle-scene-error');
       err.classList.add('hidden');
-      const raw = document.getElementById('battle-scene-map-url').value.trim();
-      let mapUrl = '';
-      if (raw) {
-        try {
-          const parsed = new URL(raw);
-          if (!['http:','https:'].includes(parsed.protocol)) throw new Error('protocol');
-          mapUrl = parsed.href;
-        } catch (e) { err.textContent = 'Ссылка на карту должна начинаться с https:// или http://.'; err.classList.remove('hidden'); return; }
-      }
-      // Меняем источник карты только если пользователь действительно ввёл новую ссылку.
-      // Иначе сохраняем выбранное локальное изображение из библиотеки при изменении размера клетки.
-      if (raw) {
-        battleScene.mapUrl = mapUrl;
-        battleScene.mapImageId = null;
-      }
-      battleScene.gridSize = Math.max(20, Math.min(100, Number(document.getElementById('battle-scene-grid-size').value) || 40));
+       battleScene.gridSize = Math.max(20, Math.min(100, Number(document.getElementById('battle-scene-grid-size').value) || 40));
       if (saveBattleScene()) renderBattleScene();
     });
     document.getElementById('battle-combatant-form').addEventListener('submit', event => {
