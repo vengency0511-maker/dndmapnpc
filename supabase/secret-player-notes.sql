@@ -144,4 +144,3 @@ $$;
 
 revoke all on function public.send_secret_player_note(uuid, text, text, text) from public, anon;
 grant execute on function public.send_secret_player_note(uuid, text, text, text) to authenticated;
-grant execute on function public.send_secret_player_note(text, text, text, text) to authenticated;
