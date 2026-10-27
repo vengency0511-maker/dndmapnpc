@@ -308,7 +308,7 @@
       <div class="mb-6 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm leading-relaxed text-amber-100"><strong>На будущее:</strong> вкладка пока не защищена авторизацией и видна всем, кто откроет страницу. Не добавляй сюда секретные сюжетные детали. Записи хранятся локально в этом браузере.</div>
       <p class="mb-6 text-sm text-zinc-400">Внешних каталогов карт здесь больше нет. Позже добавим собственную базу карт; пока используй свою подборку ниже.</p>
       <div class="mt-8 grid gap-6 xl:grid-cols-[minmax(0,.85fr)_minmax(0,1.15fr)]">
-        <section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 md:p-7"><h3 class="text-xl font-bold text-amber-200">Добавить карту в свою подборку</h3><p class="mt-2 text-sm text-zinc-400">Сохраняй ссылку на карту, чтобы быстро открыть её перед боем. Можно добавить заметку о встрече или местности.</p>
+        <section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 md:p-7"><div class="flex items-start justify-between gap-3"><div><h3 class="text-xl font-bold text-amber-200">Добавить карту в свою подборку</h3><p class="mt-2 text-sm text-zinc-400">Сохраняй ссылку на карту, чтобы быстро открыть её перед боем. Можно добавить заметку о встрече или местности.</p></div><button type="button" data-toggle-map-section="battlemap-form-content" aria-controls="battlemap-form-content" aria-expanded="true" class="shrink-0 rounded-lg border border-zinc-700 px-3 py-2 text-xs text-zinc-300 hover:border-amber-400 hover:text-amber-200">Скрыть −</button></div><div id="battlemap-form-content" class="mt-5">
           <form id="battlemap-form" class="mt-5 space-y-4">
             <label class="block text-sm text-zinc-300">Название карты <span class="text-amber-300">*</span><input id="battlemap-title" required maxlength="140" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например, Горный перевал"></label>
             <label class="block text-sm text-zinc-300">Загрузить изображение с компьютера<input id="battlemap-file" type="file" accept="image/*" class="mt-2 block w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-3 text-sm text-white"></label><div id="battlemap-upload-preview" class="hidden overflow-hidden rounded-xl border border-zinc-800"><img id="battlemap-upload-image" alt="Предпросмотр боевой карты" class="block max-h-64 w-full object-contain"></div><p class="text-xs text-zinc-500">Загрузи изображение карты с компьютера. Файл хранится локально в браузере.</p>
@@ -319,11 +319,11 @@
             <label class="block text-sm text-zinc-300">Заметка<textarea id="battlemap-notes" maxlength="2000" rows="3" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Для какой встречи подойдёт, размер сетки, важные детали..."></textarea></label>
             <p id="battlemap-form-error" class="hidden text-sm text-red-300" role="alert"></p>
             <button type="submit" class="rounded-xl bg-amber-400 px-5 py-3 font-semibold text-zinc-950">＋ Сохранить карту</button>
-          </form>
+          </form></div>
         </section>
-        <section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 md:p-7"><div class="flex flex-wrap items-center justify-between gap-3"><h3 class="text-xl font-bold text-amber-200">Моя подборка</h3><span id="battlemap-count" class="rounded-full border border-zinc-700 px-3 py-1 text-xs text-zinc-400">0 карт</span></div>
-          <label class="mt-4 block text-sm text-zinc-300">Фильтр по типу<select id="battlemap-filter" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white"><option value="all">Все карты</option><option value="forest">Лес / природа</option><option value="dungeon">Подземелье / пещера</option><option value="settlement">Город / поселение</option><option value="mountain">Горы / снег</option><option value="road">Дорога / лагерь</option><option value="other">Другое</option></select></label>
-          <div id="battlemap-list" class="mt-5 space-y-3" aria-live="polite"></div>
+        <section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 md:p-7"><div class="flex flex-wrap items-center justify-between gap-3"><h3 class="text-xl font-bold text-amber-200">Моя подборка</h3><div class="flex items-center gap-2"><span id="battlemap-count" class="rounded-full border border-zinc-700 px-3 py-1 text-xs text-zinc-400">0 карт</span><button type="button" data-toggle-map-section="battlemap-collection-content" aria-controls="battlemap-collection-content" aria-expanded="true" class="shrink-0 rounded-lg border border-zinc-700 px-3 py-2 text-xs text-zinc-300 hover:border-amber-400 hover:text-amber-200">Скрыть −</button></div></div>
+          <div id="battlemap-collection-content" class="mt-4"><label class="block text-sm text-zinc-300">Фильтр по типу<select id="battlemap-filter" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white"><option value="all">Все карты</option><option value="forest">Лес / природа</option><option value="dungeon">Подземелье / пещера</option><option value="settlement">Город / поселение</option><option value="mountain">Горы / снег</option><option value="road">Дорога / лагерь</option><option value="other">Другое</option></select></label>
+          <div id="battlemap-list" class="mt-5 space-y-3" aria-live="polite"></div></div>
         </section>
       </div>
 
@@ -986,6 +986,16 @@
     });
     document.getElementById('battlemap-file').addEventListener('change',event=>{const file=event.target.files[0];if(file&&!isImageFile(file)){showBattleMapError('Выбери файл изображения.');event.target.value='';setImagePreview(null,'battlemap-upload-preview','battlemap-upload-image');return;}setImagePreview(file,'battlemap-upload-preview','battlemap-upload-image');document.getElementById('battlemap-form-error').classList.add('hidden');});
     document.getElementById('battlemap-filter').addEventListener('change', renderBattleMaps);
+    document.querySelectorAll('[data-toggle-map-section]').forEach(button => {
+      button.addEventListener('click', () => {
+        const section = document.getElementById(button.dataset.toggleMapSection);
+        if (!section) return;
+        const willExpand = section.classList.contains('hidden');
+        section.classList.toggle('hidden', !willExpand);
+        button.setAttribute('aria-expanded', String(willExpand));
+        button.textContent = willExpand ? 'Скрыть −' : 'Показать +';
+      });
+    });
     document.getElementById('battlemap-list').addEventListener('click', event => {
       const button = event.target.closest('[data-battlemap-delete]');
       if (!button) return;
