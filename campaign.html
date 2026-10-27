@@ -589,6 +589,7 @@
       }
       window.dndLoreCurrentRole = role;
       window.dndLoreIsMaster = role === 'master';
+      window.dispatchEvent(new CustomEvent('dnd-lore-role-ready', {detail:{role,user:window.dndLoreUser || null}}));
     })();
 
     const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
@@ -1198,9 +1199,94 @@
     battleBoard.addEventListener('pointercancel', endBattlePan);
     const sideLabels = {hero:'Герой',enemy:'Враг',ally:'Союзник'};
     const sideColors = {hero:'#2563eb',enemy:'#dc2626',ally:'#059669'};
+    let battleSceneChannel = null;
+    let battleSceneSyncReady = false;
+    let battleSceneSaveInFlight = false;
+    async function persistBattleSceneToSupabase() {
+      const client = window.dndLoreSupabase;
+      const user = window.dndLoreUser;
+      if (!client || !user || window.dndLoreCurrentRole !== 'master' || battleSceneSaveInFlight) return;
+      battleSceneSaveInFlight = true;
+      try {
+        const sceneToSave = JSON.parse(JSON.stringify(battleScene));
+        delete sceneToSave.mapImageObjectUrl;
+        const result = await client.from('campaign_battle_scenes').upsert({
+          campaign_slug:'storm-kings-thunder',
+          scene:sceneToSave,
+          updated_by:user.id,
+          updated_at:new Date().toISOString()
+        }, {onConflict:'campaign_slug'});
+        if (result.error) console.error('Не удалось сохранить боевую сцену в Supabase:', result.error);
+      } catch (error) {
+        console.error('Ошибка синхронизации боевой сцены:', error);
+      } finally {
+        battleSceneSaveInFlight = false;
+      }
+    }
+    async function syncBattleSceneFromSupabase() {
+      const client = window.dndLoreSupabase;
+      if (!client || !window.dndLoreUser || battleSceneSyncReady) return;
+      const result = await client.from('campaign_battle_scenes').select('scene').eq('campaign_slug','storm-kings-thunder').maybeSingle();
+      if (result.error) {
+        console.error('Не удалось загрузить боевую сцену:', result.error);
+        return;
+      }
+      if (result.data && result.data.scene && typeof result.data.scene === 'object') {
+        const remote = result.data.scene;
+        Object.assign(battleScene, remote);
+        if (!Array.isArray(battleScene.combatants)) battleScene.combatants = [];
+        campaignData.battleScene = battleScene;
+        try { localStorage.setItem(CAMPAIGN_DATA_KEY, JSON.stringify(campaignData)); } catch (error) {}
+        renderBattleScene();
+      } else if (window.dndLoreCurrentRole === 'master') {
+        await persistBattleSceneToSupabase();
+      }
+      battleSceneSyncReady = true;
+      if (battleSceneChannel) client.removeChannel(battleSceneChannel);
+      battleSceneChannel = client.channel('battle-scene-storm-kings-thunder')
+        .on('postgres_changes', {event:'*',schema:'public',table:'campaign_battle_scenes',filter:'campaign_slug=eq.storm-kings-thunder'}, payload => {
+          if (!payload.new || !payload.new.scene || payload.new.updated_by === (window.dndLoreUser && window.dndLoreUser.id)) return;
+          Object.assign(battleScene, payload.new.scene);
+          if (!Array.isArray(battleScene.combatants)) battleScene.combatants = [];
+          campaignData.battleScene = battleScene;
+          try { localStorage.setItem(CAMPAIGN_DATA_KEY, JSON.stringify(campaignData)); } catch (error) {}
+          renderBattleScene();
+        }).subscribe();
+    }
+    async function moveBattleTokenForPlayer(combatant) {
+      const client = window.dndLoreSupabase;
+      if (!client || !window.dndLoreUser || !combatant || !combatant.characterId) {
+        alert('Эта фишка не привязана к персонажу из общей базы. Попроси Мастера заново добавить персонажа в бой.');
+        return false;
+      }
+      const result = await client.rpc('move_owned_battle_token', {
+        p_campaign_slug:'storm-kings-thunder',
+        p_combatant_id:String(combatant.id),
+        p_x:Number(combatant.x),
+        p_y:Number(combatant.y)
+      });
+      if (result.error) {
+        console.error('Перемещение фишки отклонено:', result.error);
+        alert(result.error.message && result.error.message.includes('token_not_owned')
+          ? 'Ты можешь перемещать только фишку своего персонажа.'
+          : 'Не удалось переместить фишку: ' + result.error.message);
+        await syncBattleSceneFromSupabase();
+        return false;
+      }
+      if (result.data && typeof result.data === 'object') {
+        Object.assign(battleScene, result.data);
+        if (!Array.isArray(battleScene.combatants)) battleScene.combatants = [];
+        campaignData.battleScene = battleScene;
+        try { localStorage.setItem(CAMPAIGN_DATA_KEY, JSON.stringify(campaignData)); } catch (error) {}
+        renderBattleScene();
+      }
+      return true;
+    }
     function saveBattleScene() {
       campaignData.battleScene = battleScene;
-      return saveCampaignData();
+      const saved = saveCampaignData();
+      if (saved && window.dndLoreCurrentRole === 'master') persistBattleSceneToSupabase();
+      return saved;
     }
     function sortedCombatants() {
       return battleScene.combatants.slice().sort((a,b) => Number(b.initiative)-Number(a.initiative) || String(a.name).localeCompare(String(b.name),'ru'));
@@ -1283,7 +1369,8 @@
       const id = 'combatant-' + Date.now() + '-' + Math.random().toString(36).slice(2,7);
       const count = battleScene.combatants.length;
       const playerId = side !== 'enemy' && selectedBattleFormPlayer ? selectedBattleFormPlayer.id : null;
-      battleScene.combatants.push({id,name,side,initiative:Math.max(-20,Math.min(50,Number(document.getElementById('battle-combatant-initiative').value)||0)),hp,maxHp,x:8+(count%6)*16,y:12+(Math.floor(count/6)%6)*15,...(playerId ? {playerId} : {}),...(armorClass !== null && Number.isFinite(armorClass) ? {armorClass} : {}),...(monster ? {monsterId:monster.id,monsterEdition:monster.edition,monsterData:monster,conditions:[],defeated:false} : {})});
+      const characterId = playerId && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(playerId) ? playerId : null;
+      battleScene.combatants.push({id,name,side,initiative:Math.max(-20,Math.min(50,Number(document.getElementById('battle-combatant-initiative').value)||0)),hp,maxHp,x:8+(count%6)*16,y:12+(Math.floor(count/6)%6)*15,...(playerId ? {playerId} : {}),...(characterId ? {characterId} : {}),...(armorClass !== null && Number.isFinite(armorClass) ? {armorClass} : {}),...(monster ? {monsterId:monster.id,monsterEdition:monster.edition,monsterData:monster,conditions:[],defeated:false} : {})});
       if (!battleScene.activeId) battleScene.activeId = id;
       if (saveBattleScene()) { event.target.reset(); document.getElementById('battle-combatant-initiative').value = 10; document.getElementById('battle-combatant-hp').value = 10; document.getElementById('battle-combatant-maxhp').value = 10; document.getElementById('battle-combatant-ac').value = ''; renderBattleScene(); }
     });
@@ -1336,6 +1423,16 @@
       if (!marker) return;
       event.preventDefault();
       event.stopPropagation();
+      const combatant = battleScene.combatants.find(item => item.id === marker.dataset.battleMarker);
+      if (!combatant) return;
+      if (window.dndLoreCurrentRole !== 'master') {
+        const owned = getSavedBattlePlayers().some(player => player.id === combatant.characterId && player.ownerId === (window.dndLoreUser && window.dndLoreUser.id));
+        if (!owned) {
+          if (combatant.characterId) return;
+          alert('Эта фишка не привязана к персонажу из общей базы. Попроси Мастера заново добавить персонажа в бой.');
+          return;
+        }
+      }
       draggedBattleMarker = marker.dataset.battleMarker;
       marker.setPointerCapture(event.pointerId);
     });
@@ -1351,10 +1448,17 @@
       const marker = battleMarkers.querySelector('[data-battle-marker="' + draggedBattleMarker + '"]');
       if (marker) { marker.style.left = c.x + '%'; marker.style.top = c.y + '%'; }
     });
-    function endBattleMarkerDrag() {
+    async function endBattleMarkerDrag() {
       if (!draggedBattleMarker) return;
+      const movedId = draggedBattleMarker;
       draggedBattleMarker = null;
-      saveBattleScene();
+      const combatant = battleScene.combatants.find(item => item.id === movedId);
+      if (!combatant) return;
+      if (window.dndLoreCurrentRole === 'master') {
+        saveBattleScene();
+      } else {
+        await moveBattleTokenForPlayer(combatant);
+      }
     }
     battleMarkers.addEventListener('pointerup', endBattleMarkerDrag);
     battleMarkers.addEventListener('pointercancel', endBattleMarkerDrag);
@@ -1593,6 +1697,12 @@
     });
     renderPlayers();
     syncPlayersFromSupabase().catch(error => { console.error(error); showPlayerError('Ошибка синхронизации персонажей с Supabase.'); });
+    window.addEventListener('dnd-lore-role-ready', () => {
+      syncPlayersFromSupabase().then(() => syncBattleSceneFromSupabase()).catch(error => console.error('Не удалось запустить синхронизацию кампании:', error));
+    });
+    if (window.dndLoreCurrentRole) {
+      syncPlayersFromSupabase().then(() => syncBattleSceneFromSupabase()).catch(error => console.error('Не удалось запустить синхронизацию кампании:', error));
+    }
     renderCampaignData();
 
 
