@@ -88,7 +88,78 @@ $$;
 revoke all on function public.get_campaign_master(text) from public, anon;
 grant execute on function public.get_campaign_master(text) to authenticated;
 
-do $$
+
+-- Use a security-definer RPC for sending, so membership checks and insert happen
+-- atomically without weakening direct table RLS policies.
+create or replace function public.send_campaign_message(
+  p_campaign_slug text,
+  p_recipient_id uuid,
+  p_body text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_sender_id uuid := auth.uid();
+  v_sender_is_master boolean := false;
+  v_recipient_is_master boolean := false;
+  v_message public.campaign_messages%rowtype;
+begin
+  if v_sender_id is null then raise exception 'authentication_required'; end if;
+  if p_campaign_slug is null or trim(p_campaign_slug) = '' or char_length(p_campaign_slug) > 100 then
+    raise exception 'invalid_campaign';
+  end if;
+  if p_recipient_id is null or p_recipient_id = v_sender_id then
+    raise exception 'invalid_recipient';
+  end if;
+  if p_body is null or char_length(trim(p_body)) < 1 or char_length(p_body) > 4000 then
+    raise exception 'invalid_message';
+  end if;
+
+  select exists (
+    select 1 from public.profiles p
+    where p.id = v_sender_id and p.role = 'master'
+  ) into v_sender_is_master;
+
+  select exists (
+    select 1 from public.profiles p
+    where p.id = p_recipient_id and p.role = 'master'
+  ) into v_recipient_is_master;
+
+  if v_sender_is_master then
+    if not exists (
+      select 1 from public.campaign_members m
+      where m.campaign_slug = p_campaign_slug and m.user_id = p_recipient_id
+    ) then raise exception 'recipient_not_campaign_member'; end if;
+  else
+    if not exists (
+      select 1 from public.campaign_members m
+      where m.campaign_slug = p_campaign_slug and m.user_id = v_sender_id
+    ) then
+      -- A signed-in player visiting this campaign is enrolled here as well.
+      insert into public.campaign_members(campaign_slug,user_id)
+      values (p_campaign_slug,v_sender_id) on conflict do nothing;
+    end if;
+    if not v_recipient_is_master then raise exception 'recipient_not_master'; end if;
+    if not exists (
+      select 1 from public.campaign_members m
+      where m.campaign_slug = p_campaign_slug and m.user_id = v_sender_id
+    ) then raise exception 'not_campaign_member'; end if;
+  end if;
+
+  insert into public.campaign_messages(campaign_slug,sender_id,recipient_id,body)
+  values (trim(p_campaign_slug),v_sender_id,p_recipient_id,trim(p_body))
+  returning * into v_message;
+
+  return to_jsonb(v_message);
+end;
+$;
+revoke all on function public.send_campaign_message(text,uuid,text) from public, anon;
+grant execute on function public.send_campaign_message(text,uuid,text) to authenticated;
+
+do $
 begin
   if not exists (
     select 1 from pg_publication_tables
