@@ -425,7 +425,33 @@
       <section class="mt-6 rounded-3xl border border-emerald-500/20 bg-zinc-900 p-5 md:p-7"><h3 class="text-xl font-bold text-emerald-200">Заметки игроков</h3><p class="mt-2 text-sm text-zinc-400">Каждый игрок пишет под своим именем. Автор и дата отображаются у каждой записи. Эти записи отдельно от секретов ведущего.</p>
         <form id="player-note-form" class="mt-4 grid gap-4 md:grid-cols-[minmax(0,.7fr)_minmax(0,1.3fr)]"><label class="block text-sm text-zinc-300">Имя игрока / персонажа<input id="player-note-author" required maxlength="100" autocomplete="nickname" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например, Булат / Эйдан"></label><label class="block text-sm text-zinc-300 md:row-span-2">Твоя заметка<textarea id="player-note-content" required maxlength="5000" rows="4" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Догадки, имена, найденные улики..."></textarea></label><button type="submit" class="self-start rounded-xl bg-emerald-400 px-5 py-3 font-semibold text-zinc-950">Опубликовать заметку</button></form><div id="player-note-list" class="mt-6 grid gap-3 md:grid-cols-2"></div>
       </section>
-      <section class="mt-6 rounded-3xl border border-red-500/20 bg-zinc-900 p-5 md:p-7"><h3 class="text-xl font-bold text-red-200">Секретные заметки мастера</h3><p class="mt-2 text-sm text-zinc-400">Скрытые подсказки, будущие повороты сюжета и тайны за ширмой.</p><form id="secret-note-form" class="mt-4 flex flex-col gap-3 sm:flex-row"><textarea id="secret-note-content" required maxlength="5000" rows="3" class="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Секрет мастера..."></textarea><button type="submit" class="shrink-0 rounded-xl border border-red-500/40 px-5 py-3 font-semibold text-red-200">Сохранить секрет</button></form><div id="secret-note-list" class="mt-5 space-y-3"></div></section>
+      <section id="secret-note-section" class="mt-6 rounded-3xl border border-red-500/20 bg-zinc-900 p-5 md:p-7">
+        <h3 class="text-xl font-bold text-red-200">Секретные заметки</h3>
+        <p class="mt-2 text-sm text-zinc-400">Мастер может отправить личную подсказку конкретному игроку. Она появится только в его аккаунте.</p>
+        <div id="secret-note-local-tools" class="mt-5 rounded-2xl border border-red-500/20 bg-zinc-950/60 p-4">
+          <h4 class="font-semibold text-red-200">Личные секреты мастера</h4>
+          <p class="mt-1 text-xs text-zinc-500">Эти черновые заметки сохраняются только в этом браузере и игрокам не отправляются.</p>
+          <form id="secret-note-form" class="mt-4 flex flex-col gap-3 sm:flex-row"><textarea id="secret-note-content" required maxlength="5000" rows="3" class="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Секрет мастера..."></textarea><button type="submit" class="shrink-0 rounded-xl border border-red-500/40 px-5 py-3 font-semibold text-red-200">Сохранить секрет</button></form>
+          <div id="secret-note-list" class="mt-5 space-y-3"></div>
+        </div>
+        <div id="secret-message-master-tools" class="mt-6 hidden rounded-2xl border border-amber-500/20 bg-zinc-950/60 p-4">
+          <h4 class="font-semibold text-amber-200">Отправить игроку</h4>
+          <p class="mt-1 text-sm text-zinc-400">Укажи email, с которым игрок зарегистрирован на сайте. Сообщение будет видно только этому аккаунту.</p>
+          <form id="secret-message-form" class="mt-4 space-y-3">
+            <label class="block text-sm text-zinc-300">Email игрока<input id="secret-message-recipient" type="email" required maxlength="254" autocomplete="off" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="player@example.com"></label>
+            <label class="block text-sm text-zinc-300">Заголовок<input id="secret-message-title" required maxlength="160" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например: Тайна твоего персонажа"></label>
+            <label class="block text-sm text-zinc-300">Сообщение<textarea id="secret-message-content" required maxlength="5000" rows="4" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="То, что должен узнать только этот игрок..."></textarea></label>
+            <div class="flex flex-wrap items-center gap-3"><button id="secret-message-submit" type="submit" class="rounded-xl bg-amber-400 px-5 py-3 font-semibold text-zinc-950">Отправить секрет</button><span id="secret-message-status" class="text-sm text-zinc-400" role="status" aria-live="polite"></span></div>
+          </form>
+          <h4 class="mt-6 font-semibold text-amber-200">Отправленные сообщения</h4>
+          <div id="secret-message-sent-list" class="mt-3 space-y-3"><p class="text-sm text-zinc-500">Загружаем сообщения…</p></div>
+        </div>
+        <div id="player-secret-inbox" class="mt-5 hidden rounded-2xl border border-blue-500/20 bg-zinc-950/60 p-4">
+          <h4 class="font-semibold text-blue-200">Личные сообщения от мастера</h4>
+          <p class="mt-1 text-sm text-zinc-400">Эти сообщения видны только тебе. Проверяй раздел во время игры.</p>
+          <div id="player-secret-inbox-list" class="mt-4 space-y-3"><p class="text-sm text-zinc-500">Загружаем сообщения…</p></div>
+        </div>
+      </section>
     </section>
     <footer class="mt-8 border-t border-zinc-800 py-6 text-sm text-zinc-500 flex flex-wrap justify-between gap-3"><span>DnD Lore Portal · Гром штурмового короля</span><a href="index.html#campaigns" class="hover:text-amber-300">Вернуться к кампаниям ↑</a></footer>
   </main>
@@ -479,8 +505,8 @@
           el.querySelectorAll('input,textarea,select,button').forEach(function(control) { control.disabled = true; });
         });
         document.querySelectorAll('#world-entry-list button, #session-list button, #quest-list button, #secret-note-list button').forEach(function(button) { button.disabled = true; });
-        const secretForm = document.getElementById('secret-note-form');
-        if (secretForm && secretForm.closest('section')) secretForm.closest('section').classList.add('hidden');
+        const secretTools = document.getElementById('secret-note-local-tools');
+        if (secretTools) secretTools.classList.add('hidden');
       }
       if (role === 'master') {
         document.getElementById('add-player-button')?.classList.add('hidden');
@@ -598,6 +624,94 @@
       campaignData.secretNotes.push({id:'secret-'+Date.now(),content:document.getElementById('secret-note-content').value.trim(),createdAt:new Date().toISOString()});
       if (saveCampaignData()) { event.target.reset(); renderCampaignData(); }
     });
+    // Личные сообщения игрокам хранятся в Supabase и защищены RLS-политиками.
+    (async function initSecretPlayerMessages() {
+      const masterTools = document.getElementById('secret-message-master-tools');
+      const playerInbox = document.getElementById('player-secret-inbox');
+      const sentList = document.getElementById('secret-message-sent-list');
+      const inboxList = document.getElementById('player-secret-inbox-list');
+      const form = document.getElementById('secret-message-form');
+      const status = document.getElementById('secret-message-status');
+      const projectUrl = (localStorage.getItem('dnd-lore-supabase-url') || 'https://qfddxghiwzmtdoxcxrhy.supabase.co').trim().replace(/\\/$/, '');
+      const publicKey = (localStorage.getItem('dnd-lore-supabase-publishable-key') || '').trim();
+      if (!publicKey || !window.supabase?.createClient) {
+        if (sentList) sentList.textContent = 'Подключи публичный ключ Supabase на странице входа.';
+        if (inboxList) inboxList.textContent = 'Не удалось подключиться к аккаунту. Выйди и войди снова.';
+        return;
+      }
+      const client = window.supabase.createClient(projectUrl, publicKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+      const {data:sessionData,error:sessionError} = await client.auth.getSession();
+      const user = sessionData?.session?.user;
+      if (sessionError || !user) {
+        if (sentList) sentList.textContent = 'Войди в аккаунт, чтобы использовать секретные сообщения.';
+        if (inboxList) inboxList.textContent = 'Войди в аккаунт, чтобы проверить личные сообщения.';
+        return;
+      }
+      const {data:profile,error:profileError} = await client.from('profiles').select('role').eq('id',user.id).maybeSingle();
+      if (profileError || !profile) {
+        if (sentList) sentList.textContent = 'Не удалось определить роль аккаунта. Проверь настройки профиля Supabase.';
+        if (inboxList) inboxList.textContent = 'Не удалось определить роль аккаунта.';
+        return;
+      }
+      const isMaster = profile.role === 'master';
+      if (isMaster) masterTools?.classList.remove('hidden');
+      else playerInbox?.classList.remove('hidden');
+
+      function messageCard(item, sent) {
+        const date = new Date(item.created_at);
+        const dateLabel = Number.isNaN(date.getTime()) ? '' : date.toLocaleString('ru-RU',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+        const recipient = sent ? '<p class="mt-1 text-xs text-zinc-500">Кому: ' + safeText(item.recipient_email || '') + '</p>' : '';
+        const readLabel = sent ? (item.read_at ? '<span class="rounded-full bg-emerald-500/10 px-2 py-1 text-xs text-emerald-300">Прочитано</span>' : '<span class="rounded-full bg-amber-500/10 px-2 py-1 text-xs text-amber-200">Не прочитано</span>') : '';
+        const readButton = !sent && !item.read_at ? '<button type="button" data-secret-read="' + safeText(item.id) + '" class="mt-3 rounded-lg border border-blue-400/30 px-3 py-2 text-sm text-blue-200 hover:bg-blue-500/10">Отметить прочитанным</button>' : '';
+        return '<article class="rounded-xl border border-zinc-800 bg-zinc-900/80 p-4"><div class="flex flex-wrap items-start justify-between gap-2"><h5 class="font-semibold text-amber-200 break-words">' + safeText(item.title) + '</h5><span class="text-xs text-zinc-500">' + safeText(dateLabel) + '</span></div>' + recipient + '<p class="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed text-zinc-200">' + safeText(item.content) + '</p><div class="mt-3 flex flex-wrap items-center gap-2">' + readLabel + readButton + '</div></article>';
+      }
+      async function refreshMessages() {
+        const {data,error} = await client.from('secret_player_notes').select('id,title,content,created_at,read_at,recipient_email,sender_id,recipient_id').eq('campaign_slug','storm-kings-thunder').order('created_at',{ascending:false});
+        if (error) {
+          const explanation = 'Не удалось загрузить сообщения. Проверь, что SQL-миграция supabase/secret-player-notes.sql выполнена в Supabase SQL Editor.';
+          if (sentList) sentList.textContent = explanation;
+          if (inboxList) inboxList.textContent = explanation;
+          return;
+        }
+        if (isMaster && sentList) {
+          const sent = data.filter(item => item.sender_id === user.id);
+          sentList.innerHTML = sent.length ? sent.map(item => messageCard(item,true)).join('') : '<p class="text-sm text-zinc-500">Ты пока не отправлял личных сообщений.</p>';
+        }
+        if (!isMaster && inboxList) {
+          const received = data.filter(item => item.recipient_id === user.id);
+          inboxList.innerHTML = received.length ? received.map(item => messageCard(item,false)).join('') : '<p class="text-sm text-zinc-500">Пока нет личных сообщений от мастера.</p>';
+        }
+      }
+      form?.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!isMaster) return;
+        const recipientEmail = document.getElementById('secret-message-recipient').value.trim().toLowerCase();
+        const title = document.getElementById('secret-message-title').value.trim();
+        const content = document.getElementById('secret-message-content').value.trim();
+        if (!recipientEmail || !title || !content) { status.textContent = 'Заполни все поля.'; return; }
+        const button = document.getElementById('secret-message-submit');
+        button.disabled = true; status.textContent = 'Отправляем…';
+        const {error} = await client.rpc('send_secret_player_note',{p_recipient_email:recipientEmail,p_title:title,p_content:content,p_campaign_slug:'storm-kings-thunder'});
+        button.disabled = false;
+        if (error) {
+          status.textContent = error.message.includes('recipient_not_found') ? 'Аккаунт с таким email не найден. Игрок должен войти в систему хотя бы один раз и иметь профиль.' : error.message.includes('master_only') ? 'Отправлять секреты может только Мастер.' : 'Не удалось отправить сообщение: ' + error.message;
+          return;
+        }
+        form.reset();
+        status.textContent = 'Секрет отправлен. Его увидит только указанный аккаунт.';
+        await refreshMessages();
+      });
+      inboxList?.addEventListener('click', async event => {
+        const button = event.target.closest('[data-secret-read]');
+        if (!button || isMaster) return;
+        button.disabled = true;
+        const {error} = await client.from('secret_player_notes').update({read_at:new Date().toISOString()}).eq('id',button.dataset.secretRead).eq('recipient_id',user.id);
+        if (error) { button.disabled = false; button.textContent = 'Не удалось отметить'; return; }
+        await refreshMessages();
+      });
+      await refreshMessages();
+    })();
+
     document.getElementById('dm-quick-note-form').addEventListener('submit', event => {
       event.preventDefault(); const value = document.getElementById('dm-quick-note').value.trim(); if (!value) return;
       campaignData.quickNotes.push({id:'quick-'+Date.now(),content:value,createdAt:new Date().toISOString()});
