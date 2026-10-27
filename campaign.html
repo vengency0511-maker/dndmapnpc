@@ -2006,6 +2006,8 @@
       const selected = new Map();
       let lastFormula = '';
       const escapeHtml = value => String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+      // Не даём внешним обработчикам страницы закрывать панель при выборе кубиков или изменении количества.
+      popover.addEventListener('click', event => event.stopPropagation());
       function setOpen(open) {
         popover.classList.toggle('hidden', !open);
         popover.setAttribute('aria-hidden', String(!open));
