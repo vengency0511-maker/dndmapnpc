@@ -100,7 +100,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $function$
 declare
   v_sender_id uuid := auth.uid();
   v_sender_is_master boolean := false;
@@ -155,11 +155,11 @@ begin
 
   return to_jsonb(v_message);
 end;
-$;
+$function$;
 revoke all on function public.send_campaign_message(text,uuid,text) from public, anon;
 grant execute on function public.send_campaign_message(text,uuid,text) to authenticated;
 
-do $
+do $block$
 begin
   if not exists (
     select 1 from pg_publication_tables
@@ -169,4 +169,4 @@ begin
   end if;
 exception when undefined_object then
   raise notice 'Publication supabase_realtime is not available; enable Realtime for campaign_messages in Supabase Dashboard.';
-end $$;
+end $block$;
