@@ -402,29 +402,42 @@
               <ol id="battle-initiative-list" class="mt-4 space-y-2" aria-live="polite"></ol>
               <p id="battle-initiative-empty" class="mt-3 text-sm text-zinc-500">Участников пока нет. Добавь первого героя или врага.</p>
             </div>
-            <section id="battle-dice-panel" class="rounded-2xl border border-amber-500/30 bg-zinc-950 p-4">
-              <div class="flex items-start justify-between gap-3">
-                <div><h4 class="font-bold text-amber-200">🎲 Броски кубов</h4><p class="mt-1 text-xs text-zinc-400">Собери комбинацию для атаки, урона или проверки.</p></div>
-                <span class="rounded-full border border-zinc-700 px-2 py-1 text-[11px] text-zinc-400">D&D</span>
-              </div>
-              <div class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                <label class="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 p-2"><input type="checkbox" class="battle-die-check accent-amber-400" data-die="20"><span class="font-bold text-amber-200">D20</span><span class="ml-auto text-xs text-zinc-500">×</span><input type="number" min="1" max="20" value="1" data-die-count="20" class="w-14 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-center text-sm text-white" aria-label="Количество D20"></label>
-                <label class="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 p-2"><input type="checkbox" class="battle-die-check accent-amber-400" data-die="12"><span class="font-bold text-amber-200">D12</span><span class="ml-auto text-xs text-zinc-500">×</span><input type="number" min="1" max="20" value="1" data-die-count="12" class="w-14 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-center text-sm text-white" aria-label="Количество D12"></label>
-                <label class="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 p-2"><input type="checkbox" class="battle-die-check accent-amber-400" data-die="10"><span class="font-bold text-amber-200">D10</span><span class="ml-auto text-xs text-zinc-500">×</span><input type="number" min="1" max="20" value="1" data-die-count="10" class="w-14 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-center text-sm text-white" aria-label="Количество D10"></label>
-                <label class="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 p-2"><input type="checkbox" class="battle-die-check accent-amber-400" data-die="8"><span class="font-bold text-amber-200">D8</span><span class="ml-auto text-xs text-zinc-500">×</span><input type="number" min="1" max="20" value="1" data-die-count="8" class="w-14 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-center text-sm text-white" aria-label="Количество D8"></label>
-                <label class="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 p-2"><input type="checkbox" class="battle-die-check accent-amber-400" data-die="6"><span class="font-bold text-amber-200">D6</span><span class="ml-auto text-xs text-zinc-500">×</span><input type="number" min="1" max="20" value="1" data-die-count="6" class="w-14 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-center text-sm text-white" aria-label="Количество D6"></label>
-                <label class="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 p-2"><input type="checkbox" class="battle-die-check accent-amber-400" data-die="4"><span class="font-bold text-amber-200">D4</span><span class="ml-auto text-xs text-zinc-500">×</span><input type="number" min="1" max="20" value="1" data-die-count="4" class="w-14 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1 text-center text-sm text-white" aria-label="Количество D4"></label>
-              </div>
-              <div class="mt-3 grid grid-cols-2 gap-3">
-                <label class="block text-sm text-zinc-300">Кто бросает<input id="battle-dice-roller" type="text" maxlength="60" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-white" placeholder="Имя игрока / мастера"></label>
-                <label class="block text-sm text-zinc-300">Модификатор<input id="battle-dice-modifier" type="number" min="-100" max="100" value="0" class="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"></label>
-              </div>
-              <button id="battle-dice-roll" type="button" class="mt-3 w-full rounded-xl bg-amber-400 px-5 py-3 font-bold text-zinc-950 hover:bg-amber-300">🎲 Бросить</button>
-              <p id="battle-dice-error" class="mt-2 hidden text-sm text-red-300" role="alert"></p>
-              <div id="battle-dice-result" class="mt-4 rounded-xl border border-zinc-800 bg-zinc-900 p-3" aria-live="polite"><p class="text-sm text-zinc-500">Выбери один или несколько типов кубов и нажми «Бросить».</p></div>
-              <div class="mt-4"><div class="flex items-center justify-between gap-2"><h5 class="text-sm font-semibold text-zinc-200">История бросков</h5><button id="battle-dice-clear" type="button" class="text-xs text-zinc-500 hover:text-amber-200">Очистить</button></div><ol id="battle-dice-history" class="mt-2 space-y-2"></ol></div>
-              <p class="mt-3 text-[11px] leading-relaxed text-zinc-500">Результаты этой версии сохраняются в текущей вкладке браузера. Общая история бросков для всех игроков потребует синхронизации через Supabase.</p>
-            </section>
+            <div id="battle-dice-widget" class="relative flex justify-end">
+              <button id="battle-dice-open" type="button" aria-expanded="false" aria-controls="battle-dice-popover" class="group flex items-center gap-3 rounded-2xl border border-amber-500/30 bg-zinc-950 px-3 py-2.5 text-left shadow-lg transition hover:border-amber-300/70 hover:bg-zinc-900">
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-400/10 text-amber-200 transition group-hover:scale-105" aria-hidden="true">
+                  <svg viewBox="0 0 48 48" width="36" height="36" fill="none" role="img" aria-label="D20">
+                    <path d="M24 3 42 14v20L24 45 6 34V14L24 3Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
+                    <path d="M24 3v42M6 14l36 20M42 14 6 34M6 14h36M6 34h36" stroke="currentColor" stroke-width="1.3" opacity=".65"/>
+                    <path d="m24 12 10 6-2 12-8 6-8-6-2-12 10-6Z" fill="#fbbf24" fill-opacity=".16" stroke="#fbbf24" stroke-width="1.3"/>
+                    <text x="24" y="26" text-anchor="middle" font-size="12" font-weight="800" fill="#fde68a">20</text>
+                  </svg>
+                </span>
+                <span><span class="block text-sm font-bold text-amber-200">Бросить кубы</span><span class="mt-0.5 block text-xs text-zinc-500">D20 · D12 · D10 · D8 · D6 · D4</span></span>
+                <span class="ml-2 text-zinc-500 transition group-hover:text-amber-200" aria-hidden="true">⌄</span>
+              </button>
+              <section id="battle-dice-popover" class="absolute bottom-14 right-0 z-50 hidden w-[min(340px,calc(100vw-2.5rem))] rounded-2xl border border-amber-500/30 bg-zinc-950 p-4 shadow-2xl shadow-black/50" aria-label="Кубики" aria-hidden="true">
+                <div class="flex items-center justify-between gap-3">
+                  <div><h4 class="font-bold text-amber-200">Бросок кубов</h4><p class="mt-0.5 text-xs text-zinc-500">Выбери кубы или введи формулу</p></div>
+                  <button id="battle-dice-close" type="button" aria-label="Закрыть кубики" class="flex h-8 w-8 items-center justify-center rounded-lg text-xl text-zinc-400 hover:bg-zinc-800 hover:text-white">×</button>
+                </div>
+                <div id="battle-dice-types" class="mt-3 grid grid-cols-3 gap-2">
+                  <button type="button" data-die="20" aria-pressed="false" class="dice-type rounded-xl border border-zinc-800 bg-zinc-900 px-2 py-2 text-sm font-bold text-zinc-300 hover:border-amber-400/60">D20</button>
+                  <button type="button" data-die="12" aria-pressed="false" class="dice-type rounded-xl border border-zinc-800 bg-zinc-900 px-2 py-2 text-sm font-bold text-zinc-300 hover:border-amber-400/60">D12</button>
+                  <button type="button" data-die="10" aria-pressed="false" class="dice-type rounded-xl border border-zinc-800 bg-zinc-900 px-2 py-2 text-sm font-bold text-zinc-300 hover:border-amber-400/60">D10</button>
+                  <button type="button" data-die="8" aria-pressed="false" class="dice-type rounded-xl border border-zinc-800 bg-zinc-900 px-2 py-2 text-sm font-bold text-zinc-300 hover:border-amber-400/60">D8</button>
+                  <button type="button" data-die="6" aria-pressed="false" class="dice-type rounded-xl border border-zinc-800 bg-zinc-900 px-2 py-2 text-sm font-bold text-zinc-300 hover:border-amber-400/60">D6</button>
+                  <button type="button" data-die="4" aria-pressed="false" class="dice-type rounded-xl border border-zinc-800 bg-zinc-900 px-2 py-2 text-sm font-bold text-zinc-300 hover:border-amber-400/60">D4</button>
+                </div>
+                <div id="battle-dice-counts" class="mt-2 flex flex-wrap gap-2"></div>
+                <div class="mt-3 border-t border-zinc-800 pt-3">
+                  <label for="battle-dice-notation" class="block text-xs font-medium text-zinc-400">Формула броска</label>
+                  <div class="mt-1 flex gap-2"><input id="battle-dice-notation" type="text" maxlength="100" autocomplete="off" spellcheck="false" class="min-w-0 flex-1 rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2.5 font-mono text-sm text-white placeholder:text-zinc-600 focus:border-amber-400 focus:outline-none" placeholder="Например, 2D12D8 или 1D20+5"><button id="battle-dice-roll" type="button" class="rounded-xl bg-amber-400 px-4 py-2 font-bold text-zinc-950 hover:bg-amber-300">Кинуть</button></div>
+                  <p class="mt-1 text-[11px] text-zinc-500">Можно писать слитно: 2D12D8 = 2D12 + 1D8</p>
+                  <p id="battle-dice-error" class="mt-2 hidden text-xs text-red-300" role="alert"></p>
+                </div>
+                <div id="battle-dice-result" class="mt-3 hidden rounded-xl border border-amber-500/20 bg-zinc-900 p-3" aria-live="polite"></div>
+              </section>
+            </div>
           </div>
         </div>
       </section>
@@ -1978,57 +1991,108 @@
 
   <script>
     (() => {
-      const panel = document.getElementById('battle-dice-panel');
-      if (!panel) return;
-      const resultBox = document.getElementById('battle-dice-result');
-      const historyBox = document.getElementById('battle-dice-history');
-      const errorBox = document.getElementById('battle-dice-error');
+      const widget = document.getElementById('battle-dice-widget');
+      if (!widget) return;
+      const openButton = document.getElementById('battle-dice-open');
+      const popover = document.getElementById('battle-dice-popover');
+      const closeButton = document.getElementById('battle-dice-close');
+      const types = document.getElementById('battle-dice-types');
+      const counts = document.getElementById('battle-dice-counts');
+      const notation = document.getElementById('battle-dice-notation');
       const rollButton = document.getElementById('battle-dice-roll');
-      const rollHistory = [];
+      const resultBox = document.getElementById('battle-dice-result');
+      const errorBox = document.getElementById('battle-dice-error');
+      const sidesAllowed = [20,12,10,8,6,4];
+      const selected = new Map();
+      let lastFormula = '';
       const escapeHtml = value => String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-      function renderHistory() {
-        historyBox.innerHTML = rollHistory.length ? rollHistory.map(item =>
-          '<li class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2"><div class="flex items-center justify-between gap-3"><span class="text-xs text-zinc-400">' + escapeHtml(item.time) + ' · ' + escapeHtml(item.roller) + ' · ' + escapeHtml(item.formula) + '</span><strong class="text-amber-200">' + item.total + '</strong></div><p class="mt-1 text-xs text-zinc-300">' + escapeHtml(item.detail) + '</p></li>'
-        ).join('') : '<li class="text-xs text-zinc-500">Здесь появятся последние броски.</li>';
+      function setOpen(open) {
+        popover.classList.toggle('hidden', !open);
+        popover.setAttribute('aria-hidden', String(!open));
+        openButton.setAttribute('aria-expanded', String(open));
+        if (open) notation.focus();
       }
-      rollButton.addEventListener('click', () => {
-        errorBox.classList.add('hidden');
-        const selected = [...panel.querySelectorAll('.battle-die-check:checked')];
-        if (!selected.length) {
-          errorBox.textContent = 'Сначала выбери хотя бы один тип куба.';
-          errorBox.classList.remove('hidden');
-          return;
-        }
-        let totalDice = 0;
-        const groups = [];
-        selected.forEach(check => {
-          const sides = Number(check.dataset.die);
-          const countInput = panel.querySelector('[data-die-count="' + sides + '"]');
-          const count = Math.max(1, Math.min(20, Number.parseInt(countInput.value, 10) || 1));
-          countInput.value = count;
-          totalDice += count;
-          const rolls = Array.from({length: count}, () => Math.floor(Math.random() * sides) + 1);
-          groups.push({sides, rolls, sum: rolls.reduce((a,b)=>a+b,0)});
+      function renderCounts() {
+        counts.innerHTML = [...selected.entries()].map(([sides,count]) =>
+          '<label class="flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-2 py-1.5 text-xs"><span class="font-bold text-amber-200">D'+sides+'</span><button type="button" data-count-action="minus" data-sides="'+sides+'" aria-label="Уменьшить количество D'+sides+'" class="h-6 w-6 rounded-md border border-zinc-700 text-zinc-200 hover:border-amber-400">−</button><span class="min-w-3 text-center text-white">'+count+'</span><button type="button" data-count-action="plus" data-sides="'+sides+'" aria-label="Увеличить количество D'+sides+'" class="h-6 w-6 rounded-md border border-zinc-700 text-zinc-200 hover:border-amber-400">+</button></label>'
+        ).join('');
+        types.querySelectorAll('[data-die]').forEach(button => {
+          const active = selected.has(Number(button.dataset.die));
+          button.setAttribute('aria-pressed', String(active));
+          button.className = 'dice-type rounded-xl border px-2 py-2 text-sm font-bold transition ' + (active ? 'border-amber-400 bg-amber-400/10 text-amber-200' : 'border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-amber-400/60');
         });
-        if (totalDice > 50) {
-          errorBox.textContent = 'За один раз можно бросить не больше 50 кубов. Уменьши количество.';
-          errorBox.classList.remove('hidden');
-          return;
+      }
+      function buildFormula() {
+        return [...selected.entries()].map(([sides,count]) => (count > 1 ? count : '') + 'D' + sides).join('+');
+      }
+      function syncFormulaFromSelection() {
+        notation.value = buildFormula();
+      }
+      function showError(message) {
+        errorBox.textContent = message;
+        errorBox.classList.toggle('hidden', !message);
+      }
+      function roll() {
+        showError('');
+        const raw = notation.value.trim().toUpperCase().replace(/\s+/g,'');
+        if (!raw) { showError('Выбери куб или введи формулу.'); return; }
+        const normalized = raw.replace(/D/g,'D');
+        const termRegex = /([+-]?)(\d*)D(20|12|10|8|6|4)|([+-]\d+)/g;
+        let match, cursor = 0, totalDice = 0, total = 0, detail = [], canonical = '';
+        while ((match = termRegex.exec(normalized)) !== null) {
+          const gap = normalized.slice(cursor, match.index);
+          if (gap && gap !== '+') { showError('Не удалось прочитать формулу. Пример: 2D12D8 или 1D20+5'); return; }
+          cursor = termRegex.lastIndex;
+          if (match[4]) {
+            const mod = Number(match[4]);
+            total += mod; canonical += (canonical && mod > 0 ? '+' : '') + String(mod);
+            detail.push((mod > 0 ? '+' : '') + mod);
+            continue;
+          }
+          const sign = match[1] === '-' ? -1 : 1;
+          const count = match[2] ? Number(match[2]) : 1;
+          const sides = Number(match[3]);
+          if (!sidesAllowed.includes(sides) || count < 1 || count > 50) { showError('Количество кубов должно быть от 1 до 50.'); return; }
+          totalDice += count;
+          if (totalDice > 50) { showError('За один раз можно бросить не больше 50 кубов.'); return; }
+          const rolls = Array.from({length:count}, () => Math.floor(Math.random()*sides)+1);
+          const sum = rolls.reduce((a,b)=>a+b,0) * sign;
+          total += sum;
+          const term = (count > 1 ? count : '') + 'D' + sides;
+          canonical += (canonical && sign > 0 ? '+' : sign < 0 ? '-' : '') + term;
+          detail.push(term + ' [' + rolls.join(', ') + '] = ' + sum);
         }
-        const modifier = Math.max(-100, Math.min(100, Number.parseInt(document.getElementById('battle-dice-modifier').value, 10) || 0));
-        document.getElementById('battle-dice-modifier').value = modifier;
-        const diceTotal = groups.reduce((sum, group) => sum + group.sum, 0);
-        const total = diceTotal + modifier;
-        const formula = groups.map(g => (g.rolls.length > 1 ? g.rolls.length : '') + 'D' + g.sides).join(' + ') + (modifier ? (modifier > 0 ? ' + ' : ' − ') + Math.abs(modifier) : '');
-        const detail = groups.map(g => (g.rolls.length > 1 ? g.rolls.length + 'D' : 'D') + g.sides + ': [' + g.rolls.join(', ') + '] = ' + g.sum).join(' · ') + (modifier ? ' · модификатор ' + (modifier > 0 ? '+' : '') + modifier : '');
-        resultBox.innerHTML = '<p class="text-xs uppercase tracking-wider text-zinc-400">Результат броска</p><div class="mt-1 flex items-end justify-between gap-3"><strong class="text-4xl font-black text-amber-200">' + total + '</strong><span class="text-sm text-zinc-300">' + escapeHtml(formula) + '</span></div><p class="mt-2 text-sm leading-relaxed text-zinc-300">' + escapeHtml(detail) + '</p>';
-        const roller = (document.getElementById('battle-dice-roller').value || '').trim() || 'Игрок / мастер';
-        rollHistory.unshift({time:new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),roller,formula,detail,total});
-        if (rollHistory.length > 10) rollHistory.length = 10;
-        renderHistory();
+        if (!cursor || cursor !== normalized.length) { showError('Проверь запись. Например: 2D12D8, 2D6+1D8 или 1D20+5.'); return; }
+        lastFormula = normalized;
+        resultBox.classList.remove('hidden');
+        resultBox.innerHTML = '<div class="flex items-start justify-between gap-3"><div><p class="text-[10px] uppercase tracking-[.18em] text-zinc-500">Результат</p><strong class="mt-1 block text-4xl font-black leading-none text-amber-200">'+total+'</strong><p class="mt-2 text-xs font-medium text-zinc-300">'+escapeHtml(canonical)+'</p></div><div class="flex gap-1"><button type="button" id="battle-dice-reroll" title="Бросить снова" aria-label="Бросить снова" class="flex h-8 w-8 items-center justify-center rounded-lg text-lg text-amber-200 hover:bg-zinc-800">↻</button><button type="button" id="battle-dice-result-close" title="Скрыть результат" aria-label="Скрыть результат" class="flex h-8 w-8 items-center justify-center rounded-lg text-xl text-zinc-400 hover:bg-zinc-800 hover:text-white">×</button></div></div><p class="mt-2 text-xs leading-relaxed text-zinc-400">'+escapeHtml(detail.join(' · '))+'</p>';
+        document.getElementById('battle-dice-reroll').addEventListener('click', roll);
+        document.getElementById('battle-dice-result-close').addEventListener('click', () => resultBox.classList.add('hidden'));
+      }
+      openButton.addEventListener('click', () => setOpen(popover.classList.contains('hidden')));
+      closeButton.addEventListener('click', () => setOpen(false));
+      types.addEventListener('click', event => {
+        const button = event.target.closest('[data-die]');
+        if (!button) return;
+        const sides = Number(button.dataset.die);
+        if (selected.has(sides)) selected.delete(sides); else selected.set(sides,1);
+        renderCounts(); syncFormulaFromSelection();
       });
-      document.getElementById('battle-dice-clear').addEventListener('click', () => { rollHistory.length = 0; renderHistory(); });
-      renderHistory();
+      counts.addEventListener('click', event => {
+        const button = event.target.closest('[data-count-action]');
+        if (!button) return;
+        const sides = Number(button.dataset.sides);
+        const current = selected.get(sides) || 1;
+        if (button.dataset.countAction === 'minus') {
+          if (current <= 1) selected.delete(sides); else selected.set(sides,current-1);
+        } else if (current < 50) selected.set(sides,current+1);
+        renderCounts(); syncFormulaFromSelection();
+      });
+      rollButton.addEventListener('click', roll);
+      notation.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); roll(); } });
+      document.addEventListener('keydown', event => { if (event.key === 'Escape' && !popover.classList.contains('hidden')) setOpen(false); });
+      document.addEventListener('click', event => { if (!widget.contains(event.target)) setOpen(false); });
+      renderCounts();
     })();
   </script>
 
