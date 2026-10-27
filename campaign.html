@@ -1250,7 +1250,12 @@
           mapUrl = parsed.href;
         } catch (e) { err.textContent = 'Ссылка на карту должна начинаться с https:// или http://.'; err.classList.remove('hidden'); return; }
       }
-      battleScene.mapUrl = mapUrl; battleScene.mapImageId = null;
+      // Меняем источник карты только если пользователь действительно ввёл новую ссылку.
+      // Иначе сохраняем выбранное локальное изображение из библиотеки при изменении размера клетки.
+      if (raw) {
+        battleScene.mapUrl = mapUrl;
+        battleScene.mapImageId = null;
+      }
       battleScene.gridSize = Math.max(20, Math.min(100, Number(document.getElementById('battle-scene-grid-size').value) || 40));
       if (saveBattleScene()) renderBattleScene();
     });
