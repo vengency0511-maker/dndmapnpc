@@ -110,7 +110,7 @@
     </div>
   </header>
 
-  <main class="page-wrap max-w-7xl mx-auto px-6 py-8 md:py-12">
+  <main class="page-wrap max-w-screen-2xl mx-auto px-6 py-8 md:py-12">
     <a href="index.html#campaigns" class="text-sm text-zinc-400 hover:text-amber-300">Кампании /</a>
     <section class="campaign-hero mt-5 overflow-hidden rounded-3xl border border-amber-500/20">
       <div class="p-6 md:p-10">
@@ -304,34 +304,12 @@
     </section>
 
     <section id="panel-battlemaps" class="tab-panel py-8" role="tabpanel" aria-labelledby="tab-battlemaps" hidden>
-      <div class="mb-6 master-map-tools"><p class="text-xs uppercase tracking-[.2em] text-amber-400">Инструменты ведущего</p><h2 class="mt-2 text-3xl font-black">Библиотека боевых карт</h2><p class="mt-2 max-w-3xl text-zinc-400">Личная подборка карт и тактическая сцена для подготовки столкновений.</p></div><div id="player-readonly-map" class="mb-6 hidden rounded-2xl border border-blue-500/30 bg-blue-950/20 p-4"><h2 class="text-xl font-bold text-blue-200">Карта от Мастера</h2><p class="mt-1 text-sm text-zinc-400">Игрок видит поле, выбранное Мастером, без возможности менять карту.</p></div>
+      <div class="mb-4 master-map-tools"><p class="text-xs uppercase tracking-[.2em] text-amber-400">Инструменты ведущего</p><h2 class="mt-2 text-3xl font-black">Боевые карты и тактическая сцена</h2><p class="mt-2 max-w-3xl text-zinc-400">Поле боя теперь в приоритете; библиотека карт находится ниже.</p></div><div id="player-readonly-map" class="mb-6 hidden rounded-2xl border border-blue-500/30 bg-blue-950/20 p-4"><h2 class="text-xl font-bold text-blue-200">Карта от Мастера</h2><p class="mt-1 text-sm text-zinc-400">Игрок видит поле, выбранное Мастером, без возможности менять карту.</p></div>
       <div class="mb-6 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm leading-relaxed text-amber-100"><strong>На будущее:</strong> вкладка пока не защищена авторизацией и видна всем, кто откроет страницу. Не добавляй сюда секретные сюжетные детали. Записи хранятся локально в этом браузере.</div>
       <p class="mb-6 text-sm text-zinc-400">Внешних каталогов карт здесь больше нет. Позже добавим собственную базу карт; пока используй свою подборку ниже.</p>
-      <div class="mt-8 grid gap-6 xl:grid-cols-[minmax(0,.85fr)_minmax(0,1.15fr)]">
-        <section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 md:p-7"><div class="flex items-start justify-between gap-3"><div><h3 class="text-xl font-bold text-amber-200">Добавить карту в свою подборку</h3><p class="mt-2 text-sm text-zinc-400">Сохраняй ссылку на карту, чтобы быстро открыть её перед боем. Можно добавить заметку о встрече или местности.</p></div><button type="button" data-toggle-map-section="battlemap-form-content" aria-controls="battlemap-form-content" aria-expanded="true" class="shrink-0 rounded-lg border border-zinc-700 px-3 py-2 text-xs text-zinc-300 hover:border-amber-400 hover:text-amber-200">Скрыть −</button></div><div id="battlemap-form-content" class="mt-5">
-          <form id="battlemap-form" class="mt-5 space-y-4">
-            <label class="block text-sm text-zinc-300">Название карты <span class="text-amber-300">*</span><input id="battlemap-title" required maxlength="140" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например, Горный перевал"></label>
-            <label class="block text-sm text-zinc-300">Загрузить изображение с компьютера<input id="battlemap-file" type="file" accept="image/*" class="mt-2 block w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-3 text-sm text-white"></label><div id="battlemap-upload-preview" class="hidden overflow-hidden rounded-xl border border-zinc-800"><img id="battlemap-upload-image" alt="Предпросмотр боевой карты" class="block max-h-64 w-full object-contain"></div><p class="text-xs text-zinc-500">Загрузи изображение карты с компьютера. Файл хранится локально в браузере.</p>
-            <div class="grid gap-4 sm:grid-cols-2">
-              <label class="block text-sm text-zinc-300">Тип местности<select id="battlemap-type" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white"><option value="forest">Лес / природа</option><option value="dungeon">Подземелье / пещера</option><option value="settlement">Город / поселение</option><option value="mountain">Горы / снег</option><option value="road">Дорога / лагерь</option><option value="other">Другое</option></select></label>
-              <label class="block text-sm text-zinc-300">Источник<input id="battlemap-source" maxlength="120" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например, Forgotten Adventures"></label>
-            </div>
-            <label class="block text-sm text-zinc-300">Заметка<textarea id="battlemap-notes" maxlength="2000" rows="3" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Для какой встречи подойдёт, размер сетки, важные детали..."></textarea></label>
-            <p id="battlemap-form-error" class="hidden text-sm text-red-300" role="alert"></p>
-            <button type="submit" class="rounded-xl bg-amber-400 px-5 py-3 font-semibold text-zinc-950">＋ Сохранить карту</button>
-          </form></div>
-        </section>
-        <section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 md:p-7"><div class="flex flex-wrap items-center justify-between gap-3"><h3 class="text-xl font-bold text-amber-200">Моя подборка</h3><div class="flex items-center gap-2"><span id="battlemap-count" class="rounded-full border border-zinc-700 px-3 py-1 text-xs text-zinc-400">0 карт</span><button type="button" data-toggle-map-section="battlemap-collection-content" aria-controls="battlemap-collection-content" aria-expanded="true" class="shrink-0 rounded-lg border border-zinc-700 px-3 py-2 text-xs text-zinc-300 hover:border-amber-400 hover:text-amber-200">Скрыть −</button></div></div>
-          <div id="battlemap-collection-content" class="mt-4"><label class="block text-sm text-zinc-300">Фильтр по типу<select id="battlemap-filter" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white"><option value="all">Все карты</option><option value="forest">Лес / природа</option><option value="dungeon">Подземелье / пещера</option><option value="settlement">Город / поселение</option><option value="mountain">Горы / снег</option><option value="road">Дорога / лагерь</option><option value="other">Другое</option></select></label>
-          <div id="battlemap-list" class="mt-5 space-y-3" aria-live="polite"></div></div>
-        </section>
-      </div>
-
-
-
       <section class="mt-8 rounded-3xl border border-amber-500/20 bg-zinc-900 p-5 md:p-7" aria-labelledby="battle-scene-heading">
         <div class="mb-5"><p class="text-xs uppercase tracking-[.2em] text-amber-400">Игровое поле</p><h3 id="battle-scene-heading" class="mt-2 text-2xl font-black text-amber-200">Тактическая сцена</h3><p class="mt-2 text-sm text-zinc-400">Добавь участников, расставь фишки на клетках и веди очередь ходов. Сцена сохраняется в этом браузере.</p></div>
-        <div class="grid gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(280px,.8fr)]">
+        <div class="grid gap-5 xl:grid-cols-[minmax(0,2.4fr)_minmax(300px,.8fr)]">
           <div class="min-w-0">
             <div class="mb-4 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-3">
               <label for="battle-scene-saved-map" class="text-sm font-semibold text-amber-200">Выбрать сохранённую карту</label>
@@ -358,7 +336,7 @@
                 <button id="battle-scene-zoom-reset" type="button" class="rounded-lg border border-zinc-700 px-3 py-2 text-xs text-zinc-300 hover:border-amber-400">Сброс</button>
               </div>
             </div>
-            <div id="battle-scene-board" class="relative isolate min-h-[360px] overflow-hidden rounded-2xl border border-zinc-700 bg-zinc-950" style="height:min(66vw,620px);max-height:620px;touch-action:none;cursor:grab" aria-label="Боевая сетка; перетаскивай пустое место для перемещения карты, фишки можно перетаскивать отдельно">
+            <div id="battle-scene-board" class="relative isolate min-h-[360px] overflow-hidden rounded-2xl border border-zinc-700 bg-zinc-950" style="height:min(70vh,760px);max-height:760px;touch-action:none;cursor:grab" aria-label="Боевая сетка; перетаскивай пустое место для перемещения карты, фишки можно перетаскивать отдельно">
               <div id="battle-scene-world" class="absolute inset-0" style="transform-origin:top left">
                 <div id="battle-scene-map-layer" class="pointer-events-none absolute inset-0 z-0 bg-contain bg-center bg-no-repeat opacity-90"></div>
                 <div id="battle-scene-grid" class="pointer-events-none absolute inset-0 z-10 opacity-70"></div>
@@ -441,6 +419,26 @@
           </div>
         </div>
       </section>
+      <div class="mt-8 grid gap-6 xl:grid-cols-[minmax(0,.85fr)_minmax(0,1.15fr)]">
+        <section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 md:p-7"><div class="flex items-start justify-between gap-3"><div><h3 class="text-xl font-bold text-amber-200">Добавить карту в свою подборку</h3><p class="mt-2 text-sm text-zinc-400">Сохраняй ссылку на карту, чтобы быстро открыть её перед боем. Можно добавить заметку о встрече или местности.</p></div><button type="button" data-toggle-map-section="battlemap-form-content" aria-controls="battlemap-form-content" aria-expanded="true" class="shrink-0 rounded-lg border border-zinc-700 px-3 py-2 text-xs text-zinc-300 hover:border-amber-400 hover:text-amber-200">Скрыть −</button></div><div id="battlemap-form-content" class="mt-5">
+          <form id="battlemap-form" class="mt-5 space-y-4">
+            <label class="block text-sm text-zinc-300">Название карты <span class="text-amber-300">*</span><input id="battlemap-title" required maxlength="140" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например, Горный перевал"></label>
+            <label class="block text-sm text-zinc-300">Загрузить изображение с компьютера<input id="battlemap-file" type="file" accept="image/*" class="mt-2 block w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-3 text-sm text-white"></label><div id="battlemap-upload-preview" class="hidden overflow-hidden rounded-xl border border-zinc-800"><img id="battlemap-upload-image" alt="Предпросмотр боевой карты" class="block max-h-64 w-full object-contain"></div><p class="text-xs text-zinc-500">Загрузи изображение карты с компьютера. Файл хранится локально в браузере.</p>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <label class="block text-sm text-zinc-300">Тип местности<select id="battlemap-type" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white"><option value="forest">Лес / природа</option><option value="dungeon">Подземелье / пещера</option><option value="settlement">Город / поселение</option><option value="mountain">Горы / снег</option><option value="road">Дорога / лагерь</option><option value="other">Другое</option></select></label>
+              <label class="block text-sm text-zinc-300">Источник<input id="battlemap-source" maxlength="120" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Например, Forgotten Adventures"></label>
+            </div>
+            <label class="block text-sm text-zinc-300">Заметка<textarea id="battlemap-notes" maxlength="2000" rows="3" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white" placeholder="Для какой встречи подойдёт, размер сетки, важные детали..."></textarea></label>
+            <p id="battlemap-form-error" class="hidden text-sm text-red-300" role="alert"></p>
+            <button type="submit" class="rounded-xl bg-amber-400 px-5 py-3 font-semibold text-zinc-950">＋ Сохранить карту</button>
+          </form></div>
+        </section>
+        <section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-5 md:p-7"><div class="flex flex-wrap items-center justify-between gap-3"><h3 class="text-xl font-bold text-amber-200">Моя подборка</h3><div class="flex items-center gap-2"><span id="battlemap-count" class="rounded-full border border-zinc-700 px-3 py-1 text-xs text-zinc-400">0 карт</span><button type="button" data-toggle-map-section="battlemap-collection-content" aria-controls="battlemap-collection-content" aria-expanded="true" class="shrink-0 rounded-lg border border-zinc-700 px-3 py-2 text-xs text-zinc-300 hover:border-amber-400 hover:text-amber-200">Скрыть −</button></div></div>
+          <div id="battlemap-collection-content" class="mt-4"><label class="block text-sm text-zinc-300">Фильтр по типу<select id="battlemap-filter" class="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-base text-white"><option value="all">Все карты</option><option value="forest">Лес / природа</option><option value="dungeon">Подземелье / пещера</option><option value="settlement">Город / поселение</option><option value="mountain">Горы / снег</option><option value="road">Дорога / лагерь</option><option value="other">Другое</option></select></label>
+          <div id="battlemap-list" class="mt-5 space-y-3" aria-live="polite"></div></div>
+        </section>
+      </div>
+
       <p class="mt-5 text-xs leading-relaxed text-zinc-500">Тактическая сцена и инициатива пока не имеют отдельной авторизации и доступны посетителям страницы. Не используй здесь секретные данные до настройки защиты мастера.</p>
     </section>
 
